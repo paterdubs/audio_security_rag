@@ -108,13 +108,24 @@ sources:
     access: public_direct
     priority: 2
     zenodo_record: 2589280
-    files:                             # 21 zip độc lập; chỉ lấy 4
+    # ⚠️ 21 zip chia theo THỨ TỰ FILE, không phải theo cảnh — mỗi zip ~694 file, và
+    # file xếp theo tên nên các cảnh nằm liền khối theo bảng chữ cái:
+    #     zip 1–4   airport + bus          (đã tải; CẢ HAI đều là cảnh ta không dùng
+    #                                       trừ airport, xem background_map.yaml)
+    #     zip 9–11  park                   → khu dân cư
+    #     zip 17–19 street_traffic         → bãi đỗ / nhà xe
+    # Lấy 4 zip đầu như kế hoạch cũ là lấy trúng đúng hai cảnh vô dụng nhất. Đo thật
+    # 14/09: 2776 file tải về = 1440 airport + 1336 bus, 0 file thuộc cảnh cần dùng.
+    files:
       - TAU-urban-acoustic-scenes-2019-development.meta.zip
       - TAU-urban-acoustic-scenes-2019-development.audio.1.zip
-      - TAU-urban-acoustic-scenes-2019-development.audio.2.zip
-      - TAU-urban-acoustic-scenes-2019-development.audio.3.zip
-      - TAU-urban-acoustic-scenes-2019-development.audio.4.zip
-    approx_size_gb: 6.97
+      - TAU-urban-acoustic-scenes-2019-development.audio.9.zip
+      - TAU-urban-acoustic-scenes-2019-development.audio.10.zip
+      - TAU-urban-acoustic-scenes-2019-development.audio.11.zip
+      - TAU-urban-acoustic-scenes-2019-development.audio.17.zip
+      - TAU-urban-acoustic-scenes-2019-development.audio.18.zip
+      - TAU-urban-acoustic-scenes-2019-development.audio.19.zip
+    approx_size_gb: 12.2
     license: "Non-commercial (TAU)"
     redistributable: no
     provides_classes: [ambient_noise]

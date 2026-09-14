@@ -151,7 +151,13 @@ def apply_peak_ceiling(audio: np.ndarray, ceiling_dbfs: float) -> np.ndarray:
 # ── Xử lý một file ───────────────────────────────────────────────────────────
 
 
-def process_row(row: dict, config: dict, dry_run: bool) -> tuple[Rejection | None, ReviewFlag | None]:
+def process_row(row: dict, config: dict, dry_run: bool,
+                out_dir: Path | None = None, subdir_key: str = "claimed_class",
+                ) -> tuple[Rejection | None, ReviewFlag | None]:
+    """Chuẩn hoá một clip. `out_dir`/`subdir_key` để background bank dùng lại được
+    cùng bộ cổng chất lượng và cùng phép chuẩn hoá độ to — nền và tiền cảnh phải qua
+    ĐÚNG một quy trình, nếu lệch thì Scaper trộn hai thứ khác mức độ to với nhau và
+    tham số SNR trong config không còn nghĩa gì."""
     source_path = REPO_ROOT / row["path_raw"]
     if not source_path.exists():
         return Rejection("missing_file", row["path_raw"]), None
@@ -176,7 +182,7 @@ def process_row(row: dict, config: dict, dry_run: bool) -> tuple[Rejection | Non
     if dry_run:
         return None, flag
 
-    destination = NORMALIZED_DIR / row["claimed_class"] / f"{row['file_id']}.wav"
+    destination = (out_dir or NORMALIZED_DIR) / row[subdir_key] / f"{row['file_id']}.wav"
     destination.parent.mkdir(parents=True, exist_ok=True)
     soundfile.write(destination, audio, audio_settings["target_sample_rate"], subtype="PCM_16")
     return None, flag

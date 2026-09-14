@@ -175,3 +175,47 @@ def test_bat_duoc_clip_ngoai_bank_lot_vao_foreground():
 def test_bank_sach_thi_khong_bao_gi():
     files = [Path("bank/siren/a.wav")]
     assert sg.check_bank_clean(files, eligible={"a", "b"}) == []
+
+
+# ── Chuỗi nhân quả thiếu mắt xích ────────────────────────────────────────────
+
+
+def test_bo_chuoi_khi_bank_thieu_mot_lop():
+    """Sinh chuỗi CỤT mà vẫn mang nhãn của chuỗi đủ là dạy model định nghĩa sai.
+
+    `glass_breaking → scream` vẫn được ghi là kịch bản "đột nhập" dù thiếu hẳn tiếng
+    chân chạy. Xảy ra thật: bank không có `shout_yell` (0 clip auto-accept), làm hai
+    kịch bản forced_entry và emergency không sinh được.
+    """
+    chains = [
+        {"name": "break_in", "sequence": ["glass_breaking", "scream", "running_footsteps"]},
+        {"name": "forced_entry", "sequence": ["door_slam", "shout_yell", "running_footsteps"]},
+    ]
+    ok, bo = sg.usable_chains(chains, {"glass_breaking", "scream", "running_footsteps", "door_slam"})
+    assert [c["name"] for c in ok] == ["break_in"]
+    assert bo == [("forced_entry", ["shout_yell"])]
+
+
+def test_bank_du_moi_lop_thi_khong_bo_chuoi_nao():
+    chains = [{"name": "x", "sequence": ["a", "b"]}]
+    ok, bo = sg.usable_chains(chains, {"a", "b", "c"})
+    assert len(ok) == 1 and bo == []
+
+
+def test_neu_ten_moi_lop_con_thieu_de_sua_duoc_ngay():
+    chains = [{"name": "x", "sequence": ["a", "b", "c"]}]
+    _, bo = sg.usable_chains(chains, {"a"})
+    assert bo[0][1] == ["b", "c"]
+
+
+def test_khong_con_chuoi_nao_thi_khong_clip_nao_mang_lat_cat_do():
+    # Không bỏ lát cắt thì plan_clips chọn chuỗi từ danh sách rỗng và nổ ở rng.choice.
+    plans = sg.plan_clips(CONFIG, 500, seed=3, chains=[])
+    assert all("causal_chain" not in p.slices and p.chain is None for p in plans)
+
+
+def test_chi_chon_trong_cac_chuoi_con_dung_duoc():
+    chi_mot = [CONFIG["causal_chains"][0]]
+    plans = sg.plan_clips(CONFIG, 500, seed=3, chains=chi_mot)
+    ten = {p.chain for p in plans if p.chain}
+    assert ten <= {"break_in"}

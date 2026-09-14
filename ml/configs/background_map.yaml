@@ -1,0 +1,58 @@
+# Nguồn nào thành khu vực nào cho background bank — DATA_PLAN §5.
+#
+# ⚠️ ĐÂY LÀ ÁNH XẠ GẦN ĐÚNG, không phải tương ứng một-một. Bốn khu vực mà DATA_PLAN
+# yêu cầu được chọn theo bối cảnh giám sát an ninh tại IUH; TAU2019 thì thu ở châu Âu
+# theo mục đích phân loại cảnh đô thị. Chúng không sinh ra cho nhau.
+#
+# Hệ quả phải nêu trong phần Hạn chế của khoá luận: background bank của giai đoạn này
+# là NỀN ĐÔ THỊ THAY THẾ, không phải nền thật của khu vực triển khai. Chỉ buổi thu
+# thực địa tại IUH mới cho nền thật, và nó không thay thế được bằng bất cứ dataset nào.
+
+area_types: [school, parking, residential, factory]
+
+# ── TAU2019 Urban Acoustic Scenes ────────────────────────────────────────────
+# Clip 10 giây. Cột `scene_label` trong meta.csv.
+tau2019_partial:
+  # Tiếng người rì rầm trong không gian rộng — gần nhất với sân trường giờ ra chơi.
+  public_square:     school
+  shopping_mall:     school
+  # ⚠️ Ánh xạ YẾU NHẤT trong file này, và là ánh xạ có chủ ý. Sảnh sân bay và hành
+  # lang trường học cùng là không gian lớn nhiều vang, tiếng người rì rầm liên tục,
+  # xen thông báo qua loa. Khác biệt thật (tiếng vali kéo, mật độ vọng) là có, nhưng
+  # đây là cảnh DUY NHẤT ta có đủ 1440 clip, và nền thay thế còn hơn không có nền.
+  # Buổi thu tại IUH thay thế hoàn toàn phần này.
+  airport:           school
+  # Giao thông nền, tiếng động cơ xa — gần nhất với nhà xe / bãi đỗ.
+  street_traffic:    parking
+  # Ngoài trời yên tĩnh, người đi bộ thưa — gần nhất với khu dân cư.
+  park:              residential
+  street_pedestrian: residential
+  # CỐ Ý BỎ: bus, metro, metro_station, tram.
+  # Nền của phương tiện giao thông kín có đặc trưng phổ rất riêng (tiếng rung thân xe,
+  # thông báo tự động, tiếng ray) mà không khu vực nào của ta có. Đưa vào sẽ dạy model
+  # một loại nền nó không bao giờ gặp, và làm loãng những nền nó thực sự phải chịu.
+
+# ── UrbanSound8K, chỉ clip salience = 2 ──────────────────────────────────────
+# salience=2 nghĩa là lớp được gán nằm ở HẬU CẢNH, tức phần nổi trội của clip chính
+# là nền. Đó đúng là thứ ta cần. Clip 4 giây.
+#
+# ⚠️ `factory` KHÔNG có trong TAU2019 — ba lớp máy móc dưới đây là nguồn DUY NHẤT cho
+# nó ở giai đoạn này, và cả ba đều là tiếng máy ngoài trời chứ không phải trong xưởng.
+urbansound8k:
+  jackhammer:        factory
+  drilling:          factory
+  engine_idling:     parking
+  air_conditioner:   residential
+  children_playing:  school
+  # CỐ Ý BỎ: siren, gun_shot (là lớp Nhóm A của chính ta — dù salience=2 vẫn không
+  # được đưa vào nền), car_horn và dog_bark (là SỰ KIỆN rời rạc, không phải nền),
+  # street_music (nhạc có cấu trúc sẽ bị Scaper coi là im lặng và dạy model sai).
+
+# Ngưỡng sàng lọc nhiễm sự kiện Nhóm A — DATA_PLAN §5 bước 2.
+# Cố ý đặt THẤP: ở đây thà báo nhầm nhiều còn hơn lọt. Một tiếng chuông lọt vào nền
+# sẽ được Scaper gán nhãn "không có sự kiện", và model học sai một cách hệ thống.
+contamination_threshold: 0.15
+
+# Mục tiêu DATA_PLAN §5: 2–4 giờ, ≥100 đoạn, phủ cả 4 khu vực.
+target_hours_per_area: 0.75
+min_clips_per_area: 25

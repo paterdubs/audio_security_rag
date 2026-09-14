@@ -122,7 +122,7 @@ def slice_probabilities(config: dict) -> dict[str, float]:
     return probability
 
 
-def plan_clips(config: dict, n_clips: int, seed: int) -> list[ClipPlan]:
+def plan_clips(config: dict, n_clips: int, seed: int, chains: list[dict] | None = None) -> list[ClipPlan]:
     """Kế hoạch cho n_clips, tất định theo seed.
 
     Mỗi slice rút Bernoulli ĐỘC LẬP theo tỉ lệ của nó, nên một clip có thể vừa
@@ -131,7 +131,7 @@ def plan_clips(config: dict, n_clips: int, seed: int) -> list[ClipPlan]:
     tỉ lệ từng lát và không sinh được ca khó nhất (low_snr + overlap cùng lúc).
     """
     forced = config["forced_slices"]
-    chains = config["causal_chains"]
+    chains = config["causal_chains"] if chains is None else chains
     rng = random.Random(seed)
     probability = slice_probabilities(config)
 
@@ -149,11 +149,39 @@ def plan_clips(config: dict, n_clips: int, seed: int) -> list[ClipPlan]:
 
         if "overlap" in plan.slices:
             plan.n_events = max(plan.n_events, int(forced["overlap"]["min_events"]))
+        if "causal_chain" in plan.slices and not chains:
+            plan.slices.discard("causal_chain")     # không còn chuỗi nào sinh được
         if "causal_chain" in plan.slices:
             plan.chain = rng.choice(chains)["name"]
             plan.n_events = max(plan.n_events, len(chain_by_name(chains, plan.chain)["sequence"]))
         plans.append(plan)
     return plans
+
+
+def usable_chains(chains: list[dict], available: set[str]) -> tuple[list[dict], list[tuple[str, list[str]]]]:
+    """(chuỗi dùng được, [(tên chuỗi bỏ, các lớp còn thiếu)]).
+
+    Chuỗi nhân quả chỉ có nghĩa khi ĐỦ mọi mắt xích. Thiếu một lớp thì hoặc Scaper
+    chết giữa chừng, hoặc — tệ hơn — ta lặng lẽ sinh ra chuỗi cụt mang nhãn của chuỗi
+    đủ: `glass_breaking → scream` vẫn được ghi là kịch bản "đột nhập" dù thiếu hẳn
+    tiếng chân chạy, và model học một định nghĩa sai về đột nhập.
+
+    Bỏ hẳn chuỗi và NÓI RA là lựa chọn đúng: thiếu `shout_yell` thì hai kịch bản
+    forced_entry và emergency không sinh được, và đó là thông tin phải biết chứ không
+    phải chi tiết cần giấu.
+    """
+    ok, bo = [], []
+    for chain in chains:
+        thieu = [label for label in chain["sequence"] if label not in available]
+        (bo.append((chain["name"], thieu)) if thieu else ok.append(chain))
+    return ok, bo
+
+
+def available_labels() -> set[str]:
+    """Các lớp THẬT SỰ có clip trong bank foreground — đọc từ đĩa, không từ config."""
+    if not FOREGROUND_DIR.exists():
+        return set()
+    return {p.name for p in FOREGROUND_DIR.iterdir() if p.is_dir() and any(p.glob("*.wav"))}
 
 
 def chain_by_name(chains: list[dict], name: str) -> dict:
@@ -223,8 +251,10 @@ def build_scaper(config: dict, seed: int):
     return generator
 
 
-def populate(generator, plan: ClipPlan, config: dict, rng: random.Random) -> None:
+def populate(generator, plan: ClipPlan, config: dict, rng: random.Random,
+             chains: list[dict] | None = None) -> None:
     """Nạp nền + các sự kiện của một clip vào generator theo đúng kế hoạch."""
+    chains = config["causal_chains"] if chains is None else chains
     events = config["events"]
     duration = float(config["duration_sec"])
     snr_low, snr_high = events["snr_db"]
@@ -235,7 +265,7 @@ def populate(generator, plan: ClipPlan, config: dict, rng: random.Random) -> Non
 
     placed = 0
     if plan.chain:
-        chain = chain_by_name(config["causal_chains"], plan.chain)
+        chain = chain_by_name(chains, plan.chain)
         for label, start in zip(chain["sequence"], chain_event_times(chain, rng, duration)):
             _add_event(generator, label, ("const", start), events, (snr_low, snr_high))
             placed += 1
@@ -259,7 +289,8 @@ def _add_event(generator, label: str | None, event_time, events: dict, snr: tupl
     )
 
 
-def generate_split(config: dict, split: str, plans: list[ClipPlan], seed: int) -> int:
+def generate_split(config: dict, split: str, plans: list[ClipPlan], seed: int,
+                   chains: list[dict] | None = None) -> int:
     out = OUTPUT_DIR / split
     for sub in ("audio", "jams", "tsv"):
         (out / sub).mkdir(parents=True, exist_ok=True)
@@ -273,11 +304,18 @@ def generate_split(config: dict, split: str, plans: list[ClipPlan], seed: int) -
     for plan in plans:
         name = f"{split}_{plan.index:06d}"
         generator = build_scaper(config, seed + plan.index)
-        populate(generator, plan, config, rng)
+        populate(generator, plan, config, rng, chains)
         generator.generate(
             audio_path=str(out / "audio" / f"{name}.wav"),
             jams_path=str(out / "jams" / f"{name}.jams"),
             reverb=0.4 if ("reverb" in plan.slices and reverb_ok) else None,
+            # BẮT BUỘC. Nền ở -23 LUFS cộng SNR tối đa +25 dB cho sự kiện ở +2 dBFS,
+            # tức méo cứng. Đo thật trên 5 clip đầu: 3/5 clip méo, tới 4016 mẫu chạm
+            # trần. Sinh ra train set mà chính cổng chất lượng của ta sẽ loại (>0.1%
+            # mẫu cắt phẳng → `clipped`) là tự mâu thuẫn, và méo là thứ model học
+            # được rất nhanh: nó sẽ dùng méo làm dấu hiệu nhận biết sự kiện to.
+            # fix_clipping hạ đều cả soundscape nên GIỮ NGUYÊN tỉ số SNR đã đặt.
+            fix_clipping=True,
         )
         written += 1
         if written % 100 == 0:
@@ -318,7 +356,16 @@ def main() -> int:
     if args.limit:
         n_clips = min(n_clips, args.limit)
 
-    plans = plan_clips(config, n_clips, seed)
+    co_san = available_labels()
+    chains, bo_chuoi = usable_chains(config["causal_chains"], co_san)
+    for name, thieu in bo_chuoi:
+        print(f"⚠️ bỏ chuỗi `{name}` — bank chưa có lớp {thieu}")
+    if bo_chuoi:
+        print("   Sinh chuỗi cụt mà vẫn mang nhãn của chuỗi đủ sẽ dạy model một định")
+        print("   nghĩa sai về kịch bản đó, nên bỏ hẳn và ghi lại ở đây.")
+        print()
+
+    plans = plan_clips(config, n_clips, seed, chains)
     print(f"▶ {args.split}: {n_clips} clip × {config['duration_sec']}s "
           f"= {n_clips * float(config['duration_sec']) / 3600:.1f} h · seed {seed}\n")
     print(slice_report(plans, config))
@@ -347,7 +394,7 @@ def main() -> int:
         print("\n(--plan-only: chưa sinh audio)")
         return 0
 
-    written = generate_split(config, args.split, plans, seed)
+    written = generate_split(config, args.split, plans, seed, chains)
     print(f"\n✓ đã sinh {written} clip → {(OUTPUT_DIR / args.split).relative_to(REPO_ROOT)}")
     return 0
 
