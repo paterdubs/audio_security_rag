@@ -167,3 +167,35 @@ def test_thieu_byte_so_voi_zenodo_thi_bat(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(ds, "fetch_with_retry", lambda *a: 900)
     with pytest.raises(OSError):
         ds._download_locked("u", dest, part, expected_size=1000)
+
+
+# ── Dọn kho nén chia nhiều phần ──────────────────────────────────────────────
+
+
+def test_xoa_ca_cac_phan_z0x_chu_khong_rieng_file_zip(tmp_path: Path):
+    """Xoá mỗi `.zip` là bỏ sót 5 phần + file ghép — 34 GB nằm lì ở riêng FSD50K."""
+    archive = tmp_path / "A.dev_audio.zip"
+    joined = tmp_path / "A.dev_audio.joined.zip"
+    parts = [tmp_path / f"A.dev_audio.z0{i}" for i in range(1, 6)]
+    for path in [archive, joined, *parts]:
+        path.write_bytes(b"x" * 100)
+    khac = tmp_path / "B.khac.zip"           # kho của nguồn khác, KHÔNG được đụng
+    khac.write_bytes(b"x" * 100)
+
+    freed = ds.cleanup_archive(archive, joined)
+
+    assert freed == 700                      # 1 zip + 1 joined + 5 phần
+    assert not any(p.exists() for p in [archive, joined, *parts])
+    assert khac.exists()
+
+
+def test_kho_khong_chia_phan_thi_chi_xoa_chinh_no(tmp_path: Path):
+    archive = tmp_path / "x.tar.gz"
+    archive.write_bytes(b"x" * 50)
+    assert ds.cleanup_archive(archive, archive) == 50
+    assert not archive.exists()
+
+
+def test_file_da_bi_xoa_tu_truoc_khong_lam_no_loi(tmp_path: Path):
+    archive = tmp_path / "x.zip"
+    assert ds.cleanup_archive(archive, archive) == 0

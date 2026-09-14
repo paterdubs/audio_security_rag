@@ -356,9 +356,25 @@ def fetch_source(name: str, spec: dict, keep_archive: bool) -> bool:
         source = join_split_zip(archive) if spec.get("split_archive") else archive
         extract(source, dest)
         if not keep_archive:
-            archive.unlink()
-            print("    đã xoá file nén (cleanup_policy)")
+            freed = cleanup_archive(archive, source)
+            print(f"    đã xoá file nén, giải phóng {freed / 1e9:.1f} GB (cleanup_policy)")
     return True
+
+
+def cleanup_archive(archive: Path, source: Path) -> int:
+    """Xoá kho nén và MỌI phần của nó, trả về số byte giải phóng.
+
+    Với kho chia nhiều phần, xoá mỗi file `.zip` là bỏ sót 5 phần `.z0x` cộng file
+    ghép — 34 GB nằm lì trên đĩa ở riêng FSD50K, trong khi đỉnh dung lượng của bước
+    kế tiếp đã tính trên giả định chúng biến mất.
+    """
+    doomed = {archive, source, *archive.parent.glob(f"{archive.stem}.z[0-9][0-9]")}
+    freed = 0
+    for path in doomed:
+        if path.exists():
+            freed += path.stat().st_size
+            path.unlink()
+    return freed
 
 
 # ── Các lệnh ─────────────────────────────────────────────────────────────────
