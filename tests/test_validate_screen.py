@@ -175,3 +175,22 @@ def test_ti_le_dep_nhung_mau_qua_nho_thi_van_canh_bao(capsys):
     errors, total, _ = vs.error_rate(audited)
     vs.report(errors, total, audited)
     assert "cận trên" in capsys.readouterr().out
+
+
+# ── Phiếu duyệt phải MÙ ──────────────────────────────────────────────────────
+
+
+def test_phieu_khong_chua_diem_cua_may():
+    """Dặn người duyệt nghe mù rồi in sẵn p_target ngay cạnh là lời dặn vô nghĩa.
+
+    Biết máy chấm 0.95 rồi mới nghe thì kết luận đã bị neo vào đó, và phép kiểm định
+    chỉ còn đo được mức độ người đồng ý với máy khi đã biết máy nghĩ gì — không đo
+    được điều ta cần, là máy có đúng hay không.
+    """
+    cam = {"p_target", "p_confusable", "top_confusable", "decision", "priority"}
+    assert not (cam & set(vs.AUDIT_FIELDS))
+
+
+def test_phieu_co_du_thu_de_nghe_va_phan_xet():
+    # Thiếu path_norm thì người duyệt không có file để mở.
+    assert {"file_id", "class_id", "path_norm", "verdict"} <= set(vs.AUDIT_FIELDS)

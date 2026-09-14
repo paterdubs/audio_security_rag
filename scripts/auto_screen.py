@@ -39,10 +39,14 @@ STAGE = "auto_screen"
 
 ACCEPT_THRESHOLD = 0.30      # p_target ≥ ngưỡng này và vượt confusable → tự động nhận
 REJECT_THRESHOLD = 0.05      # p_target dưới ngưỡng này → tự động loại
+# Nếu tagger loại quá nửa một lớp, nó không phải bộ lọc hợp lệ cho lớp đó — xem
+# guard_low_resolution_classes(). Nửa là ranh giới tự nhiên, không phải số tinh chỉnh.
+GUARD_REJECT_RATE = 0.50
 SAMPLE_RATE = 32000          # PANNs CNN14 được huấn luyện ở 32 kHz, không phải 16 kHz
+MIN_SAMPLES = SAMPLE_RATE    # 1 giây — dưới mức này CNN14 sập ở tầng pooling
 
 SCORE_FIELDS = ["file_id", "class_id", "p_target", "p_confusable", "top_confusable",
-                "decision", "priority", "onset", "offset"]
+                "decision", "priority", "onset", "offset", "path_norm"]
 QUEUE_FIELDS = ["priority", "file_id", "class_id", "p_target", "p_confusable",
                 "top_confusable", "onset", "offset", "path_norm"]
 
@@ -252,6 +256,43 @@ def load_tagger():
         SoundEventDetection(checkpoint_path=str(checkpoint), device=device), device
 
 
+def pad_to_minimum(audio: np.ndarray) -> np.ndarray:
+    """Kéo dài clip ngắn bằng cách LẶP LẠI chính nó, không phải đệm im lặng.
+
+    Hai lý do, lý do thứ hai mới là lý do thật:
+
+    1. CNN14 sập với clip quá ngắn: chồng pooling đưa kích thước tensor về 0 và ném
+       `RuntimeError: Output size is too small`. 1076/5260 clip của bank dưới 1 giây.
+
+    2. Đệm im lặng LÀM SAI KẾT QUẢ, im lặng. CNN14 gộp theo cả trung bình lẫn cực đại
+       trên trục thời gian, nên chèn 0.9 giây im lặng vào một tiếng súng 0.1 giây sẽ
+       dìm xác suất xuống. Đo trên 40 clip ngắn thật (<0.6 s):
+
+           đệm im lặng : p_target trung bình 0.012 → 37/40 clip bị TỰ ĐỘNG LOẠI
+           lặp lại clip: p_target trung bình 0.400 →  2/40 clip bị loại
+
+       Tức đệm im lặng sẽ xoá khoảng 1000 clip khỏi bank với lý do "sai lớp", mà
+       chúng không hề sai lớp. Và mất mát ấy tập trung đúng vào các lớp xung kích —
+       object_drop_dishes, gunshot, glass_breaking, door_slam — tức đúng những lớp
+       quyết định của bài toán an ninh.
+    """
+    if len(audio) >= MIN_SAMPLES or len(audio) == 0:
+        return audio
+    repeats = int(np.ceil(MIN_SAMPLES / len(audio)))
+    return np.tile(audio, repeats)[:MIN_SAMPLES]
+
+
+def real_frame_count(frames: int, original_samples: int) -> int:
+    """Số frame đầu tiên thuộc về audio THẬT, phần còn lại là bản lặp.
+
+    Đề xuất biên chỉ được đọc phần thật: đọc cả phần lặp sẽ cho ra một biên trỏ vào
+    bản sao thứ ba của sự kiện, tức một khoảng thời gian không tồn tại trong file gốc.
+    """
+    if original_samples >= MIN_SAMPLES:
+        return frames
+    return max(1, round(frames * original_samples / MIN_SAMPLES))
+
+
 def load_audio_32k(path: Path) -> np.ndarray:
     """Đọc clip đã chuẩn hoá và đưa về 32 kHz — tần số PANNs được huấn luyện.
 
@@ -290,6 +331,48 @@ def write_rows(path: Path, fields: list[str], rows: list[dict]) -> None:
         writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
+
+
+def guard_low_resolution_classes(scored: list[dict]) -> dict[str, int]:
+    """Huỷ quyết định tự động loại ở những lớp mà tagger không đủ phân giải.
+
+    Luật `p_target < 0.05 → loại` ngầm giả định tagger đáng tin cho lớp đó. Giả định
+    ấy SAI với một số lớp, và cái sai không hề lộ ra: clip bị loại lặng lẽ, bank teo
+    lại, không ai biết.
+
+    Đo được ngày 14/09 trên bank 5260 clip:
+
+        shout_yell         loại 93%  → PANNs nghe ra "Speech" ở 22/25 clip mẫu,
+                                       kèm Groan, Gasp, Sigh, Wail — đều là phát âm
+                                       của người. Clip ĐÚNG là tiếng hét; PANNs chỉ
+                                       gộp chúng vào lớp tổng quát hơn.
+        object_drop_dishes loại 87%  → nghe ra Chink/clink, Coin dropping, Glass,
+                                       Percussion — đúng nội dung âm học, sai nhãn.
+
+    Mà những clip này đã qua cổng PP của FSD50K, tức CON NGƯỜI đã chấm nhãn là có mặt
+    và nổi trội. Giữa một tagger mAP 0.431 và một phiếu chấm của người, tin người.
+
+    Nên: lớp nào bị loại quá nửa thì mọi quyết định loại của nó chuyển thành "để người
+    duyệt". Đắt hơn về công, nhưng cái giá còn lại là xoá nhầm clip đúng — mà với
+    `shout_yell` (56 clip, đang thiếu) thì xoá 93% là xoá luôn cả lớp.
+    """
+    from collections import Counter
+
+    per_class: dict[str, Counter] = {}
+    for row in scored:
+        per_class.setdefault(row["class_id"], Counter())[row["decision"]] += 1
+
+    cuu = {}
+    for class_id, counts in per_class.items():
+        total = sum(counts.values())
+        if total and counts["auto_reject"] / total > GUARD_REJECT_RATE:
+            cuu[class_id] = counts["auto_reject"]
+
+    for row in scored:
+        if row["class_id"] in cuu and row["decision"] == "auto_reject":
+            row["decision"] = "review"
+            row["priority"] = "normal"
+    return cuu
 
 
 def report(scored: list[dict]) -> None:
@@ -339,28 +422,47 @@ def main() -> int:
     index_of = mid_to_index(list(labels), REPO_ROOT / "data" / "reference" / "audioset_ontology.json")
     print(f"  ghép được {len(index_of)}/{len(labels)} nhãn PANNs theo mã AudioSet")
 
-    scored, rejected = [], {}
+    scored, reasons = [], {}
+    padded_count = 0
     for number, clip in enumerate(clips, 1):
         if number % 100 == 0:
             print(f"  {number}/{len(clips)}…", flush=True)
         audio = load_audio_32k(Path(clip["path_norm"]))
+        duration = len(audio) / SAMPLE_RATE
+        model_input = pad_to_minimum(audio)
+        if len(model_input) > len(audio):
+            padded_count += 1
         target, confusable = class_indices(ontology, clip["class_id"], index_of)
 
-        clip_probs = tagger.inference(audio[None, :])[0][0]
+        clip_probs = tagger.inference(model_input[None, :])[0][0]
         p_target, p_confusable, top_name = score_clip(clip_probs, target, confusable)
         routing = route(p_target, p_confusable)
 
         onset = offset = ""
         if routing.decision != "auto_reject" and target:
-            frame_probs = detector.inference(audio[None, :])[0][:, target].max(axis=1)
-            onset, offset = propose_boundary(frame_probs, len(audio) / SAMPLE_RATE)
+            frame_probs = detector.inference(model_input[None, :])[0][:, target].max(axis=1)
+            # Chỉ đọc phần audio THẬT; phần còn lại là bản lặp do đệm.
+            frame_probs = frame_probs[:real_frame_count(len(frame_probs), len(audio))]
+            onset, offset = propose_boundary(frame_probs, duration)
 
         scored.append({**clip, "p_target": round(p_target, 4), "p_confusable": round(p_confusable, 4),
                        "top_confusable": top_name, "decision": routing.decision,
                        "priority": routing.priority, "onset": onset, "offset": offset})
-        if routing.decision == "auto_reject":
-            rejected[clip["file_id"]] = ("wrong_class", routing.reason)
+        reasons[clip["file_id"]] = routing.reason
 
+    # Guard chạy TRƯỚC khi ghi exclusions. Ghi trong vòng lặp thì clip được guard cứu
+    # vẫn nằm trong exclusions.csv — vừa ở hàng đợi duyệt vừa bị đánh dấu đã loại,
+    # đúng loại mâu thuẫn làm dataset không tái lập được.
+    cuu = guard_low_resolution_classes(scored)
+    for class_id, count in sorted(cuu.items(), key=lambda kv: -kv[1]):
+        print(f"  ⚠️ `{class_id}`: tagger loại >{GUARD_REJECT_RATE:.0%} số clip → "
+              f"không đủ phân giải cho lớp này, {count} quyết định loại chuyển thành duyệt tay")
+    rejected = {row["file_id"]: ("wrong_class", reasons[row["file_id"]])
+                for row in scored if row["decision"] == "auto_reject"}
+
+    if padded_count:
+        print(f"  {padded_count} clip ngắn hơn 1s — đã kéo dài bằng cách lặp lại "
+              f"(đệm im lặng sẽ làm 92% trong số đó bị loại oan, xem pad_to_minimum)")
     write_exclusions(STAGE, rejected, {c["file_id"] for c in clips})
     write_rows(SCORES_PATH, SCORE_FIELDS, scored)
     queue = sorted((r for r in scored if r["decision"] == "review"),

@@ -31,8 +31,12 @@ SAMPLE_FRACTION = 0.10       # DATA_PLAN §4.4
 ERROR_BUDGET = 0.10          # vượt mức này → nâng ngưỡng và chạy lại TOÀN BỘ
 SEED = 20260914              # cố định để mẫu tái lập được; ghi vào báo cáo
 
-AUDIT_FIELDS = ["file_id", "class_id", "p_target", "p_confusable", "top_confusable",
-                "onset", "offset", "path_norm", "verdict", "note"]
+# CỐ Ý KHÔNG có p_target / p_confusable / decision. Phiếu này dặn người duyệt nghe mù,
+# mà in sẵn điểm của máy ngay cạnh thì lời dặn ấy vô nghĩa: biết máy chấm 0.95 rồi mới
+# nghe thì kết luận đã bị neo vào đó, và toàn bộ phép kiểm định mất giá trị — nó chỉ
+# còn đo được mức độ người duyệt đồng ý với máy khi đã biết máy nghĩ gì.
+# Điểm vẫn nằm nguyên trong screen_scores.csv và được ghép lại theo file_id ở --score.
+AUDIT_FIELDS = ["file_id", "class_id", "onset", "offset", "path_norm", "verdict", "note"]
 # Người duyệt chỉ điền cột `verdict` bằng một trong ba giá trị này.
 VERDICTS = {"ok": "máy đúng", "wrong_class": "sai lớp", "bad_audio": "audio không dùng được"}
 

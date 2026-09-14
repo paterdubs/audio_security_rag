@@ -180,3 +180,110 @@ def test_neu_ten_lop_de_nham_manh_nhat_duoc_ghi_lai():
 def test_lop_khong_co_ma_nao_khop_thi_ve_0_chu_khong_no():
     p_target, p_conf, name = asc.score_clip(np.array([0.5]), target=[], confusable={})
     assert (p_target, p_conf, name) == (0.0, 0.0, "")
+
+
+# ── Đệm clip ngắn ────────────────────────────────────────────────────────────
+#
+# 1076/5260 clip của bank dưới 1 giây, và CNN14 SẬP với chúng. Nhưng cách đệm mới là
+# chỗ nguy hiểm: đệm im lặng chạy trơn tru và cho ra số, chỉ là số sai.
+
+
+def test_clip_ngan_duoc_keo_dai_du_cho_mo_hinh():
+    ngan = np.ones(3200)                       # 0.1 giây
+    assert len(asc.pad_to_minimum(ngan)) == asc.MIN_SAMPLES
+
+
+def test_keo_dai_bang_LAP_LAI_chu_khong_phai_im_lang():
+    """Đo trên 40 clip ngắn thật: đệm im lặng cho p_target trung bình 0.012 và làm
+    37/40 clip bị tự động loại; lặp lại cho 0.400 và chỉ loại 2.
+
+    Tức đệm im lặng sẽ xoá ~1000 clip khỏi bank với lý do "sai lớp" trong khi chúng
+    không hề sai lớp — và mất mát tập trung đúng vào các lớp xung kích.
+    """
+    ngan = np.array([0.5, -0.5] * 1600)        # 0.1 giây, không có mẫu 0 nào
+    keo_dai = asc.pad_to_minimum(ngan)
+    assert not np.any(keo_dai == 0), "có mẫu 0 nghĩa là đang đệm im lặng"
+    assert np.array_equal(keo_dai[:3200], ngan)
+
+
+def test_clip_du_dai_thi_giu_nguyen():
+    dai = np.ones(asc.MIN_SAMPLES * 2)
+    assert np.array_equal(asc.pad_to_minimum(dai), dai)
+
+
+def test_clip_dung_1_giay_khong_bi_dong_vao():
+    vua = np.ones(asc.MIN_SAMPLES)
+    assert np.array_equal(asc.pad_to_minimum(vua), vua)
+
+
+def test_clip_rong_khong_lam_no_vong_lap():
+    assert len(asc.pad_to_minimum(np.array([]))) == 0
+
+
+def test_chi_doc_phan_audio_that_khi_de_xuat_bien():
+    """Đọc cả phần lặp sẽ cho ra biên trỏ vào bản sao thứ ba của sự kiện — một khoảng
+    thời gian KHÔNG TỒN TẠI trong file gốc, mà người duyệt bấm 'nhận' là nó vào nhãn."""
+    # Clip 0.25 s được lặp 4 lần thành 1 s → chỉ 1/4 số frame là thật.
+    assert asc.real_frame_count(frames=100, original_samples=asc.MIN_SAMPLES // 4) == 25
+
+
+def test_clip_du_dai_thi_doc_het_frame():
+    assert asc.real_frame_count(frames=100, original_samples=asc.MIN_SAMPLES * 3) == 100
+
+
+def test_luon_con_it_nhat_mot_frame_de_doc():
+    assert asc.real_frame_count(frames=10, original_samples=1) >= 1
+
+
+# ── Guard: lớp mà tagger không đủ phân giải ──────────────────────────────────
+#
+# Đo thật trên bank 5260 clip: shout_yell bị loại 93%, object_drop_dishes 87%. Chẩn
+# đoán cho thấy PANNs nghe ra "Speech"/"Groan"/"Gasp" ở shout_yell và
+# "Chink, clink"/"Coin dropping"/"Glass" ở object_drop_dishes — tức nghe ĐÚNG nội dung
+# âm học, chỉ gán vào lớp lân cận. Mà các clip ấy đã qua cổng PP của FSD50K, nghĩa là
+# CON NGƯỜI đã chấm nhãn là có mặt và nổi trội.
+
+
+def _diem(class_id: str, decision: str, n: int) -> list[dict]:
+    return [{"class_id": class_id, "decision": decision, "priority": "", "file_id": f"{class_id}_{decision}_{i}"}
+            for i in range(n)]
+
+
+def test_lop_bi_loai_qua_nua_thi_huy_moi_quyet_dinh_loai():
+    scored = _diem("shout_yell", "auto_reject", 93) + _diem("shout_yell", "review", 7)
+    cuu = asc.guard_low_resolution_classes(scored)
+    assert cuu == {"shout_yell": 93}
+    assert all(r["decision"] == "review" for r in scored)
+
+
+def test_lop_binh_thuong_khong_bi_dong_vao():
+    scored = _diem("siren", "auto_reject", 7) + _diem("siren", "auto_accept", 293)
+    assert asc.guard_low_resolution_classes(scored) == {}
+    assert sum(1 for r in scored if r["decision"] == "auto_reject") == 7
+
+
+def test_dung_muc_mot_nua_thi_chua_kich_hoat():
+    # Nửa là ranh giới tự nhiên chứ không phải số tinh chỉnh; phải VƯỢT nửa.
+    scored = _diem("door_slam", "auto_reject", 50) + _diem("door_slam", "auto_accept", 50)
+    assert asc.guard_low_resolution_classes(scored) == {}
+
+
+def test_moi_lop_duoc_xet_rieng():
+    scored = (_diem("shout_yell", "auto_reject", 93) + _diem("shout_yell", "review", 7)
+              + _diem("siren", "auto_reject", 7) + _diem("siren", "auto_accept", 293))
+    cuu = asc.guard_low_resolution_classes(scored)
+    assert set(cuu) == {"shout_yell"}
+    assert sum(1 for r in scored if r["decision"] == "auto_reject") == 7    # siren giữ nguyên
+
+
+def test_clip_duoc_cuu_vao_hang_doi_uu_tien_THUONG():
+    # Không phải ưu tiên cao: chúng không khó vì lẫn lớp, chúng chỉ nằm ngoài tầm
+    # phân giải của tagger. Đẩy lên ưu tiên cao sẽ dìm mất những ca thật sự khó.
+    bi_loai = _diem("shout_yell", "auto_reject", 93)
+    scored = bi_loai + _diem("shout_yell", "review", 7)
+    asc.guard_low_resolution_classes(scored)
+    assert all(r["priority"] == "normal" for r in bi_loai)
+
+
+def test_lop_khong_co_clip_nao_khong_lam_no():
+    assert asc.guard_low_resolution_classes([]) == {}
