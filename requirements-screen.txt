@@ -16,6 +16,14 @@ torch==2.5.1
 panns-inference==0.1.1   # CNN14 pretrain trên AudioSet, 527 lớp
 torchlibrosa==0.1.0      # panns-inference phụ thuộc; ghim để tái lập được
 
+# ⚠️ HAI DÒNG DƯỚI ĐÂY KHÔNG PHẢI THỪA — đừng xoá vì "pip tự lo được".
+# panns-inference kéo theo matplotlib (nó chỉ dùng để vẽ), và matplotlib mới nhất
+# đòi numpy>=2.0 → pip lặng lẽ GỠ numpy 1.26 và cài numpy 2.0.2. Scaper chết ngay
+# sau đó ở np.Inf, mà không có gì nối hai sự kiện ấy với nhau: người dùng chỉ thấy
+# "cài xong bộ sàng lọc thì bước sinh train set hỏng". Đã xảy ra thật 14/09/2026.
+matplotlib==3.9.4        # bản cuối còn chạy với numpy 1.26
+numpy==1.26.4            # lặp lại từ requirements-data.txt để pip không hạ bệ nó
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Checkpoint: panns-inference tự tải Cnn14_mAP=0.431.pth (~300 MB) về ~/panns_data
 # ở lần chạy đầu. KHÔNG nằm trong repo và KHÔNG có checksum do tác giả công bố —

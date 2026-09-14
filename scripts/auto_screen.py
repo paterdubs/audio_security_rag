@@ -198,17 +198,58 @@ def score_clip(clip_probs: np.ndarray, target: list[int],
 # ── Chạy mô hình ─────────────────────────────────────────────────────────────
 
 
+CHECKPOINT_URL = "https://zenodo.org/record/3987831/files/Cnn14_mAP%3D0.431.pth?download=1"
+CHECKPOINT_PATH = Path.home() / "panns_data" / "Cnn14_mAP=0.431.pth"
+CHECKPOINT_BYTES = 327428481
+
+
+def ensure_checkpoint() -> Path:
+    """Tải checkpoint CNN14 nếu chưa có, và ghi lại SHA-256 của nó.
+
+    panns-inference tự tải bằng `os.system("wget ...")`. Trên Windows không có wget
+    nên nó tạo sẵn thư mục rồi chết ở FileNotFoundError — thông báo không hề nhắc tới
+    wget, và người dùng đi tìm nhầm chỗ. Tự tải vừa chạy được trên mọi nền, vừa tận
+    dụng cơ chế thử-lại-khi-504 đã viết ở download_sources.py.
+
+    Tác giả PANNs KHÔNG công bố checksum. Ta tự ghi lại SHA-256 của bản đã tải để lần
+    sau còn đối chiếu — không có nó thì không có cách nào biết mình đang chạy đúng bộ
+    trọng số của lần thí nghiệm trước.
+    """
+    import hashlib
+
+    from download_sources import fetch_with_retry
+
+    if CHECKPOINT_PATH.exists() and CHECKPOINT_PATH.stat().st_size == CHECKPOINT_BYTES:
+        return CHECKPOINT_PATH
+
+    CHECKPOINT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    part = CHECKPOINT_PATH.with_suffix(".pth.part")
+    print(f"▶ tải checkpoint CNN14 (~312 MB) → {CHECKPOINT_PATH}")
+    done = part.stat().st_size if part.exists() else 0
+    done = fetch_with_retry(CHECKPOINT_URL, part, done, CHECKPOINT_PATH.name)
+    if done != CHECKPOINT_BYTES:
+        part.unlink(missing_ok=True)
+        raise SystemExit(f"❌ checkpoint tải về {done} byte, mong đợi {CHECKPOINT_BYTES}")
+    part.replace(CHECKPOINT_PATH)
+
+    digest = hashlib.sha256(CHECKPOINT_PATH.read_bytes()).hexdigest()
+    record = CHECKPOINT_PATH.with_suffix(".pth.sha256")
+    record.write_text(digest, encoding="utf-8")
+    print(f"  ✓ SHA-256 {digest[:16]}… đã ghi vào {record.name}")
+    return CHECKPOINT_PATH
+
+
 def load_tagger():
     """Nạp PANNs CNN14. Import ở đây chứ không ở đầu file: phần định tuyến và đề xuất
     biên phải kiểm thử được trên máy không cài torch (requirements-data.txt §ghi chú)."""
     import torch
     from panns_inference import SoundEventDetection, AudioTagging
 
+    checkpoint = ensure_checkpoint()
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"▶ nạp PANNs CNN14 trên {device}"
-          + (" (lần đầu sẽ tải checkpoint ~300 MB)" if device else ""))
-    return AudioTagging(checkpoint_path=None, device=device), \
-        SoundEventDetection(checkpoint_path=None, device=device), device
+    print(f"▶ nạp PANNs CNN14 trên {device}")
+    return AudioTagging(checkpoint_path=str(checkpoint), device=device), \
+        SoundEventDetection(checkpoint_path=str(checkpoint), device=device), device
 
 
 def load_audio_32k(path: Path) -> np.ndarray:

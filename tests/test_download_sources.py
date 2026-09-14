@@ -225,3 +225,54 @@ def test_that_su_chua_cai_thi_bao_cach_cai(monkeypatch):
     with pytest.raises(SystemExit) as err:
         ds.find_zip_tool()
     assert "winget" in str(err.value) and "apt install" in str(err.value)
+
+
+# ── Luồng kết thúc sớm mà không ném lỗi ──────────────────────────────────────
+
+
+def test_luong_ket_thuc_som_thi_tai_tiep_chu_khong_chet(tmp_path: Path, monkeypatch):
+    """FSD50K.dev_audio.z05: thiếu 17 MB trên 3 GB, im lặng hoàn toàn.
+
+    response.read() trả b"" giữa chừng nên không có lỗi nào được ném; mọi thứ trông
+    như đã xong. Không có nhánh này thì lỗi chỉ lộ ra ở phép so kích thước cuối cùng,
+    ném OSError không-thể-thử-lại và giết cả lệnh tải — dù việc cần làm chỉ là tải tiếp.
+    """
+    part = tmp_path / "x.part"
+    luot = []
+
+    def gia_lap(url, p, done, name):
+        luot.append(done)
+        moi = [2_000_000, 2_900_000, 3_000_000][len(luot) - 1]
+        p.write_bytes(b"a" * moi)
+        return moi
+
+    monkeypatch.setattr(ds, "fetch_one_pass", gia_lap)
+    monkeypatch.setattr(ds.time, "sleep", lambda _: None)
+
+    assert ds.fetch_with_retry("u", part, 0, "x", expected_size=3_000_000) == 3_000_000
+    assert luot == [0, 2_000_000, 2_900_000]      # mỗi lượt tải tiếp, không làm lại
+
+
+def test_khong_tien_them_duoc_byte_nao_thi_dung(tmp_path: Path, monkeypatch):
+    # Thử lại 8 lần một máy chủ luôn trả đúng chừng ấy byte chỉ làm mất thời gian.
+    part = tmp_path / "x.part"
+
+    def kep(url, p, done, name):
+        p.write_bytes(b"a" * 1000)
+        return 1000
+
+    monkeypatch.setattr(ds, "fetch_one_pass", kep)
+    monkeypatch.setattr(ds.time, "sleep", lambda _: None)
+    with pytest.raises(OSError, match="kẹt"):
+        ds.fetch_with_retry("u", part, 0, "x", expected_size=2000)
+
+
+def test_du_kich_thuoc_thi_tra_ve_ngay(tmp_path: Path, monkeypatch):
+    monkeypatch.setattr(ds, "fetch_one_pass", lambda *a: 1000)
+    assert ds.fetch_with_retry("u", tmp_path / "x.part", 0, "x", expected_size=1000) == 1000
+
+
+def test_khong_biet_kich_thuoc_dich_thi_khong_kiem_tra(tmp_path: Path, monkeypatch):
+    # Nguồn không công bố kích thước: tin vào luồng, không có gì để đối chiếu.
+    monkeypatch.setattr(ds, "fetch_one_pass", lambda *a: 500)
+    assert ds.fetch_with_retry("u", tmp_path / "x.part", 0, "x", expected_size=0) == 500

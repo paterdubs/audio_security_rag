@@ -164,24 +164,41 @@ def fetch_one_pass(url: str, part: Path, done: int, name: str) -> int:
             return _stream(response, handle, done, total, name)
 
 
-def fetch_with_retry(url: str, part: Path, done: int, name: str) -> int:
-    """Tải, thử lại khi máy chủ lỗi tạm thời hoặc mạng đứt.
+def fetch_with_retry(url: str, part: Path, done: int, name: str, expected_size: int = 0) -> int:
+    """Tải, thử lại khi máy chủ lỗi tạm thời, mạng đứt, HOẶC luồng kết thúc sớm.
 
     Mỗi lần thử lại đọc lại kích thước THẬT của .part rồi tải tiếp từ đó, nên không
-    lượt nào phải làm lại từ đầu. Đây là điểm khác biệt so với chạy lại cả lệnh: một
-    cú 504 ở phút thứ 40 của file 6 GB chỉ mất vài giây, không mất 40 phút.
+    lượt nào phải làm lại từ đầu. Một cú 504 ở phút thứ 40 của file 6 GB chỉ mất vài
+    giây, không mất 40 phút.
+
+    Trường hợp khó thấy nhất là luồng KẾT THÚC SỚM mà không ném lỗi gì: máy chủ đóng
+    kết nối giữa chừng, response.read() trả về b"" và mọi thứ trông như đã xong. Đã
+    xảy ra với FSD50K.dev_audio.z05 — thiếu 17 MB trên 3 GB, im lặng hoàn toàn. Không
+    có nhánh này thì lỗi ấy chỉ lộ ra ở phép so kích thước cuối cùng, ném ra một
+    OSError không-thể-thử-lại và giết cả lệnh tải, dù việc cần làm chỉ là tải tiếp.
     """
+    last_short = 0
     for attempt in range(MAX_ATTEMPTS):
         try:
-            return fetch_one_pass(url, part, done, name)
-        except Exception as error:                       # noqa: BLE001 — phân loại ngay bên dưới
+            done = fetch_one_pass(url, part, done, name)
+            if not expected_size or done >= expected_size:
+                return done
+            if done == last_short:
+                # Tải tiếp mà không thêm được byte nào: vấn đề không phải tạm thời.
+                raise OSError(f"{name}: kẹt ở {done} byte, không tiến thêm được")
+            last_short = done
+            error: Exception = ConnectionError(
+                f"luồng kết thúc sớm, thiếu {(expected_size - done) / 1e6:.1f} MB")
+        except Exception as caught:                      # noqa: BLE001 — phân loại ngay bên dưới
+            error = caught
             if not is_transient(error) or attempt == MAX_ATTEMPTS - 1:
                 raise
-            done = part.stat().st_size if part.exists() else 0
-            delay = min(60, 2 ** attempt)
-            print(f"    ⚠️ {type(error).__name__}: {error} → thử lại sau {delay}s "
-                  f"(lần {attempt + 2}/{MAX_ATTEMPTS}, đang có {done / 1e6:.0f} MB)", flush=True)
-            time.sleep(delay)
+
+        done = part.stat().st_size if part.exists() else 0
+        delay = min(60, 2 ** attempt)
+        print(f"    ⚠️ {type(error).__name__}: {error} → thử lại sau {delay}s "
+              f"(lần {attempt + 2}/{MAX_ATTEMPTS}, đang có {done / 1e6:.0f} MB)", flush=True)
+        time.sleep(delay)
     raise OSError(f"{name}: hết {MAX_ATTEMPTS} lần thử")
 
 
@@ -207,7 +224,7 @@ def _download_locked(url: str, dest: Path, part: Path, expected_size: int) -> No
         finalize(part, dest)
         return
 
-    done = fetch_with_retry(url, part, done, dest.name)
+    done = fetch_with_retry(url, part, done, dest.name, expected_size)
 
     # Kiểm tra KÍCH THƯỚC THẬT TRÊN ĐĨA, không phải bộ đếm của chính mình. Hai con số
     # này lệch nhau khi có tiến trình khác cùng ghi vào .part: bộ đếm nội bộ vẫn khớp
