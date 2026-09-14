@@ -1,0 +1,314 @@
+# ontology_map.yaml — NGUỒN CHÂN LÝ DUY NHẤT cho ánh xạ 15 class ↔ nhãn của các dataset nguồn
+#
+# Mọi script tải dữ liệu, sàng lọc, sinh Scaper đều đọc file này. KHÔNG hardcode class ở nơi khác.
+# Kiểm tra tính đúng đắn: python scripts/verify_ontology.py
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# TRẠNG THÁI XÁC MINH (cập nhật 2026-09-14)
+#   ✅ audioset_ids        — đã đối chiếu với data/reference/audioset_ontology.json (file gốc, 632 lớp)
+#   ✅ audioset_strong     — đã đối chiếu với audioset_strong_mid_to_display_name.tsv (456 lớp có strong label)
+#   ✅ esc50_labels        — đã đối chiếu với data/reference/esc50_meta.csv (2000 clip / 50 lớp)
+#   ✅ fsd50k_labels       — SINH TỰ ĐỘNG từ audioset_ids qua data/reference/fsd50k_vocabulary.csv
+#                            (ánh xạ bằng MÃ AudioSet, không phải khớp chuỗi tên — chắc hơn hẳn)
+#   ⚠️  urbansound_labels  — CẦN XÁC MINH khi có UrbanSound8K/metadata/UrbanSound8K.csv
+#   ⚠️  desed_labels       — CẦN XÁC MINH khi có metadata DESED
+#   ⚠️  mivia_labels       — CẦN XÁC MINH sau khi đơn xin dataset được duyệt
+# ─────────────────────────────────────────────────────────────────────────────
+
+meta:
+  version: "0.1.0"
+  n_classes: 15
+  reference_files:
+    audioset_ontology: data/reference/audioset_ontology.json
+    audioset_strong_vocab: data/reference/audioset_strong_mid_to_display_name.tsv
+    esc50_meta: data/reference/esc50_meta.csv
+    fsd50k_vocab: data/reference/fsd50k_vocabulary.csv
+  # Các nguồn chưa tải về; verify_ontology.py sẽ cảnh báo (không fail) khi thiếu.
+  reference_files_pending:
+    urbansound_meta: data/reference/UrbanSound8K.csv
+    desed_vocab: data/reference/desed_classes.txt
+
+# Nhóm A — sự kiện an ninh (10 lớp). Đây là các lớp sinh cảnh báo.
+# Nhóm B — lớp gây nhầm lẫn & nền (5 lớp). Tồn tại để model học cách KHÔNG báo động.
+
+classes:
+
+  # ══════════════════════════ NHÓM A ══════════════════════════
+
+  gunshot:
+    group: A
+    audioset_ids: ["/m/032s66", "/m/04zjc", "/m/073cg4"]
+    audioset_names: ["Gunshot, gunfire", "Machine gun", "Cap gun"]
+    fsd50k_labels: ["Gunshot_and_gunfire"]
+    esc50_labels: []                                  # ESC-50 KHÔNG có lớp súng
+    urbansound_labels: ["gun_shot"]                   # ⚠️
+    desed_labels: []
+    mivia_labels: ["gunshot"]                         # ⚠️
+    confusable_with: ["fireworks", "explosion", "door_slam"]
+    target_foreground: 200
+    min_acceptable: 80
+    notes: >
+      Loạt bắn (burst) phải tách thành từng phát riêng hoặc gán một event dài liên tục —
+      quyết định ghi trong annotation_guideline.md, không để mỗi người làm một kiểu.
+
+  explosion:
+    group: A
+    audioset_ids: ["/m/014zdl", "/m/0_1c"]
+    audioset_names: ["Explosion", "Artillery fire"]
+    fsd50k_labels: ["Explosion"]
+    esc50_labels: []                                  # ESC-50 KHÔNG có lớp nổ
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: []
+    confusable_with: ["gunshot", "fireworks"]
+    target_foreground: 120
+    min_acceptable: 50
+    risk: "🟢 dồi dào hơn dự kiến — xem notes"
+    notes: >
+      SỬA ĐÁNH GIÁ (D1): lớp này từng bị xếp 🔴 "khan hiếm tự nhiên ở mọi nguồn".
+      SAI. FSD50K có 1388 clip gắn nhãn Explosion, thừa xa mục tiêu 120.
+      Đánh giá cũ dựa trên trực giác chứ không dựa trên số đếm.
+      Vẫn phải sàng lọc kỹ vì nhãn FSD50K là weak và nhiễu.
+      CỐ Ý KHÔNG lấy "/m/07qsvvw Burst, pop": lớp đó gồm cả bóng bay nổ, nắp chai —
+      đưa vào sẽ làm bẩn lớp explosion. Dùng nó làm tín hiệu LOẠI khi sàng lọc.
+
+  scream:
+    group: A
+    audioset_ids: ["/m/03qc9zr"]
+    audioset_names: ["Screaming"]
+    fsd50k_labels: ["Screaming"]
+    esc50_labels: []
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: ["scream"]                          # ⚠️
+    confusable_with: ["shout_yell", "laughter_cheering"]
+    target_foreground: 200
+    min_acceptable: 80
+    notes: >
+      Ranh giới scream / shout_yell là nguồn bất đồng lớn nhất giữa hai người gán nhãn.
+      Tiêu chí phân biệt phải nằm trong annotation_guideline.md TRƯỚC buổi pilot 30 clip.
+
+  glass_breaking:
+    group: A
+    audioset_ids: ["/m/039jq", "/m/07rn7sz", "/m/07pc8lb"]
+    audioset_names: ["Glass", "Shatter", "Breaking"]
+    fsd50k_labels: ["Glass", "Shatter"]
+    esc50_labels: ["glass_breaking"]
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: ["glass_breaking"]                  # ⚠️
+    confusable_with: ["object_drop_dishes", "vehicle_crash"]
+    target_foreground: 250
+    min_acceptable: 100
+    notes: >
+      "/m/039jq Glass" và "/m/07pc8lb Breaking" rộng hơn ta cần (gồm cả rót nước vào ly,
+      bẻ gỗ). Bắt buộc qua sàng lọc §4.2 rồi mới vào bank, không nhận thẳng.
+
+  vehicle_crash:
+    group: A
+    audioset_ids: ["/m/07pjjrj", "/m/0h9mv", "/m/07rknqz"]
+    audioset_names: ["Smash, crash", "Tire squeal", "Skidding"]
+    audioset_weak_only: ["/m/07rknqz"]                # Skidding KHÔNG có trong bộ strong 456 lớp
+    fsd50k_labels: []
+    esc50_labels: []
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: ["crash"]                           # MIVIA Road — ⚠️ chờ duyệt đơn
+    confusable_with: ["glass_breaking"]
+    target_foreground: 80
+    min_acceptable: 30
+    risk: "🔴 RỦI RO CAO NHẤT"
+    notes: >
+      PHÁT HIỆN QUAN TRỌNG (D1): AudioSet KHÔNG có lớp nào nghĩa là "va chạm xe".
+      "/m/07pjjrj Smash, crash" là tiếng vỡ/đập nói chung, không đặc thù xe cộ.
+      Nghĩa là lớp này phụ thuộc MIVIA Road gần như tuyệt đối, rủi ro cao hơn cả
+      đánh giá ban đầu trong DATA_PLAN §2. Nộp đơn MIVIA ngay ngày đầu.
+      Dùng "Smash, crash" + "Tire squeal" chỉ như nguồn dự phòng, và mọi clip lấy
+      từ đó PHẢI qua người duyệt, không được auto-accept.
+
+  shout_yell:
+    group: A
+    audioset_ids: ["/m/07p6fty", "/m/07sr1lc"]
+    audioset_names: ["Shout", "Yell"]
+    fsd50k_labels: ["Shout", "Yell"]
+    esc50_labels: []
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: []
+    confusable_with: ["scream", "laughter_cheering", "speech_normal"]
+    target_foreground: 200
+    min_acceptable: 80
+    notes: >
+      "/t/dd00135 Children shouting" CỐ Ý xếp sang laughter_cheering: trẻ con la hét
+      ở sân trường là cảnh bình thường, không phải sự kiện an ninh. Đây là quyết định
+      taxonomy có ảnh hưởng trực tiếp đến FAR ở khu vực trường học.
+
+  door_slam:
+    group: A
+    audioset_ids: ["/m/02dgv", "/m/07rjzl8"]
+    audioset_names: ["Door", "Slam"]
+    fsd50k_labels: ["Door", "Slam"]
+    esc50_labels: []                                  # xem notes
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: []
+    confusable_with: ["object_drop_dishes", "gunshot"]
+    target_foreground: 250
+    min_acceptable: 100
+    notes: >
+      SỬA SO VỚI DATA_PLAN §2: ESC-50 KHÔNG dùng được cho lớp này. Hai lớp cửa của
+      ESC-50 là "door_wood_knock" (gõ cửa) và "door_wood_creaks" (cửa kêu cọt kẹt) —
+      cả hai đều KHÔNG phải đóng sầm. Đã đối chiếu esc50_meta.csv.
+      "/m/02dgv Door" rộng (gồm mở cửa, tra chìa) → bắt buộc qua sàng lọc.
+
+  running_footsteps:
+    group: A
+    audioset_ids: ["/m/07pbtc8", "/m/06h7j"]
+    audioset_names: ["Walk, footsteps", "Run"]
+    fsd50k_labels: ["Walk_and_footsteps", "Run"]
+    esc50_labels: ["footsteps"]                       # xem notes
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: []
+    confusable_with: ["object_drop_dishes"]
+    target_foreground: 250
+    min_acceptable: 100
+    notes: >
+      CẢNH BÁO: "footsteps" của ESC-50 và "/m/07pbtc8 Walk, footsteps" phần lớn là ĐI BỘ,
+      không phải CHẠY. Lớp của ta là running_footsteps. Tiêu chí phân biệt (nhịp bước,
+      cường độ) phải có trong annotation_guideline.md, và tỉ lệ loại ở lớp này sẽ cao —
+      đừng hoảng khi thấy nhiều clip bị reject với mã wrong_class.
+
+  siren:
+    group: A
+    audioset_ids: ["/m/03kmc9", "/m/04qvtq", "/m/012n7d", "/m/012ndj", "/m/0dgbq"]
+    audioset_names:
+      ["Siren", "Police car (siren)", "Ambulance (siren)",
+       "Fire engine, fire truck (siren)", "Civil defense siren"]
+    fsd50k_labels: ["Siren"]
+    esc50_labels: ["siren"]
+    urbansound_labels: ["siren"]                      # ⚠️
+    desed_labels: []
+    mivia_labels: []
+    confusable_with: ["alarm_bell"]
+    target_foreground: 300
+    min_acceptable: 120
+
+  alarm_bell:
+    group: A
+    audioset_ids: ["/m/07pp_mv", "/m/0c3f7m", "/m/01y3hg", "/m/02mfyn", "/m/046dlr",
+                   "/m/0395lw", "/m/03wwcy"]
+    audioset_names:
+      ["Alarm", "Fire alarm", "Smoke detector, smoke alarm", "Car alarm",
+       "Alarm clock", "Bell", "Doorbell"]
+    fsd50k_labels: ["Alarm", "Bell", "Doorbell"]
+    esc50_labels: ["clock_alarm", "church_bells"]
+    urbansound_labels: []
+    desed_labels: ["Alarm_bell_ringing"]              # ⚠️ DESED cho strong label trực tiếp
+    mivia_labels: []
+    confusable_with: ["siren"]
+    target_foreground: 250
+    min_acceptable: 100
+
+  # ══════════════════════════ NHÓM B ══════════════════════════
+  # 5 lớp gây nhầm lẫn. Không sinh cảnh báo. Tồn tại để đo FAR và để model học
+  # phân biệt — bỏ nhóm này là bỏ luôn đóng góp chính về mặt độ tin cậy.
+
+  fireworks:
+    group: B
+    audioset_ids: ["/m/0g6b5", "/g/122z_qxw"]
+    audioset_names: ["Fireworks", "Firecracker"]
+    fsd50k_labels: ["Fireworks"]
+    esc50_labels: ["fireworks"]
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: []
+    confusable_with: ["gunshot", "explosion"]
+    target_foreground: 200
+    min_acceptable: 80
+    risk: "🟡 pháo quốc tế có thể khác pháo VN về phổ — buổi thu thực địa số 2"
+
+  object_drop_dishes:
+    group: B
+    audioset_ids: ["/m/04brg2", "/m/07qnq_y"]
+    audioset_names: ["Dishes, pots, and pans", "Thump, thud"]
+    fsd50k_labels: ["Dishes_and_pots_and_pans", "Thump_and_thud"]
+    esc50_labels: []
+    urbansound_labels: []
+    desed_labels: ["Dishes"]                          # ⚠️ DESED cho strong label trực tiếp
+    mivia_labels: []
+    confusable_with: ["glass_breaking", "door_slam", "running_footsteps"]
+    target_foreground: 250
+    min_acceptable: 100
+
+  laughter_cheering:
+    group: B
+    audioset_ids: ["/m/01j3sz", "/m/053hz1", "/t/dd00135", "/m/028ght"]
+    audioset_names: ["Laughter", "Cheering", "Children shouting", "Applause"]
+    fsd50k_labels: ["Laughter", "Cheering", "Applause"]
+    esc50_labels: ["laughing", "clapping"]
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: []
+    confusable_with: ["scream", "shout_yell"]
+    target_foreground: 250
+    min_acceptable: 100
+    notes: >
+      CỐ Ý KHÔNG lấy "/m/03qtwd Crowd": lớp đó là "có đám đông", quá rộng, gồm cả
+      đám đông đang hoảng loạn — đưa vào sẽ dạy model rằng đám đông = an toàn.
+
+  speech_normal:
+    group: B
+    audioset_ids: ["/m/09x0r", "/m/05zppz", "/m/02zsn", "/m/0ytgt", "/m/01h8n0"]
+    audioset_names:
+      ["Speech", "Male speech, man speaking", "Female speech, woman speaking",
+       "Child speech, kid speaking", "Conversation"]
+    fsd50k_labels: ["Speech", "Male_speech_and_man_speaking", "Female_speech_and_woman_speaking", "Child_speech_and_kid_speaking", "Conversation"]
+    esc50_labels: []
+    urbansound_labels: []
+    desed_labels: ["Speech"]                          # ⚠️ DESED cho strong label trực tiếp
+    mivia_labels: []
+    confusable_with: ["shout_yell"]
+    target_foreground: 300
+    min_acceptable: 120
+    notes: >
+      QUYỀN RIÊNG TƯ: lớp này chỉ dùng để phát hiện "có tiếng nói", TUYỆT ĐỐI không
+      nhận dạng nội dung hay người nói. Không lưu transcript. Xem SYSTEM.md §1.4.
+      Ưu tiên clip đa ngôn ngữ để model không gắn "tiếng nói" với một ngôn ngữ cụ thể.
+
+  ambient_noise:
+    group: B
+    audioset_ids: []
+    audioset_names: []
+    fsd50k_labels: []
+    esc50_labels: []
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: []
+    confusable_with: []
+    target_foreground: 0                              # không có foreground — đây là background bank
+    min_acceptable: 0
+    notes: >
+      Lớp này KHÔNG lấy từ ontology. Nó là background bank (§5 DATA_PLAN): cảnh nền
+      đã được XÁC MINH là không chứa bất kỳ sự kiện Nhóm A nào. Nguồn: TAU/DCASE
+      acoustic scenes, UrbanSound8K nền, và thu thực địa tại IUH.
+
+# Các AudioSet id mà nếu xuất hiện trong một clip background thì clip đó bị LOẠI.
+# Dùng bởi scripts/screen_background.py với ngưỡng thấp (0.15) — thà loại nhầm còn hơn
+# để lọt một tiếng súng vào nền rồi Scaper dán nhãn "không có sự kiện" lên nó.
+background_reject_ids:
+  - "/m/032s66"   # Gunshot, gunfire
+  - "/m/04zjc"    # Machine gun
+  - "/m/014zdl"   # Explosion
+  - "/m/03qc9zr"  # Screaming
+  - "/m/07p6fty"  # Shout
+  - "/m/07sr1lc"  # Yell
+  - "/m/07rn7sz"  # Shatter
+  - "/m/07pc8lb"  # Breaking
+  - "/m/07pjjrj"  # Smash, crash
+  - "/m/07rjzl8"  # Slam
+  - "/m/03kmc9"   # Siren
+  - "/m/07pp_mv"  # Alarm
+  - "/m/0c3f7m"   # Fire alarm
+  - "/m/0g6b5"    # Fireworks
+  - "/g/122z_qxw" # Firecracker

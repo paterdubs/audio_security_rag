@@ -1,0 +1,56 @@
+# preprocessing.yaml — ngưỡng cho giai đoạn 1 (chuẩn hoá kỹ thuật), DATA_PLAN §4.1.
+#
+# Mọi ngưỡng đều nằm ở đây, không hardcode trong script: các con số này sẽ phải
+# chỉnh sau khi nhìn báo cáo loại bỏ thực tế, và mỗi lần chỉnh phải thấy được
+# trong git diff vì nó thay đổi thành phần dataset.
+
+audio:
+  target_sample_rate: 16000     # BEATs nhận 16 kHz; giữ nguyên suốt pipeline
+  target_channels: 1            # mono — trung bình các kênh, không lấy kênh trái
+  resample_type: soxr_hq        # chất lượng cao; kaldi/scipy cho artefact ở tần số cao
+
+loudness:
+  # Chuẩn hoá độ to theo EBU R128, KHÔNG dùng peak normalize.
+  # Peak normalize chỉnh theo đúng MỘT mẫu to nhất, nên một tiếng nổ lách tách
+  # cũng kéo cả clip xuống; R128 đo độ to cảm nhận trên toàn clip.
+  target_lufs: -23.0            # mức tham chiếu EBU R128
+  # pyloudnorm cần ≥ 0.4 s để lấp đầy một block 400 ms. Clip ngắn hơn thì
+  # bỏ qua chuẩn hoá độ to (vẫn giữ clip) và đánh dấu trong manifest.
+  min_duration_for_lufs: 0.4
+  # Sau khi chỉnh gain có thể vượt 0 dBFS → giới hạn lại để tránh méo khi ghi file.
+  peak_ceiling_dbfs: -1.0
+
+quality_gates:
+  # Mỗi ngưỡng dưới đây tương ứng một mã lý do trong exclusions.csv (N3).
+  # Khớp với annotation_guideline.md §2: "thời lượng event tối thiểu 100 ms".
+  # Ngưỡng 0.3 s ban đầu là tuỳ tiện và mâu thuẫn với chính guideline — nó không ràng
+  # buộc gì với ESC-50 (mọi clip đều 5 s) nên không lộ ra, nhưng với soundbank kiểu
+  # DESED thì cắt mất 43% lớp `object_drop_dishes`: một tiếng chén khua thật sự chỉ
+  # dài ~0.2 s (trung vị 0.36 s, phân vị 25 là 0.21 s — đo trên 143 clip).
+  min_duration_sec: 0.1
+  max_duration_sec: 30.0        # dài hơn thì gần như chắc chắn nhiều sự kiện
+  # ── Phát hiện méo (clipping) ───────────────────────────────────────────────
+  # Đo bằng tỉ lệ mẫu nằm trong các đoạn ĐỈNH BỊ CẮT PHẲNG (≥3 mẫu liên tiếp chạm
+  # trần), đo trên FILE GỐC trước khi resample. Đo trên bản đã resample là sai cả
+  # hai chiều, và đây là số liệu đo thật trên 320 clip ESC-50 (D1):
+  #     chạm trần, sau resample     → 138 clip có dấu hiệu (thổi phồng: resampler
+  #                                   tự vượt đỉnh, đếm cả mẫu không hề bị cắt)
+  #     cắt phẳng, sau resample     →  19 clip  (bỏ sót: resample làm MƯỢT đỉnh
+  #                                   phẳng thành cong, xoá mất dấu vết méo)
+  #     cắt phẳng, trên file gốc    → 119 clip  ← đúng
+  clipping_min_run_samples: 3     # dưới 3 mẫu liên tiếp thì chưa phải cắt phẳng
+  clipping_ceiling: 0.999
+  # Máy chỉ tự loại clip méo NẶNG. Vùng xám chuyển sang người nghe, đúng tinh thần
+  # luật định tuyến ở §4.2 — với dữ liệu an ninh vốn khan hiếm và vốn xung nhọn
+  # (tiếng súng, kính vỡ), tự loại 10% ở ngưỡng 0.1% là quá tay.
+  max_clipped_ratio: 0.01         # > 1% đoạn cắt phẳng → tự loại (4.1% số clip)
+  clipping_review_ratio: 0.001    # 0.1%–1% → GẮN CỜ cho người nghe (thêm ~6%)
+  # RMS dưới mức này coi như im lặng (thang tuyến tính, xấp xỉ -60 dBFS).
+  silence_rms_threshold: 0.001
+  # File có sample rate gốc thấp hơn mức này là đã bị nâng mẫu ở đâu đó:
+  # nội dung trên 8 kHz là bịa, sẽ làm hỏng đặc trưng tần số cao.
+  min_original_sample_rate: 16000
+
+# Cố ý KHÔNG tự động loại theo các mã sau — chúng cần tai người:
+#   wrong_class · multiple_events · too_noisy · music_overlay · speech_overlay
+# Máy chỉ được loại theo tiêu chí kỹ thuật đo được.

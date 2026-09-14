@@ -1,0 +1,211 @@
+# sources.yaml — đăng ký các nguồn dữ liệu. Đọc bởi scripts/download_sources.py.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# RÀNG BUỘC QUYẾT ĐỊNH CHIẾN LƯỢC: dung lượng ổ đĩa
+#
+#   Ổ D: còn trống 95.7 GB (đo 2026-09-14 sau khi dọn ổ, xem meta.disk_survey).
+#   Tải toàn bộ 4 dataset công khai = 95.3 GB → vừa đủ về lý thuyết, nhưng vẫn KHÔNG NÊN:
+#   18.87 GB soundscape DESED sinh sẵn và 17 GB clip FSD50K ngoài 15 lớp là rác thuần tuý.
+#
+#   Vì vậy nguyên tắc là TẢI CHỌN LỌC, không sao chép toàn bộ dataset:
+#     · DESED  — chỉ lấy soundbank 2.42 GB, BỎ 18.87 GB soundscape đã sinh sẵn
+#                (ta tự sinh bằng Scaper, xem DATA_PLAN §7 — tự sinh còn kiểm soát
+#                 được tỉ lệ 8 test slice, dùng bản có sẵn thì không)
+#     · TAU    — 21 zip độc lập nhau, chỉ lấy 4 phần làm nền
+#     · FSD50K — dev_audio giải nén được, nhưng đỉnh 36.8 GB. Phải làm CUỐI CÙNG
+#                và phải tỉa bớt ngay sau khi chọn clip. Xem khoá `fsd50k_dev_audio`.
+#
+#   Mọi kích thước và license dưới đây LẤY TỪ API Zenodo ngày 2026-09-14,
+#   không phải từ trí nhớ. Kiểm lại: python scripts/download_sources.py --verify-sizes
+# ─────────────────────────────────────────────────────────────────────────────
+
+meta:
+  disk_survey:
+    date: "2026-09-14"
+    free_gb_d: 95.7
+    free_gb_c: 21.6
+    updated: "2026-09-14 — người dùng dọn ổ, từ 52 GB lên 95.7 GB"
+    measured_by: "shutil.disk_usage (đã đối chiếu Win32_LogicalDisk)"
+    warning: >
+      KHÔNG dùng `Get-PSDrive` để đo: nó báo 37.1 GB trong khi dung lượng thật là 52 GB.
+      Sai số 15 GB này suýt làm ta bỏ FSD50K dev_audio một cách không cần thiết.
+      Script download_sources.py dùng shutil.disk_usage, đã kiểm chứng là đúng.
+  # Mỗi dataset tải xong PHẢI xoá file nén trước khi sang dataset sau.
+  cleanup_policy: delete_archive_after_extract
+
+sources:
+
+  # ══════════ Nhóm 1 — tải tự động được ngay, ưu tiên cao ══════════
+
+  esc50:
+    access: public_direct
+    priority: 1
+    url: "https://codeload.github.com/karolpiczak/ESC-50/zip/refs/heads/master"
+    archive_name: ESC-50-master.zip
+    approx_size_gb: 0.6
+    license: "CC BY-NC 3.0"
+    redistributable: labels_only       # audio KHÔNG được phát hành lại
+    provides_classes: [glass_breaking, siren, alarm_bell, fireworks,
+                       laughter_cheering, running_footsteps, ambient_noise]
+    label_type: weak                   # 1 nhãn / clip 5 giây, không có onset/offset
+    notes: >
+      Rẻ nhất, tải trước tiên. 2000 clip / 50 lớp / 5 giây / 44.1 kHz.
+      Mỗi clip có cột `fold` (1..5) và `src_file` — src_file CHÍNH LÀ source_group_id
+      (nhiều clip cắt từ cùng một bản ghi Freesound gốc). Bắt buộc dùng để chống rò rỉ.
+
+  desed_soundbank:
+    access: public_direct
+    priority: 1
+    zenodo_record: 4568876
+    files: [DESED_synth_soundbank.tar.gz]
+    approx_size_gb: 2.42
+    license: "CC BY 4.0"
+    redistributable: yes
+    provides_classes: [alarm_bell, object_drop_dishes, speech_normal, ambient_noise]
+    label_type: strong
+    notes: >
+      MÓN HỜI LỚN NHẤT của cả kế hoạch. Đây là bank foreground/background đã tách sẵn,
+      đã cắt gọn, đúng định dạng Scaper cần — tức là đã làm hộ ta phần việc tốn công
+      nhất ở §4 cho 3 lớp. CC BY 4.0 nên công bố lại được.
+      CỐ Ý KHÔNG tải dcase21_synth.tar.gz (18.87 GB): đó là soundscape người ta đã
+      sinh sẵn theo tỉ lệ của họ, không theo 8 test slice của ta.
+
+  fsd50k_metadata:
+    access: public_direct
+    priority: 1
+    zenodo_record: 4060432
+    files: [FSD50K.ground_truth.zip, FSD50K.metadata.zip, FSD50K.doc.zip]
+    approx_size_gb: 0.02
+    license: "CC BY 4.0 / CC BY-NC / CC0 (khác nhau THEO TỪNG CLIP)"
+    redistributable: labels_only
+    label_type: weak
+    notes: >
+      Vài MB, tải ngay bất kể sau này có lấy audio hay không.
+      ground_truth cho biết CHÍNH XÁC clip nào thuộc lớp nào, và metadata cho biết
+      uploader Freesound của từng clip → đây là source_group_id cho FSD50K (N2).
+      ⚠️ License của FSD50K là PER-CLIP, không đồng nhất. Phải đọc và ghi vào
+      raw_manifest.license theo từng file, không được ghi gộp một dòng.
+
+  # ══════════ Nhóm 2 — tải được nhưng nặng, làm tuần tự ══════════
+
+  urbansound8k:
+    access: public_direct
+    priority: 2
+    zenodo_record: 1203745
+    files: [UrbanSound8K.tar.gz]
+    approx_size_gb: 6.02
+    peak_disk_gb: 12.1                 # nén + giải nén cùng lúc
+    license: "CC BY-NC 4.0"
+    redistributable: labels_only
+    provides_classes: [siren, gunshot, ambient_noise]
+    label_type: weak_with_salience     # có cột salience: 1=foreground, 2=background
+    notes: >
+      Nguồn chính cho `siren`. Có `gun_shot` nhưng chỉ 374 clip và chất lượng lẫn lộn.
+      Cột `fsID` (id Freesound gốc) CHÍNH LÀ source_group_id — nhiều clip cùng fsID.
+      Dùng salience=1 cho foreground, salience=2 + các lớp nền cho background bank.
+
+  tau2019_partial:
+    access: public_direct
+    priority: 2
+    zenodo_record: 2589280
+    files:                             # 21 zip độc lập; chỉ lấy 4
+      - TAU-urban-acoustic-scenes-2019-development.meta.zip
+      - TAU-urban-acoustic-scenes-2019-development.audio.1.zip
+      - TAU-urban-acoustic-scenes-2019-development.audio.2.zip
+      - TAU-urban-acoustic-scenes-2019-development.audio.3.zip
+      - TAU-urban-acoustic-scenes-2019-development.audio.4.zip
+    approx_size_gb: 6.97
+    license: "Non-commercial (TAU)"
+    redistributable: no
+    provides_classes: [ambient_noise]
+    label_type: scene_label            # nhãn CẢNH, không phải nhãn sự kiện
+    notes: >
+      Chỉ dùng làm background bank. Mỗi zip giải nén độc lập được nên lấy thêm/bớt
+      tuỳ ý — nếu sau khi sàng lọc §5 còn quá ít nền sạch thì tải thêm audio.5.zip.
+      ⚠️ Nhãn của TAU là cảnh (park, metro_station, street_traffic...), KHÔNG bảo đảm
+      không chứa sự kiện Nhóm A. Bắt buộc chạy screen_background.py với ngưỡng 0.15.
+
+  # ══════════ Nhóm 3 — cần quyết định / cần đơn từ ══════════
+
+  fsd50k_dev_audio:
+    access: public_direct
+    priority: 3
+    zenodo_record: 4060432
+    files: [FSD50K.dev_audio.zip, FSD50K.dev_audio.z01, FSD50K.dev_audio.z02,
+            FSD50K.dev_audio.z03, FSD50K.dev_audio.z04, FSD50K.dev_audio.z05]
+    approx_size_gb: 18.41
+    peak_disk_gb: 36.8
+    license: "per-clip"
+    split_archive: true
+    prune_after_selection: true
+    notes: >
+      Nặng nhất nhưng là nguồn weak-label rộng nhất, đặc biệt cho `door_slam` và
+      `running_footsteps` — hai lớp mà ESC-50 không dùng được.
+      Dung lượng không còn là vấn đề (95.7 GB trống, đỉnh 36.8 GB), nhưng vẫn giữ
+      nguyên quy trình tỉa vì 17 GB clip ngoài 15 lớp là rác:
+        1. Làm SAU CÙNG, khi mọi nguồn khác đã tải và đã xoá file nén.
+        2. Split archive: phải có đủ 6 phần rồi mới ghép giải nén được.
+        3. Giải nén xong → chạy ngay bước chọn clip theo ontology_map.yaml
+           → XOÁ những clip không thuộc 15 lớp, thu hồi ~17 GB.
+        Bỏ qua bước 3 là ổ đĩa đầy ở nguồn kế tiếp.
+      Phương án dự phòng nếu ổ vẫn chật: Freesound API (đăng ký token miễn phí ở
+      freesound.org/apiv2/apply) tải lẻ ~3000 clip cần, tốn ~2 GB thay vì 18.4 GB,
+      đổi lại chậm vì giới hạn tần suất.
+
+  fsd50k_eval_audio:
+    access: public_direct
+    priority: 3
+    zenodo_record: 4060432
+    files: [FSD50K.eval_audio.zip, FSD50K.eval_audio.z01]
+    approx_size_gb: 6.26
+    peak_disk_gb: 12.5
+    license: "per-clip"
+    notes: >
+      Nhỏ hơn dev nhiều và VẪN GIẢI NÉN ĐƯỢC với chỗ trống hiện có.
+      Nếu phương án (A) ở trên quá chậm thì đây là lối thoát: lấy eval trước để có
+      dữ liệu làm việc ngay, dev bổ sung sau.
+
+  audioset_strong:
+    access: youtube_scrape
+    priority: 3
+    label_urls:
+      - "http://storage.googleapis.com/us_audioset/youtube_corpus/strong/audioset_train_strong.tsv"
+      - "http://storage.googleapis.com/us_audioset/youtube_corpus/strong/audioset_eval_strong.tsv"
+      - "http://storage.googleapis.com/us_audioset/youtube_corpus/strong/mid_to_display_name.tsv"
+    approx_size_gb: 0.05               # chỉ riêng phần NHÃN
+    license: "Nhãn: CC BY 4.0 — Audio: thuộc về chủ video YouTube"
+    redistributable: labels_only
+    label_type: strong
+    notes: >
+      Nhãn tải trực tiếp và rất nhỏ. Audio phải tải từng video bằng yt-dlp.
+      ⚠️ Dự trù 15–30% video đã bị gỡ hoặc chặn theo vùng — tỉ lệ hụt này PHẢI ghi
+      vào exclusions.csv với mã `unavailable`, và phải báo cáo trong khoá luận.
+      ⚠️ Audio KHÔNG được phát hành lại. Chỉ công bố danh sách YTID + mốc thời gian.
+      Chỉ tải các đoạn thuộc 15 lớp của ta, không tải cả corpus.
+
+  mivia_audio_events:
+    access: application_required
+    priority: 1                        # ưu tiên 1 vì ĐỘ TRỄ, không vì dung lượng
+    url: "https://mivia.unisa.it/datasets/audio-analysis/mivia-audio-events/"
+    license: "Nghiên cứu, theo thoả thuận"
+    redistributable: no
+    provides_classes: [gunshot, scream, glass_breaking]
+    label_type: strong
+    status: REQUESTED           # đã gửi email 14/09/2026, đang chờ duyệt
+    notes: >
+      ⏳ ĐÃ NỘP ĐƠN 14/09/2026, đang chờ duyệt. Duyệt mất 1–2 tuần, đây là đường găng dài nhất
+      của cả giai đoạn dữ liệu. Đơn gửi bằng email từ địa chỉ của trường.
+
+  mivia_road_events:
+    access: application_required
+    priority: 1
+    url: "https://mivia.unisa.it/datasets/audio-analysis/mivia-road-audio-events-data-set/"
+    license: "Nghiên cứu, theo thoả thuận"
+    redistributable: no
+    provides_classes: [vehicle_crash]
+    label_type: strong
+    status: REQUESTED           # đã gửi email 14/09/2026, đang chờ duyệt
+    notes: >
+      ⏳ ĐÃ NỘP ĐƠN 14/09/2026. KHỐI CHẶN DUY NHẤT của lớp `vehicle_crash`. Đã xác minh ở D1: AudioSet
+      KHÔNG có lớp nào nghĩa là va chạm xe (xem ontology_map.yaml). Không có nguồn
+      này thì lớp `vehicle_crash` phải ra cổng quyết định D7.

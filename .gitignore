@@ -1,0 +1,18 @@
+# Dữ liệu: hàng chục GB, tải lại được từ scripts/download_sources.py
+data/raw/
+data/interim/
+data/features/
+data/synthetic/
+data/banks/
+
+# Manifest, exclusions, báo cáo phủ: NHỎ và là bản ghi quyết định → PHẢI theo dõi.
+!data/manifests/
+!data/reference/
+!data/annotations/
+!data/gold/
+
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/

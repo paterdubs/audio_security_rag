@@ -1,0 +1,22 @@
+# Giai đoạn chuẩn bị dữ liệu (W2–W3 / D0–D10 trong docs/DATA_PLAN.md).
+# Cố ý TÁCH khỏi requirements của train & serving: giai đoạn này phải chạy được
+# trên máy không có GPU, và người gán nhãn thứ hai không cần cài torch.
+#
+# Ghim phiên bản chính xác: dataset phải tái lập được, kể cả 6 tháng sau.
+
+# --- cấu hình & manifest ---
+PyYAML==6.0.2
+pandas==2.2.3
+numpy==1.26.4            # giữ <2.0: nhiều thư viện audio chưa tương thích numpy 2.x
+
+# --- xử lý audio ---
+soundfile==0.12.1        # đọc/ghi wav, flac
+librosa==0.10.2.post1    # resample, phân tích
+pyloudnorm==0.1.1        # chuẩn hoá EBU R128 (KHÔNG dùng peak normalize — xem DATA_PLAN §4.1)
+
+# --- sinh soundscape + nhãn strong ---
+scaper==1.6.5            # sinh train set kèm strong label tự động
+
+# --- tiện ích ---
+requests==2.32.3
+tqdm==4.67.1

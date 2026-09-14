@@ -1,0 +1,32 @@
+file_id,stage,reason_code,detail,decided_by,decided_at
+esc50_alarm_bell_1d12a9f2,normalize,clipped,1.33% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_alarm_bell_c8378919,normalize,clipped,1.98% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_alarm_bell_cd9fd493,normalize,clipped,4.90% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_fireworks_c772c002,normalize,clipped,2.45% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_fireworks_f87acf8b,normalize,clipped,1.58% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_glass_breaking_872608ee,normalize,clipped,1.27% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_glass_breaking_88bbd7af,normalize,clipped,2.37% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_glass_breaking_98b930c2,normalize,clipped,1.93% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_laughter_cheering_2b08bf04,normalize,clipped,2.36% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_laughter_cheering_8da0720b,normalize,clipped,6.82% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_laughter_cheering_9d061b30,normalize,clipped,2.28% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_siren_75bf135f,normalize,clipped,15.29% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+esc50_siren_d1301a63,normalize,clipped,2.26% đoạn cắt phẳng,auto,2026-09-14T08:37:06+00:00
+desed_alarm_bell_3c39b5e5,normalize,too_short,0.09s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_alarm_bell_46415fd7,normalize,too_short,0.09s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_alarm_bell_b35268d5,normalize,too_short,0.10s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_alarm_bell_bc1f0722,normalize,too_short,0.10s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_alarm_bell_c3056946,normalize,too_short,0.10s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_alarm_bell_ded23e29,normalize,too_short,0.10s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_alarm_bell_e8a560a4,normalize,too_short,0.09s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_alarm_bell_f2f7f7b9,normalize,too_short,0.10s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_object_drop_dishes_0bfd743e,normalize,too_short,0.07s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_object_drop_dishes_24217991,normalize,clipped,1.49% đoạn cắt phẳng,auto,2026-09-14T08:56:05+00:00
+desed_object_drop_dishes_33e82a2d,normalize,too_short,0.07s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_object_drop_dishes_51a77bfc,normalize,too_short,0.07s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_object_drop_dishes_6e6410dc,normalize,too_short,0.05s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_object_drop_dishes_7358dda0,normalize,too_short,0.09s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_object_drop_dishes_7dc980ac,normalize,too_short,0.07s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_object_drop_dishes_d4ec4266,normalize,too_short,0.10s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_object_drop_dishes_f1b06202,normalize,too_short,0.10s < 0.1s,auto,2026-09-14T08:56:05+00:00
+desed_speech_normal_329d6a24,normalize,clipped,2.31% đoạn cắt phẳng,auto,2026-09-14T08:56:05+00:00
