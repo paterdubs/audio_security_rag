@@ -199,3 +199,29 @@ def test_kho_khong_chia_phan_thi_chi_xoa_chinh_no(tmp_path: Path):
 def test_file_da_bi_xoa_tu_truoc_khong_lam_no_loi(tmp_path: Path):
     archive = tmp_path / "x.zip"
     assert ds.cleanup_archive(archive, archive) == 0
+
+
+# ── Tìm công cụ zip ──────────────────────────────────────────────────────────
+
+
+def test_uu_tien_zip_tren_path(monkeypatch):
+    monkeypatch.setattr(ds.shutil, "which", lambda name: "/usr/bin/zip")
+    assert ds.find_zip_tool() == "/usr/bin/zip"
+
+
+def test_tim_duoc_noi_winget_cai_du_khong_co_tren_path(tmp_path: Path, monkeypatch):
+    # Bộ cài GnuWin32 KHÔNG thêm vào PATH. Chỉ dựa vào which() sẽ báo "chưa cài" cho
+    # một máy đã cài xong — bảo người dùng làm lại đúng việc họ vừa làm.
+    gia_lap = tmp_path / "zip.exe"
+    gia_lap.write_bytes(b"")
+    monkeypatch.setattr(ds.shutil, "which", lambda name: None)
+    monkeypatch.setattr(ds, "ZIP_FALLBACKS", [tmp_path / "khong_co.exe", gia_lap])
+    assert ds.find_zip_tool() == str(gia_lap)
+
+
+def test_that_su_chua_cai_thi_bao_cach_cai(monkeypatch):
+    monkeypatch.setattr(ds.shutil, "which", lambda name: None)
+    monkeypatch.setattr(ds, "ZIP_FALLBACKS", [])
+    with pytest.raises(SystemExit) as err:
+        ds.find_zip_tool()
+    assert "winget" in str(err.value) and "apt install" in str(err.value)

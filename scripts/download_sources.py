@@ -254,6 +254,30 @@ def verify_checksum(path: Path, expected_md5: str) -> bool:
 
 # ── Giải nén ─────────────────────────────────────────────────────────────────
 
+# Nơi winget đặt Info-ZIP trên Windows. Bộ cài KHÔNG thêm vào PATH, nên chỉ dựa vào
+# shutil.which() sẽ báo "chưa cài" cho một máy đã cài xong — người dùng đứng trước
+# một thông báo bảo họ làm lại đúng việc vừa làm.
+ZIP_FALLBACKS = [
+    Path(r"C:\Program Files (x86)\GnuWin32\bin\zip.exe"),
+    Path(r"C:\Program Files\GnuWin32\bin\zip.exe"),
+]
+
+
+def find_zip_tool() -> str:
+    """Đường dẫn tới `zip` (Info-ZIP), tìm trên PATH trước rồi tới nơi cài mặc định."""
+    found = shutil.which("zip")
+    if found:
+        return found
+    for candidate in ZIP_FALLBACKS:
+        if candidate.exists():
+            return str(candidate)
+    raise SystemExit(
+        "❌ cần công cụ `zip` (Info-ZIP) để ghép kho zip chia nhiều phần.\n"
+        "   Windows : winget install --id GnuWin32.Zip   (bấm Yes ở cửa sổ UAC)\n"
+        "   Debian  : sudo apt install zip\n"
+        "   macOS   : đã có sẵn"
+    )
+
 
 def join_split_zip(archive: Path) -> Path:
     """Ghép kho zip chia nhiều phần (.z01….zNN + .zip) thành một file đọc được.
@@ -268,14 +292,7 @@ def join_split_zip(archive: Path) -> Path:
         print(f"    đã ghép sẵn: {joined.name}")
         return joined
 
-    tool = shutil.which("zip")
-    if not tool:
-        raise SystemExit(
-            "❌ cần công cụ `zip` (Info-ZIP) để ghép kho chia nhiều phần.\n"
-            "   Windows : winget install GnuWin32.Zip\n"
-            "   Debian  : sudo apt install zip\n"
-            "   macOS   : đã có sẵn"
-        )
+    tool = find_zip_tool()
     print(f"    ghép {archive.name} + các phần .z01… → {joined.name}")
     result = subprocess.run([tool, "-s", "0", str(archive), "--out", str(joined)],
                             capture_output=True, text=True)
