@@ -308,3 +308,40 @@ def test_fsid_lam_nhom_chong_ro_ri(tmp_path, monkeypatch):
     assert entry.orig_onset == "" and entry.orig_offset == ""
     assert entry.label_type_orig == "weak_with_salience"
     assert entry.redistributable == "labels_only"     # CC BY-NC không cho phát hành lại audio
+
+
+# ── Gộp nhóm trùng lặp: ghi đè là xoá bằng chứng ─────────────────────────────
+#
+# Manifest chỉ giữ MỘT dòng cho mỗi checksum, nên bản trùng chỉ còn tồn tại trong
+# dedup_groups.csv. Ghi đè file đó khi quét nguồn khác sẽ xoá sạch nhóm của nguồn cũ,
+# và check_leakage vẫn báo xanh vì nó đọc chính file đã rỗng. Đã xảy ra thật.
+
+
+def _nhom(checksum: str, groups: str = "g1|g2") -> dict:
+    return {"checksum_sha256": checksum, "n_copies": "2", "representative_file_id": f"f_{checksum}",
+            "source_group_ids": groups, "members": "a|b", "risk": "cross_group"}
+
+
+def test_quet_nguon_moi_khong_lam_mat_nhom_cua_nguon_cu():
+    cu = [_nhom("desed_aa"), _nhom("desed_bb")]
+    moi = [_nhom("us8k_cc")]
+    ket_qua = {r["checksum_sha256"] for r in bm.merge_dedup_groups(cu, moi)}
+    assert ket_qua == {"desed_aa", "desed_bb", "us8k_cc"}
+
+
+def test_quet_lai_cung_checksum_thi_lan_moi_thang():
+    cu = [_nhom("aa", groups="g1|g2")]
+    moi = [_nhom("aa", groups="g1|g2|g3")]
+    ket_qua = bm.merge_dedup_groups(cu, moi)
+    assert len(ket_qua) == 1
+    assert ket_qua[0]["source_group_ids"] == "g1|g2|g3"
+
+
+def test_thu_tu_on_dinh_de_git_diff_doc_duoc():
+    xuoi = bm.merge_dedup_groups([_nhom("bb")], [_nhom("aa")])
+    nguoc = bm.merge_dedup_groups([_nhom("aa")], [_nhom("bb")])
+    assert [r["checksum_sha256"] for r in xuoi] == [r["checksum_sha256"] for r in nguoc] == ["aa", "bb"]
+
+
+def test_lan_quet_dau_tien_khong_co_gi_de_giu():
+    assert bm.merge_dedup_groups([], [_nhom("aa")]) == [_nhom("aa")]

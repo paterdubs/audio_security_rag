@@ -57,8 +57,8 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 - **Viết xong `taxonomy.md` + `annotation_guideline.md`** — hai tài liệu chặn đường găng pilot gán nhãn
 - **Adapter DESED xong**: +571 clip cho `alarm_bell`/`object_drop_dishes`/`speech_normal`; phát hiện và ghi lại 8 nhóm trùng **bắc cầu** giữa hai id Freesound
 - **Xác minh xong `fsd50k_labels`** bằng mã AudioSet (không đoán tên) + adapter FSD50K, đã kiểm thử: **4633 clip đạt hai cổng chọn**
-- Bank hiện tại: **852 clip / 36.5 phút** đã chuẩn hoá, 3 lớp đạt mức tối thiểu
-- 152 test, tất cả đạt (`pytest tests/ -q`)
+- Bank hiện tại: **1414 clip / 61.2 phút** đã chuẩn hoá; `siren` và `gunshot` đã đạt mức tối thiểu
+- 156 test, tất cả đạt (`pytest tests/ -q`)
 
 ### 🔄 Đang làm
 - Tải nền: `urbansound8k` · `fsd50k_dev_audio` (18.4 GB — đoạn dài nhất) · `tau2019_partial`

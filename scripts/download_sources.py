@@ -20,6 +20,7 @@ import http.client
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tarfile
 import time
@@ -254,6 +255,36 @@ def verify_checksum(path: Path, expected_md5: str) -> bool:
 # ── Giải nén ─────────────────────────────────────────────────────────────────
 
 
+def join_split_zip(archive: Path) -> Path:
+    """Ghép kho zip chia nhiều phần (.z01….zNN + .zip) thành một file đọc được.
+
+    zipfile của Python không đọc được kho chia phần — nó ném thẳng
+    `BadZipFile: zipfiles that span multiple disks are not supported`. Nối tay các
+    phần cũng không đủ: bản ghi thư mục trung tâm mang số hiệu đĩa cần sửa lại.
+    `zip -s 0` làm đúng việc đó và là cách chính FSD50K hướng dẫn.
+    """
+    joined = archive.with_name(archive.stem + ".joined.zip")
+    if joined.exists():
+        print(f"    đã ghép sẵn: {joined.name}")
+        return joined
+
+    tool = shutil.which("zip")
+    if not tool:
+        raise SystemExit(
+            "❌ cần công cụ `zip` (Info-ZIP) để ghép kho chia nhiều phần.\n"
+            "   Windows : winget install GnuWin32.Zip\n"
+            "   Debian  : sudo apt install zip\n"
+            "   macOS   : đã có sẵn"
+        )
+    print(f"    ghép {archive.name} + các phần .z01… → {joined.name}")
+    result = subprocess.run([tool, "-s", "0", str(archive), "--out", str(joined)],
+                            capture_output=True, text=True)
+    if result.returncode != 0:
+        joined.unlink(missing_ok=True)     # đừng để lại file ghép dở, lần sau sẽ tin nhầm
+        raise SystemExit(f"❌ ghép thất bại: {result.stderr.strip()[:300]}")
+    return joined
+
+
 def extract(archive: Path, dest: Path) -> None:
     dest.mkdir(parents=True, exist_ok=True)
     print(f"    giải nén → {dest.relative_to(REPO_ROOT)}")
@@ -307,16 +338,26 @@ def fetch_source(name: str, spec: dict, keep_archive: bool) -> bool:
 
     print(f"\n▶ {name}  ({spec.get('approx_size_gb', '?')} GB, {spec.get('license', '?')})")
     dest = RAW_DIR / name
+
+    # TẢI HẾT rồi mới giải nén. Giải nén ngay sau từng file là sai với kho chia nhiều
+    # phần: phần `.zip` (đoạn CUỐI của bộ) lại đứng ĐẦU danh sách, nên lần giải nén
+    # đầu tiên nổ ra trước khi 5 phần còn lại kịp tải. Đã xảy ra với FSD50K 14/09.
+    archives = []
     for filename, info in resolve_targets(spec):
         archive = ARCHIVE_DIR / name / filename
         download(info["url"], archive, info["size"])
         if not verify_checksum(archive, info["md5"]):
             return False
-        if archive.suffix in (".zip", ".gz", ".tgz") and not filename.endswith((".z01", ".z02", ".z03", ".z04", ".z05")):
-            extract(archive, dest)
-            if not keep_archive:
-                archive.unlink()
-                print("    đã xoá file nén (cleanup_policy)")
+        archives.append(archive)
+
+    for archive in archives:
+        if archive.suffix not in (".zip", ".gz", ".tgz"):
+            continue                       # .z01…: là phần của bộ, không giải nén riêng
+        source = join_split_zip(archive) if spec.get("split_archive") else archive
+        extract(source, dest)
+        if not keep_archive:
+            archive.unlink()
+            print("    đã xoá file nén (cleanup_policy)")
     return True
 
 

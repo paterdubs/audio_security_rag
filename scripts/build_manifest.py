@@ -572,12 +572,41 @@ def find_exact_duplicates(all_rows: list[dict], new_entries: list[RawEntry]) -> 
     return groups
 
 
+def merge_dedup_groups(existing: list[dict], found: list[dict]) -> list[dict]:
+    """Gộp nhóm trùng mới tìm được vào nhóm đã biết, khoá theo checksum.
+
+    KHÔNG được ghi đè. Manifest chỉ giữ MỘT dòng cho mỗi checksum, nên bản trùng chỉ
+    còn tồn tại trong chính file này; quét một nguồn khác sẽ không tìm lại được nhóm
+    của nguồn cũ (mọi bản sao của chúng đã bị manifest gộp mất) và ghi đè sẽ xoá sạch
+    bằng chứng. Đã xảy ra thật: chạy adapter urbansound8k làm biến mất 8 nhóm bắc cầu
+    của DESED, và check_leakage vẫn báo xanh vì nó đọc chính file rỗng đó.
+
+    Trùng byte là quan hệ bất biến — nhóm tìm được hôm qua vẫn đúng hôm nay — nên giữ
+    lại là an toàn; chỉ lần quét mới mới được cập nhật nhóm cùng checksum.
+    """
+    by_checksum = {row["checksum_sha256"]: row for row in existing}
+    by_checksum.update({row["checksum_sha256"]: row for row in found})
+    return [by_checksum[key] for key in sorted(by_checksum)]
+
+
 def write_dedup_groups(groups: list[dict]) -> None:
     DEDUP_PATH.parent.mkdir(parents=True, exist_ok=True)
+    existing = load_dedup_groups()
+    rows = merge_dedup_groups(existing, groups)
+    kept = len(rows) - len(groups)
+    if kept > 0:
+        print(f"  giữ lại {kept} nhóm trùng của các nguồn khác đã quét trước đó")
     with DEDUP_PATH.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=DEDUP_FIELDS)
         writer.writeheader()
-        writer.writerows(groups)
+        writer.writerows(rows)
+
+
+def load_dedup_groups() -> list[dict]:
+    if not DEDUP_PATH.exists():
+        return []
+    with DEDUP_PATH.open(encoding="utf-8", newline="") as handle:
+        return list(csv.DictReader(handle))
 
 
 def report_duplicates(groups: list[dict]) -> None:
