@@ -16,10 +16,14 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
 import json
+import os
 import shutil
 import sys
 import tarfile
+import time
+import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -73,27 +77,152 @@ def md5_of(path: Path) -> str:
 # ── Tải ──────────────────────────────────────────────────────────────────────
 
 
-def download(url: str, dest: Path, expected_size: int = 0) -> None:
-    """Tải có hỗ trợ tải tiếp. File .part chỉ được đổi tên khi đã tải xong."""
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    part = dest.with_suffix(dest.suffix + ".part")
-    done = part.stat().st_size if part.exists() else 0
+def finalize(part: Path, dest: Path, attempts: int = 6) -> None:
+    """Đổi tên .part → tên thật, có thử lại.
 
-    if dest.exists() and (not expected_size or dest.stat().st_size == expected_size):
-        print(f"    đã có, bỏ qua: {dest.name}")
-        return
+    Windows hay khoá file ngay sau khi ghi xong một file lớn (trình quét virus mở nó
+    để kiểm tra), làm os.replace ném WinError 32. Đây là lỗi TẠM THỜI: nội dung đã
+    tải đủ và đúng. Không thử lại thì mất công tải lại vài GB chỉ vì một cú đổi tên.
+    """
+    for attempt in range(attempts):
+        try:
+            part.replace(dest)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            delay = 2 ** attempt
+            print(f"    file đang bị khoá, thử lại sau {delay}s…", flush=True)
+            time.sleep(delay)
 
+
+class DownloadLock:
+    """Một người ghi cho mỗi file. Vào được thì giữ, không vào được thì báo rõ ai giữ.
+
+    Chạy hai lệnh tải cùng một nguồn là chuyện rất dễ xảy ra — mở phiên mới rồi
+    "nối lại" lệnh tải mà lệnh cũ vẫn còn sống. Hai tiến trình cùng nối thêm vào một
+    .part cho ra file thừa byte, và mỗi tiến trình đều thấy bộ đếm của mình hoàn
+    toàn đúng. Chỉ MD5 bắt được, sau khi đã tốn hàng giờ băng thông.
+    """
+
+    def __init__(self, part: Path) -> None:
+        self.path = part.with_suffix(part.suffix + ".lock")
+
+    def __enter__(self) -> "DownloadLock":
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            # O_EXCL: tạo được thì thôi, đã có thì ném FileExistsError. Nguyên tử,
+            # nên không có khe hở giữa "kiểm tra tồn tại" và "tạo".
+            handle = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            owner = self.path.read_text(encoding="utf-8").strip() or "?"
+            raise SystemExit(
+                f"❌ {self.path.stem} đang được tiến trình khác tải (PID {owner}).\n"
+                f"   Chạy song song hai lệnh tải cùng file sẽ làm hỏng file.\n"
+                f"   Nếu tiến trình đó đã chết: xoá {self.path.name} rồi chạy lại."
+            ) from None
+        os.write(handle, str(os.getpid()).encode())
+        os.close(handle)
+        return self
+
+    def __exit__(self, *exc) -> None:
+        self.path.unlink(missing_ok=True)
+
+
+# Lỗi máy chủ tạm thời, KHÔNG phải lỗi của file: thử lại được.
+# 504 của Zenodo đã làm chết một lệnh tải 6 GB đang chạy dở (14/09/2026).
+TRANSIENT_HTTP = {429, 500, 502, 503, 504}
+MAX_ATTEMPTS = 8
+
+
+def is_transient(error: Exception) -> bool:
+    if isinstance(error, urllib.error.HTTPError):
+        return error.code in TRANSIENT_HTTP
+    return isinstance(error, (urllib.error.URLError, TimeoutError, ConnectionError, http.client.IncompleteRead))
+
+
+def fetch_one_pass(url: str, part: Path, done: int, name: str) -> int:
+    """Một lượt tải, trả số byte đã có sau lượt đó. Ném lỗi để nơi gọi quyết định thử lại."""
     request = urllib.request.Request(url)
     if done:
         request.add_header("Range", f"bytes={done}-")
         print(f"    tải tiếp từ {done / 1e6:.0f} MB")
 
     with urllib.request.urlopen(request, timeout=120) as response:
-        total = done + int(response.headers.get("Content-Length", 0))
-        with part.open("ab" if done else "wb") as handle:
-            done = _stream(response, handle, done, total, dest.name)
+        # BẮT BUỘC kiểm tra máy chủ có CHẤP NHẬN Range không. Gửi Range mà nhận 200
+        # nghĩa là máy chủ phớt lờ và trả về TOÀN BỘ file; nối thêm vào .part sẽ tạo
+        # ra một file gồm hai bản chồng nhau — hỏng âm thầm, chỉ lộ ra ở bước MD5
+        # sau khi đã tải thừa hàng GB. Đã xảy ra thật với Zenodo (14/09/2026).
+        resumed = done > 0 and response.status == 206
+        if done and not resumed:
+            print(f"    máy chủ không nhận Range (HTTP {response.status}) → tải lại từ đầu")
+            done = 0
 
-    part.replace(dest)
+        total = done + int(response.headers.get("Content-Length", 0))
+        with part.open("ab" if resumed else "wb") as handle:
+            return _stream(response, handle, done, total, name)
+
+
+def fetch_with_retry(url: str, part: Path, done: int, name: str) -> int:
+    """Tải, thử lại khi máy chủ lỗi tạm thời hoặc mạng đứt.
+
+    Mỗi lần thử lại đọc lại kích thước THẬT của .part rồi tải tiếp từ đó, nên không
+    lượt nào phải làm lại từ đầu. Đây là điểm khác biệt so với chạy lại cả lệnh: một
+    cú 504 ở phút thứ 40 của file 6 GB chỉ mất vài giây, không mất 40 phút.
+    """
+    for attempt in range(MAX_ATTEMPTS):
+        try:
+            return fetch_one_pass(url, part, done, name)
+        except Exception as error:                       # noqa: BLE001 — phân loại ngay bên dưới
+            if not is_transient(error) or attempt == MAX_ATTEMPTS - 1:
+                raise
+            done = part.stat().st_size if part.exists() else 0
+            delay = min(60, 2 ** attempt)
+            print(f"    ⚠️ {type(error).__name__}: {error} → thử lại sau {delay}s "
+                  f"(lần {attempt + 2}/{MAX_ATTEMPTS}, đang có {done / 1e6:.0f} MB)", flush=True)
+            time.sleep(delay)
+    raise OSError(f"{name}: hết {MAX_ATTEMPTS} lần thử")
+
+
+def download(url: str, dest: Path, expected_size: int = 0) -> None:
+    """Tải có hỗ trợ tải tiếp. File .part chỉ được đổi tên khi đã tải xong."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    part = dest.with_suffix(dest.suffix + ".part")
+    with DownloadLock(part):
+        _download_locked(url, dest, part, expected_size)
+
+
+def _download_locked(url: str, dest: Path, part: Path, expected_size: int) -> None:
+    done = part.stat().st_size if part.exists() else 0
+
+    if dest.exists() and (not expected_size or dest.stat().st_size == expected_size):
+        print(f"    đã có, bỏ qua: {dest.name}")
+        return
+
+    # .part đã đủ kích thước: chỉ còn thiếu bước đổi tên (lần chạy trước chết ở đó).
+    # Không có nhánh này thì ta sẽ gửi Range bắt đầu từ cuối file và nhận về 416.
+    if expected_size and done == expected_size:
+        print(f"    đã tải đủ từ lần trước, chỉ cần đổi tên: {dest.name}")
+        finalize(part, dest)
+        return
+
+    done = fetch_with_retry(url, part, done, dest.name)
+
+    # Kiểm tra KÍCH THƯỚC THẬT TRÊN ĐĨA, không phải bộ đếm của chính mình. Hai con số
+    # này lệch nhau khi có tiến trình khác cùng ghi vào .part: bộ đếm nội bộ vẫn khớp
+    # hoàn hảo với Zenodo trong khi file đã thừa 200 MB. Đã xảy ra thật (14/09/2026,
+    # FSD50K) — bộ đếm báo "xong 2.31 GB" đúng từng byte, file trên đĩa 2.51 GB.
+    actual = part.stat().st_size
+    if actual != done:
+        raise OSError(
+            f"{dest.name}: bộ đếm nói {done} byte nhưng file có {actual} byte.\n"
+            f"    Gần như chắc chắn có tiến trình tải khác cùng ghi vào {part.name}.\n"
+            f"    Xoá file .part đó rồi tải lại — nội dung hiện tại không cứu được."
+        )
+    if expected_size and done != expected_size:
+        raise OSError(f"{dest.name}: tải về {done} byte, Zenodo công bố {expected_size} byte")
+
+    finalize(part, dest)
     print(f"    xong: {dest.name} ({done / 1e9:.2f} GB)")
 
 

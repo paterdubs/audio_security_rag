@@ -1,0 +1,58 @@
+# Sinh train set bằng Scaper — DATA_PLAN §7.
+#
+# Mỗi clip sinh ra kèm .jams ghi đủ công thức, nên từ bank + file này tái tạo được
+# chính xác toàn bộ train set. Đó là lý do công bố được "dataset" mà không cần công
+# bố audio — phần lớn nguồn của ta là labels_only, không phát hành lại audio được.
+
+duration_sec: 10.0
+ref_db: -23                  # trùng mức EBU R128 của bước chuẩn hoá (DATA_PLAN §4.1)
+sample_rate: 16000
+seed: 20260914               # đổi = sinh ra bộ khác. Ghi vào báo cáo.
+
+splits:
+  train:
+    target_hours: 22.0       # DATA_PLAN: 20–25 h
+  dev:
+    target_hours: 4.0        # DATA_PLAN: 3–5 h
+    seed_offset: 1000000     # lệch seed để dev không lặp lại công thức của train
+
+events:
+  # 0 sự kiện ~10%: dạy model biết im lặng. Thiếu nhánh này model sẽ luôn tìm ra
+  # một cái gì đó, và đó chính là nguồn báo động giả.
+  count_weights: {0: 0.10, 1: 0.30, 2: 0.30, 3: 0.20, 4: 0.10}
+  snr_db: [-5, 25]
+  pitch_shift_semitones: [-1, 1]
+  time_stretch: [0.9, 1.1]
+  rir_probability: 0.40
+
+# Tỉ lệ slice ÉP BUỘC — không để phân phối tự nhiên quyết định, vì đây chính là các
+# lát cắt dùng để báo cáo kết quả. Để tự nhiên thì low_snr và overlap sẽ quá thưa
+# để nói được điều gì có ý nghĩa thống kê.
+forced_slices:
+  overlap:      {ratio: 0.30, min_events: 2, min_overlap_ratio: 0.30}
+  low_snr:      {ratio: 0.25, max_snr_db: 5}
+  reverb:       {ratio: 0.40}
+  long_event:   {ratio: 0.10, min_event_duration_sec: 8.0}
+  causal_chain: {ratio: 0.15}
+
+# Kịch bản chuỗi nhân quả — chính là thứ Temporal Aggregator và captioning sinh ra
+# để xử lý, nên phải có mặt tường minh chứ không trông vào ngẫu nhiên.
+causal_chains:
+  - name: break_in
+    sequence: [glass_breaking, scream, running_footsteps]
+    gaps_sec: [[0.5, 2.0], [0.3, 1.5]]
+  - name: forced_entry
+    sequence: [door_slam, shout_yell, running_footsteps]
+    gaps_sec: [[0.5, 2.0], [0.3, 1.5]]
+  - name: emergency
+    sequence: [alarm_bell, shout_yell, running_footsteps]
+    gaps_sec: [[0.5, 2.5], [0.3, 1.5]]
+  # ★ Hai chuỗi ÂM TÍNH. Chúng dạy model rằng một chuỗi sự kiện liên tiếp KHÔNG
+  # mặc nhiên là sự cố an ninh. Thiếu chúng, model học "cứ có chuỗi là nguy hiểm"
+  # và báo động giả mỗi đêm giao thừa.
+  - name: false_alarm_fireworks
+    sequence: [fireworks, laughter_cheering]
+    gaps_sec: [[0.3, 2.0]]
+  - name: false_alarm_dishes
+    sequence: [object_drop_dishes, laughter_cheering]
+    gaps_sec: [[0.3, 2.0]]

@@ -58,7 +58,7 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 - **Adapter DESED xong**: +571 clip cho `alarm_bell`/`object_drop_dishes`/`speech_normal`; phát hiện và ghi lại 8 nhóm trùng **bắc cầu** giữa hai id Freesound
 - **Xác minh xong `fsd50k_labels`** bằng mã AudioSet (không đoán tên) + adapter FSD50K, đã kiểm thử: **4633 clip đạt hai cổng chọn**
 - Bank hiện tại: **852 clip / 36.5 phút** đã chuẩn hoá, 3 lớp đạt mức tối thiểu
-- 106 test, tất cả đạt (`pytest tests/ -q`)
+- 152 test, tất cả đạt (`pytest tests/ -q`)
 
 ### 🔄 Đang làm
 - Tải nền: `urbansound8k` · `fsd50k_dev_audio` (18.4 GB — đoạn dài nhất) · `tau2019_partial`
@@ -72,9 +72,32 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 > ```
 > ⚠️ **Phải gọi `.venv/Scripts/python.exe`, không phải `python` trần.** Trong Git Bash,
 > `python` trỏ vào Python hệ thống — script chết ngay ở `import yaml` và trông hệt như
-> lệnh tải "tự dừng". Đây chính là thứ đã làm mất một đoạn tải ở phiên 14/09.
+> lệnh tải "tự dừng".
+>
+> ⚠️ **Kiểm tra tiến trình tải cũ TRƯỚC khi chạy lại**, đừng tin là đóng phiên thì chúng
+> chết. Hai tiến trình cùng ghi một `.part` cho ra file thừa byte mà bộ đếm của mỗi bên
+> đều đúng — đã làm hỏng 2.4 GB FSD50K ngày 14/09. Script giờ có khoá `.part.lock` chặn
+> việc này, nhưng vẫn nên xem trước:
+> ```
+> powershell "Get-CimInstance Win32_Process -Filter \"Name like '%python%'\" | Where-Object { \$_.CommandLine -like '*download_sources*' }"
+> ```
 >
 > Kiểm tra trước: `.venv/Scripts/python.exe scripts/download_sources.py --list`
+
+> 🔴 **BẪY — `data/raw/_archives/fsd50k_dev_audio/FSD50K.dev_audio.zip` LÀ FILE HỎNG, phải xoá.**
+> Dài 2.510.087.071 byte trong khi Zenodo công bố 2.315.255.808 — **thừa 195 MB**, nhưng
+> tên file không còn đuôi `.part` nên **trông hệt như đã tải xong**.
+> Nguyên nhân: bản `download_sources.py` cũ gửi `Range` để tải tiếp mà không kiểm tra
+> máy chủ có chấp nhận không. Zenodo trả HTTP 200 (toàn bộ file) thay vì 206, code nối
+> thêm một bản sao thứ hai vào cuối file đã đủ.
+> ```
+> rm data/raw/_archives/fsd50k_dev_audio/FSD50K.dev_audio.zip
+> ```
+> Đã sửa trong `download_sources.py` (chưa commit): `finalize()` thử lại khi Windows khoá
+> file · bắt buộc kiểm tra HTTP 206 trước khi nối · đối chiếu kích thước sau khi tải xong.
+>
+> Hai file `.part` của `urbansound8k` (4.34/6.02 GB) và `tau2019_partial` (1.63 GB) đều
+> **nhỏ hơn** kích thước thật nên lành lặn — tải tiếp bình thường.
 
 ### ⏭️ 3 việc tiếp theo
 1. 👤 **Pilot gán nhãn 30 clip lần 1** — làm SỚM vì phải nghỉ ≥3 ngày rồi mới gán lại được. Tài liệu đã sẵn sàng (`taxonomy.md` + `annotation_guideline.md`)
