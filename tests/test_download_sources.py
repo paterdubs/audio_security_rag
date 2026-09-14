@@ -182,23 +182,56 @@ def test_xoa_ca_cac_phan_z0x_chu_khong_rieng_file_zip(tmp_path: Path):
     khac = tmp_path / "B.khac.zip"           # kho của nguồn khác, KHÔNG được đụng
     khac.write_bytes(b"x" * 100)
 
-    freed = ds.cleanup_archive(archive, joined)
+    freed = ds.cleanup_archive(archive)
 
     assert freed == 700                      # 1 zip + 1 joined + 5 phần
     assert not any(p.exists() for p in [archive, joined, *parts])
     assert khac.exists()
 
 
+def test_xoa_cac_phan_roi_nhung_GIU_file_ghep_cho_buoc_giai_nen(tmp_path: Path):
+    """Đỉnh dung lượng thật của FSD50K là 60 GB, không phải 37 GB như config từng ghi.
+
+    Xoá các phần rời ngay sau khi ghép xong kéo đỉnh ấy xuống 42 GB. Đo thật 14/09:
+    đĩa tụt còn 25 GB giữa lúc giải nén, suýt không đủ.
+    """
+    archive = tmp_path / "A.dev_audio.zip"
+    joined = tmp_path / "A.dev_audio.joined.zip"
+    parts = [tmp_path / f"A.dev_audio.z0{i}" for i in range(1, 6)]
+    for path in [archive, joined, *parts]:
+        path.write_bytes(b"x" * 100)
+
+    freed = ds.cleanup_archive(archive, keep=joined)
+
+    assert freed == 600                      # 1 zip + 5 phần, KHÔNG tính file ghép
+    assert joined.exists()                   # còn cần để giải nén
+    assert not any(p.exists() for p in [archive, *parts])
+
+
 def test_kho_khong_chia_phan_thi_chi_xoa_chinh_no(tmp_path: Path):
     archive = tmp_path / "x.tar.gz"
     archive.write_bytes(b"x" * 50)
-    assert ds.cleanup_archive(archive, archive) == 50
+    assert ds.cleanup_archive(archive) == 50
     assert not archive.exists()
 
 
 def test_file_da_bi_xoa_tu_truoc_khong_lam_no_loi(tmp_path: Path):
     archive = tmp_path / "x.zip"
-    assert ds.cleanup_archive(archive, archive) == 0
+    assert ds.cleanup_archive(archive) == 0
+
+
+def test_kiem_tra_file_ghep_truoc_khi_xoa_cac_phan(tmp_path: Path):
+    """Xoá xong mới phát hiện file ghép hỏng thì phải tải lại 18 GB."""
+    import zipfile as zf
+    tot = tmp_path / "tot.zip"
+    with zf.ZipFile(tot, "w") as handle:
+        handle.writestr("a.wav", b"x")
+    assert ds.verify_zip_readable(tot) == 1
+
+    hong = tmp_path / "hong.zip"
+    hong.write_bytes(b"khong phai zip")
+    with pytest.raises(Exception):
+        ds.verify_zip_readable(hong)
 
 
 # ── Tìm công cụ zip ──────────────────────────────────────────────────────────

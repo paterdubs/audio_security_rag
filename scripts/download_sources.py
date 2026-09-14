@@ -388,21 +388,51 @@ def fetch_source(name: str, spec: dict, keep_archive: bool) -> bool:
         if archive.suffix not in (".zip", ".gz", ".tgz"):
             continue                       # .z01…: là phần của bộ, không giải nén riêng
         source = join_split_zip(archive) if spec.get("split_archive") else archive
+
+        # Với kho chia nhiều phần: xoá các phần NGAY SAU KHI ghép xong và kiểm tra,
+        # TRƯỚC khi giải nén. Ba thứ cùng tồn tại (phần + file ghép + thư mục đã giải
+        # nén) là đỉnh dung lượng thật, và với FSD50K đỉnh ấy là 60 GB chứ không phải
+        # 37 GB như sources.yaml từng ghi. Đo thật 14/09: đĩa tụt còn 25 GB giữa lúc
+        # giải nén. Các phần lúc đó đã hoàn toàn thừa — file ghép chứa đủ mọi thứ.
+        if source is not archive and not keep_archive:
+            verify_zip_readable(source)
+            freed = cleanup_archive(archive, keep=source)
+            print(f"    đã xoá {freed / 1e9:.1f} GB các phần rời (file ghép đã đủ)")
+
         extract(source, dest)
         if not keep_archive:
-            freed = cleanup_archive(archive, source)
+            freed = cleanup_archive(archive, keep=None)
             print(f"    đã xoá file nén, giải phóng {freed / 1e9:.1f} GB (cleanup_policy)")
     return True
 
 
-def cleanup_archive(archive: Path, source: Path) -> int:
+def verify_zip_readable(archive: Path) -> int:
+    """Đọc được thư mục trung tâm của file zip, trả số mục. Ném lỗi nếu hỏng.
+
+    Rẻ (chỉ đọc phần cuối file) nhưng đủ để biết bước ghép đã thành công. Bắt buộc
+    phải gọi TRƯỚC khi xoá các phần rời: xoá xong mới phát hiện file ghép hỏng thì
+    phải tải lại 18 GB.
+    """
+    with zipfile.ZipFile(archive) as handle:
+        entries = len(handle.namelist())
+    if entries == 0:
+        raise SystemExit(f"❌ {archive.name} ghép xong nhưng rỗng — không xoá các phần rời")
+    print(f"    file ghép đọc được: {entries} mục")
+    return entries
+
+
+def cleanup_archive(archive: Path, keep: Path | None = None) -> int:
     """Xoá kho nén và MỌI phần của nó, trả về số byte giải phóng.
 
     Với kho chia nhiều phần, xoá mỗi file `.zip` là bỏ sót 5 phần `.z0x` cộng file
     ghép — 34 GB nằm lì trên đĩa ở riêng FSD50K, trong khi đỉnh dung lượng của bước
     kế tiếp đã tính trên giả định chúng biến mất.
+
+    `keep` là file phải giữ lại: gọi lần đầu để xoá các phần rời mà còn giữ file ghép
+    cho bước giải nén, gọi lần hai (keep=None) để xoá nốt.
     """
-    doomed = {archive, source, *archive.parent.glob(f"{archive.stem}.z[0-9][0-9]")}
+    joined = archive.with_name(archive.stem + ".joined.zip")
+    doomed = {archive, joined, *archive.parent.glob(f"{archive.stem}.z[0-9][0-9]")} - {keep}
     freed = 0
     for path in doomed:
         if path.exists():

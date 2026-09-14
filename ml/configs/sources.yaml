@@ -134,7 +134,11 @@ sources:
     files: [FSD50K.dev_audio.zip, FSD50K.dev_audio.z01, FSD50K.dev_audio.z02,
             FSD50K.dev_audio.z03, FSD50K.dev_audio.z04, FSD50K.dev_audio.z05]
     approx_size_gb: 18.41
-    peak_disk_gb: 36.8
+    # 18 GB các phần + 18 GB file ghép + 24 GB đã giải nén. Con số cũ (36.8) quên mất
+    # bước GHÉP — kho chia nhiều phần phải nối lại thành một file trước khi giải nén
+    # được, và file đó tồn tại đồng thời với cả hai phía. Đo thật ngày 14/09: đĩa tụt
+    # xuống còn 25 GB giữa lúc giải nén, suýt không đủ.
+    peak_disk_gb: 60.0
     license: "per-clip"
     split_archive: true
     prune_after_selection: true
