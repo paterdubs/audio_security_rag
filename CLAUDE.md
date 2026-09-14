@@ -58,26 +58,30 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 - **Adapter DESED xong**: +571 clip cho `alarm_bell`/`object_drop_dishes`/`speech_normal`; phát hiện và ghi lại 8 nhóm trùng **bắc cầu** giữa hai id Freesound
 - **Xác minh xong `fsd50k_labels`** bằng mã AudioSet (không đoán tên) + adapter FSD50K, đã kiểm thử: **4633 clip đạt hai cổng chọn**
 - Bank hiện tại: **852 clip / 36.5 phút** đã chuẩn hoá, 3 lớp đạt mức tối thiểu
-- 86 test, tất cả đạt (`pytest tests/ -q`)
+- 106 test, tất cả đạt (`pytest tests/ -q`)
 
 ### 🔄 Đang làm
-- Tải nền: `urbansound8k` (~30%) · `fsd50k_dev_audio` (~20%, 18.4 GB — đoạn dài nhất)
+- Tải nền: `urbansound8k` · `fsd50k_dev_audio` (18.4 GB — đoạn dài nhất) · `tau2019_partial`
 
-> ⚠️ **Hai lệnh tải chạy nền của phiên 14/09 và có thể đã dừng khi đóng phiên.**
-> Chúng **tải tiếp được**, không mất gì (file `.part` trong `data/raw/_archives/`):
+> ⚠️ **Lệnh tải là tiến trình con của phiên; đóng phiên là chúng dừng.** Không mất gì,
+> chúng **tải tiếp được** từ file `.part` trong `data/raw/_archives/`:
 > ```
-> python scripts/download_sources.py --source urbansound8k
-> python scripts/download_sources.py --source fsd50k_dev_audio
-> python scripts/download_sources.py --source tau2019_partial   # chưa bắt đầu
+> .venv/Scripts/python.exe scripts/download_sources.py --source urbansound8k
+> .venv/Scripts/python.exe scripts/download_sources.py --source fsd50k_dev_audio
+> .venv/Scripts/python.exe scripts/download_sources.py --source tau2019_partial
 > ```
-> Kiểm tra trước: `python scripts/download_sources.py --list`
+> ⚠️ **Phải gọi `.venv/Scripts/python.exe`, không phải `python` trần.** Trong Git Bash,
+> `python` trỏ vào Python hệ thống — script chết ngay ở `import yaml` và trông hệt như
+> lệnh tải "tự dừng". Đây chính là thứ đã làm mất một đoạn tải ở phiên 14/09.
+>
+> Kiểm tra trước: `.venv/Scripts/python.exe scripts/download_sources.py --list`
 
 ### ⏭️ 3 việc tiếp theo
 1. 👤 **Pilot gán nhãn 30 clip lần 1** — làm SỚM vì phải nghỉ ≥3 ngày rồi mới gán lại được. Tài liệu đã sẵn sàng (`taxonomy.md` + `annotation_guideline.md`)
-2. Chạy `build_manifest.py --source fsd50k` + `normalize_audio.py` khi tải xong (adapter đã viết và đã kiểm thử logic chọn clip)
-3. Viết adapter UrbanSound8K (nguồn chính cho `siren` — FSD50K chỉ cho 27 clip)
+2. Chạy `build_manifest.py --source fsd50k` + `--source urbansound8k`, rồi `normalize_audio.py`, khi tải xong (cả hai adapter đã viết và đã kiểm thử)
+3. Viết `auto_screen.py` (PANNs, DATA_PLAN §4.2) và `scaper_generate.py`
 
-Song song: `git init` · `scripts/auto_screen.py` (sàng lọc bằng PANNs, §4.2) · tải `tau2019_partial`.
+Song song: `scripts/scaper_generate.py` · thu thực địa tại IUH (nguồn duy nhất cho `gold_test` không phụ thuộc MIVIA).
 
 ### ⛔ Đang bị chặn
 - `vehicle_crash` — ⏳ đã nộp đơn MIVIA Road 14/09, chờ duyệt 1–2 tuần. Không có đường vòng.

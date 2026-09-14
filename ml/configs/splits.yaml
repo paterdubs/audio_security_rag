@@ -1,0 +1,31 @@
+# Quy tắc chia tập — DATA_PLAN §6.
+#
+# Chia theo source_group_id (N2), KHÔNG theo file. Và trước khi chia phải gộp các
+# nhóm bắc cầu: DESED có hai id Freesound khác nhau trỏ cùng một audio (giống từng
+# byte), chia theo id nguyên bản sẽ đặt cùng một âm thanh ở hai bên train/test.
+
+seed: "kltn-2026-splits-v1"     # đổi chuỗi này = chia lại toàn bộ. Đừng đổi sau D7.
+
+# Nguồn nào được vào tập nào. KHÔNG phải nguồn nào cũng thay thế nhau được:
+#   foreground_bank_train : sự kiện đã tách rời / clip weak-label → nguyên liệu Scaper
+#   dev                   : audio THẬT đã có sẵn strong label
+#   gold_test             : audio THẬT, người gán mù
+#
+# Một clip DESED soundbank là mẩu sự kiện đã cắt rời, không phải cảnh thật — đưa nó
+# vào gold_test thì bài test không còn đo được điều ta cần đo. Vì vậy đây là ràng
+# buộc cứng, không phải gợi ý; nguồn lạ sẽ làm script dừng chứ không rơi vào mặc định.
+eligibility:
+  desed_soundbank: [foreground_bank_train]
+  fsd50k:          [foreground_bank_train]
+  esc50:           [foreground_bank_train]
+  urbansound8k:    [foreground_bank_train]
+  audioset_strong: [dev, gold_test]
+  desed_real:      [dev, gold_test]
+  mivia:           [dev, gold_test]
+  iuh_field:       [gold_test]
+
+# Chỉ áp dụng cho nguồn có NHIỀU tập hợp lệ. Đây là phán đoán, không phải con số
+# lấy từ tài liệu nào: gold_test phải do một người gán mù nên đắt, giữ nhỏ hơn dev.
+ratios:
+  dev: 0.6
+  gold_test: 0.4
