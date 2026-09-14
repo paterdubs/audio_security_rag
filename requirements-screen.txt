@@ -1,0 +1,26 @@
+# Sàng lọc tự động bằng PANNs (DATA_PLAN §4.2–4.3) — scripts/auto_screen.py.
+#
+# TÁCH RIÊNG khỏi requirements-data.txt có chủ đích: bước chuẩn bị dữ liệu phải chạy
+# được trên máy không GPU và người gán nhãn thứ hai không cần cài torch. Chỉ máy nào
+# thực sự chạy sàng lọc mới cài file này.
+#
+# Cài thêm SAU requirements-data.txt, không thay thế nó:
+#   .venv/Scripts/python.exe -m pip install -r requirements-data.txt
+#   .venv/Scripts/python.exe -m pip install -r requirements-screen.txt --extra-index-url https://download.pytorch.org/whl/cu121
+
+# torch 2.5.1 là bản cuối còn chạy với numpy 1.26 — mà numpy 1.26 là bắt buộc vì
+# scaper (xem requirements-data.txt). Nâng torch mà không kiểm tra sẽ kéo numpy 2.x
+# về và làm chết toàn bộ bước sinh train set.
+torch==2.5.1
+
+panns-inference==0.1.1   # CNN14 pretrain trên AudioSet, 527 lớp
+torchlibrosa==0.1.0      # panns-inference phụ thuộc; ghim để tái lập được
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Checkpoint: panns-inference tự tải Cnn14_mAP=0.431.pth (~300 MB) về ~/panns_data
+# ở lần chạy đầu. KHÔNG nằm trong repo và KHÔNG có checksum do tác giả công bố —
+# nếu cần tái lập tuyệt đối thì tự ghi lại SHA-256 của file đã tải.
+#
+# ⚠️ PANNs được huấn luyện ở 32 kHz, còn bank của ta lưu 16 kHz. auto_screen.py
+# resample lên 32 kHz trước khi suy luận. Bỏ bước đó thì mô hình vẫn chạy và vẫn ra
+# số, nhưng là số của một tín hiệu bị dịch cao độ một quãng tám.
