@@ -1,8 +1,8 @@
 # DATA_PLAN.md — Kế hoạch chuẩn bị dữ liệu
 
-> **Vai trò:** kế hoạch chi tiết để đi từ *không có gì* → *một bộ dữ liệu chuẩn, đủ 15 class, có strong label, đóng băng được và tái lập được*.
+> **Vai trò:** kế hoạch chi tiết để đi từ *không có gì* → *một bộ dữ liệu chuẩn, đủ 16 class, có strong label, đóng băng được và tái lập được*.
 >
-> Liên quan: [SYSTEM.md §3](SYSTEM.md#3-dữ-liệu) (đặc tả dữ liệu) · [PLAN.md W2–W3](PLAN.md) (lịch) · [taxonomy.md](taxonomy.md) (15 class)
+> Liên quan: [SYSTEM.md §3](SYSTEM.md#3-dữ-liệu) (đặc tả dữ liệu) · [PLAN.md W2–W3](PLAN.md) (lịch) · [taxonomy.md](taxonomy.md) (16 class)
 >
 > **Nguyên tắc bao trùm:** *dữ liệu nào không truy vết được nguồn gốc và lý do tồn tại thì không được vào dataset.*
 
@@ -633,7 +633,7 @@ Khuyến nghị mặc định cho `vehicle_crash` nếu MIVIA Road không về k
 Chỉ tag DVC khi **toàn bộ** mục dưới đây đạt. Đây là ý nghĩa cụ thể của *"bắt đầu dự án từ data chuẩn nhất"*.
 
 ### Tính đầy đủ
-- [ ] 15/15 lớp có trạng thái 🟢 hoặc có ADR quyết định rõ ràng
+- [ ] 16/16 lớp có trạng thái 🟢 hoặc có ADR quyết định rõ ràng
 - [ ] Foreground bank ≥ `min_acceptable` cho mọi lớp còn giữ
 - [ ] Background ≥ 2 h, phủ đủ 4 `area_type`, có cả ngày và đêm
 - [ ] RIR ≥ 10 bản, ≥ 3 loại không gian

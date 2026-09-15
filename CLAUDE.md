@@ -29,7 +29,7 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 | `docs/PLAN.md` | *Làm gì, khi nào, nghiệm thu ra sao?* | Đầu mỗi tuần + khi chọn task |
 | `docs/SYSTEM.md` | *Hệ thống là gì?* (đặc tả đầy đủ = khung báo cáo) | Khi cần chi tiết kỹ thuật |
 | `docs/DATA_PLAN.md` | *Chuẩn bị dữ liệu thế nào?* (10 ngày, quy trình gán nhãn có máy hỗ trợ) | **Suốt W2–W3** |
-| `docs/taxonomy.md` | 15 class, định nghĩa bao gồm/loại trừ | Khi làm việc với nhãn |
+| `docs/taxonomy.md` | 16 class, định nghĩa bao gồm/loại trừ | Khi làm việc với nhãn |
 | `docs/annotation_guideline.md` | Quy ước gán nhãn | Khi gán nhãn |
 | `docs/evaluation_protocol.md` | Metric và cách đo | Khi làm evaluation |
 | `docs/data_inventory.md` | Số giờ/class (sinh tự động) | Khi lo về dữ liệu |
@@ -40,74 +40,50 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 ## 3. Trạng thái hiện tại
 
 **Tuần:** W1 (15–21/09/2026) · **Trạng thái:** 🟢 đang thu thập dữ liệu (D1)
-**Cập nhật lần cuối:** 2026-09-14
+**Cập nhật lần cuối:** 2026-09-15
 
 ### ✅ Đã xong
-- Chốt taxonomy 15 class (10 an ninh + 5 nhầm lẫn) và 8 test slice
+- Chốt taxonomy **16 class** (10 an ninh + **6** nhầm lẫn, xem thay đổi 15/09 dưới) và 8 test slice
 - Chốt strong label + schema DCASE TSV
 - Chốt kiến trúc Grounded AAC (BEATs❄️ + Conformer trunk chia sẻ, 3 head, grounded decoding)
 - Chốt stack: FastAPI toàn bộ · PostgreSQL+pgvector · Redis Streams · MLflow · DVC · Docker Compose
 - Viết 4 tài liệu nền: `SYSTEM.md`, `PLAN.md`, `DATA_PLAN.md`, `CLAUDE.md`
 - Tạo cấu trúc thư mục
 - Chốt quy trình dữ liệu: máy hỗ trợ gán nhãn cho foreground bank, **gán mù cho gold test set**
-- **D1 — xác minh ontology xong**: `ml/configs/ontology_map.yaml` (15 lớp, mọi ID đối chiếu file gốc AudioSet) + `scripts/verify_ontology.py` + 17 test → 0 lỗi
-- **D1 — đăng ký nguồn xong**: `ml/configs/sources.yaml` (10 nguồn, dung lượng & license lấy từ API Zenodo) + `scripts/download_sources.py`
-- Dựng môi trường: `.venv`, `requirements-data.txt`, `.gitignore`
-- **Chuẩn hoá kỹ thuật xong cho ESC-50**: `normalize_audio.py` + `preprocessing.yaml` → 307/320 clip vào `interim/normalized/`, 13 tự loại, 20 vào hàng đợi người nghe
+- **D1 — xác minh ontology xong**: `ml/configs/ontology_map.yaml` (16 lớp, mọi ID đối chiếu file gốc AudioSet) + `scripts/verify_ontology.py` + test → 0 lỗi
+- **D1 — đăng ký nguồn xong**: `ml/configs/sources.yaml` (11 nguồn, dung lượng & license lấy từ API Zenodo) + `scripts/download_sources.py`
+- Dựng môi trường: `.venv`, `requirements-data.txt`, `requirements-screen.txt` (torch + panns-inference), `.gitignore`
+- **Chuẩn hoá kỹ thuật xong cho ESC-50 + FSD50K**: `normalize_audio.py` + `preprocessing.yaml`
 - **Viết xong `taxonomy.md` + `annotation_guideline.md`** — hai tài liệu chặn đường găng pilot gán nhãn
-- **Adapter DESED xong**: +571 clip cho `alarm_bell`/`object_drop_dishes`/`speech_normal`; phát hiện và ghi lại 8 nhóm trùng **bắc cầu** giữa hai id Freesound
-- **Xác minh xong `fsd50k_labels`** bằng mã AudioSet (không đoán tên) + adapter FSD50K, đã kiểm thử: **4633 clip đạt hai cổng chọn**
-- Bank hiện tại: **5260 clip / 5.7 giờ** đã chuẩn hoá; 11/13 lớp foreground đã đủ. Còn thiếu: `vehicle_crash` (chờ MIVIA), `shout_yell` (56/80)
-- 285 test, tất cả đạt (`pytest tests/ -q`)
+- **Adapter DESED, FSD50K, ESC-50, UrbanSound8K xong** — phát hiện và ghi lại 8 nhóm trùng **bắc cầu** giữa hai id Freesound (DESED)
+- **§4.2–4.4 DATA_PLAN xong**: `auto_screen.py` (PANNs CNN14) + `validate_screen.py` (phiếu kiểm định mù) → **kiểm định 245 clip, tỉ lệ lỗi auto-accept 0.4% (Wilson CI 0.1%–2.3%)**
+- **§5 xong**: `build_background_bank.py` → background bank đã sàng lọc bằng ngưỡng 0.15
+- **§6 xong**: `make_splits.py` + `check_leakage.py` (gộp nhóm bắc cầu trước khi chia, ràng buộc theo nguồn cho `gold_test`)
+- **§7 xong**: `scaper_generate.py` — sinh soundscape, 5 lát cắt (overlap/low_snr/reverb/long_event/causal_chain), tích chập RIR thật (không dùng SoX reverb)
+- **Bank RIR xong**: 505 RIR từ OpenSLR SLR28 (`build_rir_bank.py`), xếp nhóm theo RT60 đo được: small_room 151 · medium_room 198 · large_room 156
+- **`scripts/fetch_audioset_strong.py` viết + kiểm thử xong** (yt-dlp) — nguồn duy nhất cho `dev`/`gold_test` không phụ thuộc MIVIA/thu thực địa. **Chưa chạy tải audio thật** — xem §Nợ kỹ thuật ở PLAN.md
+- **15/09 — tách `laughter_cheering` → `laughter` + `applause_cheering`** (16 lớp), chạy lại toàn bộ pipeline thật, giữ nguyên 245 verdict kiểm định đã có (xem log §10)
+- Foreground bank hiện tại: **2434 clip / ~92 phút** đã qua sàng lọc + duyệt tự động, 13/16 lớp có mặt. Còn thiếu hẳn: `vehicle_crash` (chờ MIVIA), yếu: `shout_yell`, `object_drop_dishes`, `door_slam`, `explosion`, `running_footsteps`
+- 304 test, tất cả đạt (`pytest tests/ -q` — **chạy trong `tests/`, không chạy ở gốc repo vì ESC-50 tự mang theo `tests/test_dataset.py` gây lỗi collection**)
 
 ### 🔄 Đang làm
-- Tải nền: `urbansound8k` · `fsd50k_dev_audio` (18.4 GB — đoạn dài nhất) · `tau2019_partial`
+- Tải nền: `urbansound8k` · `fsd50k_dev_audio` (18.4 GB) · `tau2019_partial` — kiểm tra tiến trình cũ trước khi chạy lại (xem cảnh báo khoá `.part.lock` ở lịch sử §10 14/09)
+- 1802-clip `review_queue.csv` — **trì hoãn có chủ đích**, chờ ổn định taxonomy (đợt tách lớp 15/09) rồi mới nghe hàng loạt, tránh nghe lại hai lần
 
-> ⚠️ **Lệnh tải là tiến trình con của phiên; đóng phiên là chúng dừng.** Không mất gì,
-> chúng **tải tiếp được** từ file `.part` trong `data/raw/_archives/`:
-> ```
-> .venv/Scripts/python.exe scripts/download_sources.py --source urbansound8k
-> .venv/Scripts/python.exe scripts/download_sources.py --source fsd50k_dev_audio
-> .venv/Scripts/python.exe scripts/download_sources.py --source tau2019_partial
-> ```
 > ⚠️ **Phải gọi `.venv/Scripts/python.exe`, không phải `python` trần.** Trong Git Bash,
 > `python` trỏ vào Python hệ thống — script chết ngay ở `import yaml` và trông hệt như
 > lệnh tải "tự dừng".
->
-> ⚠️ **Kiểm tra tiến trình tải cũ TRƯỚC khi chạy lại**, đừng tin là đóng phiên thì chúng
-> chết. Hai tiến trình cùng ghi một `.part` cho ra file thừa byte mà bộ đếm của mỗi bên
-> đều đúng — đã làm hỏng 2.4 GB FSD50K ngày 14/09. Script giờ có khoá `.part.lock` chặn
-> việc này, nhưng vẫn nên xem trước:
-> ```
-> powershell "Get-CimInstance Win32_Process -Filter \"Name like '%python%'\" | Where-Object { \$_.CommandLine -like '*download_sources*' }"
-> ```
->
-> Kiểm tra trước: `.venv/Scripts/python.exe scripts/download_sources.py --list`
-
-> 🔴 **BẪY — `data/raw/_archives/fsd50k_dev_audio/FSD50K.dev_audio.zip` LÀ FILE HỎNG, phải xoá.**
-> Dài 2.510.087.071 byte trong khi Zenodo công bố 2.315.255.808 — **thừa 195 MB**, nhưng
-> tên file không còn đuôi `.part` nên **trông hệt như đã tải xong**.
-> Nguyên nhân: bản `download_sources.py` cũ gửi `Range` để tải tiếp mà không kiểm tra
-> máy chủ có chấp nhận không. Zenodo trả HTTP 200 (toàn bộ file) thay vì 206, code nối
-> thêm một bản sao thứ hai vào cuối file đã đủ.
-> ```
-> rm data/raw/_archives/fsd50k_dev_audio/FSD50K.dev_audio.zip
-> ```
-> Đã sửa trong `download_sources.py` (chưa commit): `finalize()` thử lại khi Windows khoá
-> file · bắt buộc kiểm tra HTTP 206 trước khi nối · đối chiếu kích thước sau khi tải xong.
->
-> Hai file `.part` của `urbansound8k` (4.34/6.02 GB) và `tau2019_partial` (1.63 GB) đều
-> **nhỏ hơn** kích thước thật nên lành lặn — tải tiếp bình thường.
 
 ### ⏭️ 3 việc tiếp theo
-1. 👤 **Pilot gán nhãn 30 clip lần 1** — làm SỚM vì phải nghỉ ≥3 ngày rồi mới gán lại được. Tài liệu đã sẵn sàng (`taxonomy.md` + `annotation_guideline.md`)
-2. Chạy `build_manifest.py --source fsd50k` + `--source urbansound8k`, rồi `normalize_audio.py`, khi tải xong (cả hai adapter đã viết và đã kiểm thử)
-3. Viết `auto_screen.py` (PANNs, DATA_PLAN §4.2) và `scaper_generate.py`
+1. 👤 **Cài `yt-dlp` + `ffmpeg`, chạy `fetch_audioset_strong.py` thật** — gỡ chặn `dev`/`gold_test` đang rỗng, cổng D7 chưa qua được. Dự kiến hụt 15–30% video, phải ghi tỉ lệ thật vào exclusions.csv và báo cáo
+2. 👤 **Pilot gán nhãn 30 clip lần 1** (trên `gold_test` sau khi có audio) — nghỉ ≥3 ngày rồi gán lại mù mới tính tự-nhất-quán
+3. Tải xong `urbansound8k`/`tau2019_partial`/`fsd50k_dev_audio` → chạy `build_manifest.py`/`normalize_audio.py` cho các nguồn còn lại → bù các lớp yếu (`shout_yell`, `door_slam`, `object_drop_dishes`, `explosion`, `running_footsteps`)
 
-Song song: `scripts/scaper_generate.py` · thu thực địa tại IUH (nguồn duy nhất cho `gold_test` không phụ thuộc MIVIA).
+Song song: thu thực địa tại IUH (buổi 1: RIR hành lang/nhà xe/xưởng cho S3 + `gold_test`; buổi 2: `media_playback` cho S4 và kiểm tra phổ pháo hoa VN).
 
 ### ⛔ Đang bị chặn
 - `vehicle_crash` — ⏳ đã nộp đơn MIVIA Road 14/09, chờ duyệt 1–2 tuần. Không có đường vòng.
+- `dev`/`gold_test` — rỗng, chặn ở việc 👤 cài yt-dlp/ffmpeg (không phải việc AI làm được), xem việc tiếp theo #1.
 
 ---
 
@@ -117,7 +93,7 @@ Không thảo luận lại trừ khi có lý do mới. Mỗi thay đổi phải 
 
 | Quyết định | Chọn | Ngày | Lý do ngắn |
 |---|---|---|---|
-| Số class | **15** (10 an ninh + 5 nhầm lẫn) | 14/09 | 5 lớp nhầm lẫn kiểm soát False Alarm Rate |
+| Số class | **16** (10 an ninh + 6 nhầm lẫn) | 14/09, sửa 15/09 | 6 lớp nhầm lẫn kiểm soát False Alarm Rate. **15/09:** tách `laughter_cheering` → `laughter` + `applause_cheering` — tiếng cười một giọng khác hẳn phổ/nhịp vỗ tay-đám đông |
 | Loại nhãn | **Strong label** (onset/offset) | 14/09 | Điều kiện cần cho event-based F1 **và** cho grounding |
 | Trường hợp đặc biệt | 5 lớp nhầm lẫn **trong** taxonomy + **8 test slice** | 14/09 | Slice là lát cắt đánh giá, không phải class |
 | Bối cảnh | **Tổng quát cho cả 4 khu vực** (trường học, bãi xe, dân cư, nhà máy) | 14/09 | `location` là metadata, không phải tham số model |
@@ -146,6 +122,7 @@ Không thảo luận lại trừ khi có lý do mới. Mỗi thay đổi phải 
 - Với mỗi thay đổi kiến trúc: viết ADR vào `docs/decisions/`.
 - Cập nhật `CLAUDE.md` ở cuối mỗi block (§9).
 - Báo cáo trung thực: test trượt thì nói trượt kèm output; bỏ bước nào thì nói rõ.
+- **Sau khi sửa `ontology_map.yaml` (đổi/tách/gộp lớp): grep toàn repo tìm tên lớp cũ TRƯỚC khi coi là xong.** File_id ở nhiều script (`build_manifest.py`, `auto_screen.py`, `normalize_audio.py`) chứa `class_id`, nên đổi ontology mà không quét lại toàn bộ nguồn liên quan để lại dòng "mồ côi" mang class đã mất — nó trùng checksum với dòng mới và không script nào tự xoá được, vì cách khớp theo `file_id`/`dict.update()` không bao giờ thấy dòng đó nữa. Đã xảy ra thật 15/09 ở `raw_manifest.csv`, `review_flags.csv`, và nặng hơn: `auto_screen.py --class-id X` từng **ghi đè toàn bộ** `screen_scores.csv` chỉ với điểm của X, xoá sạch điểm mọi lớp khác. Cả ba đã sửa (`drop_stale_rows`, `source_prefix`, `merge_scored`) nhưng bài học áp dụng cho MỌI file tích luỹ theo `file_id` trong tương lai, không riêng ba file này.
 
 ### Không bao giờ làm
 - ❌ Bịa số liệu, bịa tên dataset, bịa trích dẫn paper. Không chắc → đánh dấu `⚠️ CẦN XÁC MINH` và ghi vào mục "Nợ kỹ thuật" của `PLAN.md`.
@@ -179,7 +156,7 @@ Không thảo luận lại trừ khi có lý do mới. Mỗi thay đổi phải 
 | Nhãn TSV | `filename\tonset\toffset\tevent_label` — **không thêm cột** |
 | Metadata | `{split}_metadata.csv`, join bằng `filename` |
 | `event_id` | `EVT_YYYYMMDD_NNNNNN` |
-| `class_id` | snake_case tiếng Anh, đúng 15 giá trị trong `docs/taxonomy.md` |
+| `class_id` | snake_case tiếng Anh, đúng 16 giá trị trong `docs/taxonomy.md` |
 | Model version | `{component}-v{major}.{minor}`, ví dụ `aac-v2.0` |
 | Commit | `<type>: <mô tả>` — feat, fix, refactor, docs, test, chore, exp |
 | Nhánh | `main` + nhánh tính năng; không commit thẳng lên `main` |
@@ -294,6 +271,23 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
 - **PP/PNP của FSD50K là bộ lọc chất lượng cho không** — PP = âm thanh đích nổi trội, đúng thứ foreground bank cần. Biết trước sản lượng từng lớp **trước khi tải 18 GB audio**, chỉ nhờ 34 MB metadata.
 - **Sửa hai đánh giá sai của chính mình:** (1) `explosion` không hề khan hiếm — FSD50K có 1388 clip, đánh giá 🔴 cũ dựa trên trực giác chứ không đếm; (2) ngưỡng `min_duration_sec` 0.3 s mâu thuẫn với guideline (100 ms) và cắt mất 43% lớp `object_drop_dishes`.
 - Thêm `coverage_report.py` (bảng độ phủ + danh sách cho cổng D7) và tách `write_exclusions` ra `common.py`.
+
+### 2026-09-14/15 — §4.2–4.7: sàng lọc, kiểm định, Scaper, background bank, RIR
+
+- **`auto_screen.py` (PANNs CNN14)**: định tuyến 3 ngả (nhận/loại/hàng đợi) theo §4.2, đề xuất biên onset/offset bằng ngưỡng 50% đỉnh khung. Phát hiện & sửa: clip < 1s làm CNN14 vô nghĩa — **đệm bằng cách lặp** (tile), không đệm im lặng (đo trên 40 clip thật: zero-pad → 37/40 tự loại oan, tile-pad → 2/40). `guard_low_resolution_classes()` cứu các lớp mà tagger mù (ví dụ `shout_yell` 93% tự loại vì PANNs nghe ra Speech/Groan chứ không có nhãn riêng cho quát tháo).
+- **`validate_screen.py` (§4.4)**: phiếu kiểm định **mù** — cố ý bỏ điểm số model khỏi phiếu để không mớm câu trả lời. Kiểm định 245 clip → **tỉ lệ lỗi 0.4% (Wilson CI 0.1%–2.3%)**, đạt xa dưới ngưỡng.
+- **`scaper_generate.py` (§7)**: 5 lát cắt kiểm soát tỉ lệ (overlap/low_snr/reverb/long_event/causal_chain) + 2 chuỗi nhân quả **âm tính** (dạy model rằng chuỗi sự kiện liên tiếp không mặc nhiên nguy hiểm). Phát hiện quan trọng: tham số `reverb` của Scaper là hiệu ứng SoX tổng hợp, **không phải tích chập RIR** — phải tự tích chập (`apply_rir`) mới đúng yêu cầu DATA_PLAN §7. Sửa lỗi clipping cứng (25 dB SNR + −23 LUFS có thể vượt 0 dBFS) bằng `fix_clipping=True`.
+- **`build_background_bank.py` (§5)**: ngưỡng loại 0.15, lấy đỉnh trên toàn bộ khung (không chỉ khung đầu) để không lọt sự kiện Nhóm A ẩn giữa clip nền.
+- **`build_rir_bank.py`**: 505 RIR từ OpenSLR SLR28 (bỏ MIVIA, dùng nguồn công khai). Ba bẫy: (1) thư mục "real" trộn 92 file nhiễu — lọc theo `"_rir_" in name`, không theo `startswith`; (2) `simulated_rirs` không có `largeroom` dù README nói có — phải **đo RT60 thật** rồi xếp nhóm, không tin tên thư mục; (3) 73 RIR đo trong buồng tiêu âm (RT60≈0) bị loại, nếu không lát cắt "có vang" sẽ lẫn clip không vang.
+- 287 → 300 test qua các đợt này.
+
+### 2026-09-15 — Tách `laughter_cheering`, viết fetcher AudioSet-strong, hai lỗi mồ côi dòng cũ
+
+- **`scripts/fetch_audioset_strong.py`**: tải 3 TSV nhãn strong-label, lọc `PRESENT` khớp 16 lớp, gộp sự kiện theo ổ 10 giây (`segment_id = ytid_windowstart_ms`), tải đúng đoạn bằng `yt-dlp --download-sections`. `build_manifest.adapt_audioset_strong` sinh **nhiều dòng cho một file** — khác mọi adapter khác — vì một ổ có thể chứa nhiều sự kiện chồng lấn, cần cho EOR. **Chưa chạy tải audio thật** (cần cài yt-dlp/ffmpeg, việc của người).
+- **Tách `laughter_cheering` → `laughter` + `applause_cheering`** (phương án A do người dùng chọn): tiếng cười một giọng liên tục khác hẳn phổ/nhịp vỗ tay-đám đông. Sửa đồng bộ `ontology_map.yaml`, `sources.yaml`, `scaper_train.yaml` (2 chuỗi nhân quả), `taxonomy.md`/`DATA_PLAN.md`/`SYSTEM.md`.
+- **Chạy lại thật** toàn bộ pipeline (không mô phỏng): `build_manifest` (esc50, fsd50k) → `normalize_audio` → `make_splits` → `check_leakage` → `auto_screen` (rescan toàn bộ `foreground_bank_train`, 4444 clip) → `promote_to_bank`. 25 dòng kiểm định cũ của `laughter_cheering` trong `screen_audit.csv` được patch theo checksum, **giữ nguyên** 244 verdict `ok` + 1 `wrong_class` đã có.
+- **Hai lỗi im lặng lộ ra khi làm việc này** (xem quy tắc mới ở §5): `build_manifest.py` để lại dòng mồ côi khi đổi ontology (sửa: `drop_stale_rows`) · `auto_screen.py --class-id X` ghi đè toàn bộ `screen_scores.csv` chỉ với điểm của X — **đã xoá sạch điểm mọi lớp khác đã sàng lọc trước đó**, phải rescan lại toàn bộ 4444 clip để phục hồi (sửa: `merge_scored`). `normalize_audio.py` có lỗi tương tự ở `review_flags.csv` (sửa: `source_prefix`).
+- Foreground bank sau khi rebuild: **2434/4444 clip** (13/16 lớp có mặt). 300 → 304 test.
 
 ---
 

@@ -53,7 +53,7 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 |---|---|---|---|
 | ☐ | **Nộp đơn xin MIVIA Audio Events + MIVIA Road** | 👤 | **NGÀY ĐẦU TIÊN.** Duyệt có thể mất 1–2 tuần |
 | ☐ | `git init`, `.gitignore`, `README.md`, cấu trúc thư mục | 🤖 | |
-| ☐ | Viết `docs/taxonomy.md` — 15 class, mỗi class có bao gồm/loại trừ + 3 ví dụ | 👥 | Trích từ SYSTEM.md §3.1 rồi mở rộng |
+| ☐ | Viết `docs/taxonomy.md` — 16 class, mỗi class có bao gồm/loại trừ + 3 ví dụ | 👥 | Trích từ SYSTEM.md §3.1 rồi mở rộng |
 | ☐ | Viết `docs/annotation_guideline.md` | 👥 | SYSTEM.md §3.6 |
 | ☐ | Viết `docs/evaluation_protocol.md` | 🤖 | SYSTEM.md §8 |
 | ☐ | `docker-compose.yml`: db(pgvector) + redis + mlflow + api + inference + frontend | 🤖 | Mirror `example_project/docker-compose.yml` |
@@ -149,11 +149,11 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 | ☐ | Tích hợp BART-base decoder + cross-attention lên trunk | 🤖 | |
 | ☐ | Huấn luyện **B1** (chỉ NLL) trên Clotho/AudioCaps → fine-tune trên security data | 🤖 | |
 | ☐ | Tích hợp `aac-metrics`: BLEU/METEOR/ROUGE-L/CIDEr/SPICE/SPIDEr/FENSE | 🤖 | |
-| ☐ | Xây **`EVENT_LEXICON`** cho 15 class (EN), có xử lý phủ định + biến thể | 👥 | |
+| ☐ | Xây **`EVENT_LEXICON`** cho 16 class (EN), có xử lý phủ định + biến thể | 👥 | |
 | ☐ | Cài **EHR / EOR / GS / TOA / CHR** | 🤖 | SYSTEM.md §8.2 |
 | ☐ | 🔬 **Kiểm định bộ trích $P$ thủ công trên 100 caption**, báo cáo độ chính xác của chính bộ trích | 👤 | **Điều kiện cần để C2 được chấp nhận** |
 | ☐ | Cài **B0** (structured captioner từ timeline SED + template + LLM viết lại) | 🤖 | Cận trên grounding |
-| ☐ | Pipeline dịch EN→VI với glossary 15 class cố định | 🤖 | SYSTEM.md §7.4 |
+| ☐ | Pipeline dịch EN→VI với glossary 16 class cố định | 🤖 | SYSTEM.md §7.4 |
 | ☐ | Đo B0, B1 trên G2 với đủ metric + bảng theo slice | 🤖 | |
 
 ### Nghiệm thu W4
@@ -300,11 +300,15 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 |---|---|---|---|
 | ☐ | Đối chiếu lại mọi phát biểu về công trình liên quan (SYSTEM.md §2) với bản gốc | W6 | Chương 2 báo cáo không được viết từ trí nhớ |
 | ☐ | Xác minh số giờ + license thực tế từng dataset | W2 | Đang là giả định |
-| ☐ | **Xác minh ID ontology AudioSet** trong `ml/configs/ontology_map.yaml` từ file gốc | **D0** | Chép sai ID = tải sai lớp = hỏng từ gốc |
+| ☑ | **Xác minh ID ontology AudioSet** trong `ml/configs/ontology_map.yaml` từ file gốc | **D0** | Chép sai ID = tải sai lớp = hỏng từ gốc — xong 14/09, `verify_ontology.py` 0 lỗi |
 | ☐ | Xác minh tần số frame BEATs và tỉ lệ downsample thực tế | W3 | Con số 50 Hz → 17 Hz cần kiểm chứng bằng code |
 | ☐ | Kiểm định độ chính xác bộ trích `EVENT_LEXICON` | W4 | Điều kiện cần của C2 |
 | ☐ | Xác nhận `aac-metrics` / `psds_eval` cài được trên Windows | W1 | Có gói khó build trên Windows → cân nhắc WSL2 |
 | ☐ | Kiểm tra VRAM thực tế khi train Conformer + BART | W4 | Quyết định batch size |
+| ☐ | Cài `yt-dlp` + `ffmpeg`, chạy `fetch_audioset_strong.py` thật | W2 | Script đã viết + kiểm thử 15/09, chưa tải audio thật — `dev`/`gold_test` vẫn rỗng, cổng D7 chưa qua |
+| ☐ | Đo lại tỉ lệ hụt video AudioSet-strong (dự kiến 15–30%, ghi `unavailable` vào `exclusions.csv`) | W2 | Phải báo cáo tỉ lệ hụt thật trong khoá luận, không dùng số dự kiến |
+| ☐ | Xác nhận ruling chuông quầy thức ăn nhanh trong `data/gold/decision_log.md` (đang ⚠️ CHỜ XÁC NHẬN) | W2 | Ảnh hưởng biên `alarm_bell` |
+| ☐ | Xử lý 1802-clip `review_queue.csv` (đang trì hoãn có chủ đích) | W2 | Chờ ổn định taxonomy trước khi nghe hàng loạt, tránh nghe lại 2 lần |
 
 ---
 
@@ -319,4 +323,4 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 
 ---
 
-*Cập nhật lần cuối: 2026-09-14 · Tuần hiện tại: **W1 (chưa bắt đầu)***
+*Cập nhật lần cuối: 2026-09-15 · Tuần hiện tại: **W1 (dữ liệu đang chạy sớm, xem CLAUDE.md §3)***

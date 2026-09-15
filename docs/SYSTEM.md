@@ -77,7 +77,7 @@ Cho một luồng âm thanh liên tục $x(t)$ thu từ một hoặc nhiều đi
 
 | # | Mục tiêu | Tiêu chí đo |
 |---|---|---|
-| M1 | Xây dựng taxonomy 15 lớp âm thanh an ninh có định nghĩa vận hành rõ ràng | Kappa liên người gán ≥ 0.70 |
+| M1 | Xây dựng taxonomy 16 lớp âm thanh an ninh có định nghĩa vận hành rõ ràng | Kappa liên người gán ≥ 0.70 |
 | M2 | Xây dựng bộ dữ liệu strong-label + 4 gold set cho 4 tầng đánh giá | Đủ 8 test slice, mỗi slice ≥ 20 clip |
 | M3 | Huấn luyện SED đa nhãn có định vị thời gian | Event-based F1, PSDS, báo cáo theo từng slice |
 | M4 | **Đề xuất kiến trúc Grounded AAC chống hallucination** | Giảm Event Hallucination Rate so với baseline ở cùng mức CIDEr |
@@ -90,7 +90,7 @@ Cho một luồng âm thanh liên tục $x(t)$ thu từ một hoặc nhiều đi
 
 **Trong phạm vi:**
 
-- 15 lớp sự kiện âm thanh (10 sự kiện an ninh + 5 lớp gây nhầm lẫn) — [§3.1](#31-taxonomy-15-lớp).
+- 16 lớp sự kiện âm thanh (10 sự kiện an ninh + 6 lớp gây nhầm lẫn) — [§3.1](#31-taxonomy-16-lớp).
 - Bối cảnh triển khai **tổng quát cho 4 khu vực**: trường học, bãi/nhà xe, khu dân cư, nhà máy. Hệ thống không tối ưu riêng cho một khu vực; `location` là metadata cấu hình được, không phải tham số của model.
 - Tiếng Việt cho giao diện và truy vấn RAG; tiếng Anh cho caption benchmark.
 - Near-real-time (mục tiêu P95 ≤ 6 giây end-to-end).
@@ -115,7 +115,7 @@ Cho một luồng âm thanh liên tục $x(t)$ thu từ một hoặc nhiều đi
 |---|---|---|
 | **C1** | **Kiến trúc Grounded AAC đa nhiệm**: chia sẻ trunk BEATs+Conformer giữa SED và captioning, dùng **strong label làm tín hiệu grounding**, kết hợp 3 mục tiêu (NLL + InfoNCE + frame-level SED) và **grounded decoding** chặn từ vựng sự kiện không có bằng chứng | Nghiên cứu |
 | **C2** | **Bộ metric đo hallucination cho AAC** dựa trên strong label: Event Hallucination Rate, Event Omission Rate, Grounding Score, Temporal Order Accuracy | Nghiên cứu |
-| **C3** | **Taxonomy 15 lớp an ninh có chủ đích đưa 5 lớp gây nhầm lẫn vào**, kèm 8 test slice mô phỏng điều kiện thực tế (đặc biệt `media_playback` — âm thanh nguy hiểm phát ra từ TV/loa) | Dữ liệu |
+| **C3** | **Taxonomy 16 lớp an ninh có chủ đích đưa 6 lớp gây nhầm lẫn vào**, kèm 8 test slice mô phỏng điều kiện thực tế (đặc biệt `media_playback` — âm thanh nguy hiểm phát ra từ TV/loa) | Dữ liệu |
 | **C4** | **Security Audio RAG Evaluation Set** — bộ gold 4 tầng cho SED / Captioning / Retrieval / End-to-end Alert | Dữ liệu |
 | **C5** | Hệ thống end-to-end streaming → alert → RAG có trích dẫn, vận hành theo quy trình MLOps đầy đủ | Kỹ thuật |
 
@@ -217,7 +217,7 @@ Bốn trụ cột áp dụng: **data versioning** (DVC), **experiment tracking +
 
 # 3. Dữ liệu
 
-## 3.1 Taxonomy 15 lớp
+## 3.1 Taxonomy 16 lớp
 
 Nguyên tắc thiết kế: **10 lớp sự kiện an ninh + 5 lớp gây nhầm lẫn/nền**. Năm lớp Nhóm B không phải "rác" — chúng là lớp có nhãn đầy đủ và chính chúng quyết định False Alarm Rate.
 
@@ -515,7 +515,7 @@ CREATE TABLE security_events (
 CREATE TABLE event_detections (
     id           BIGSERIAL PRIMARY KEY,
     event_id     TEXT REFERENCES security_events(event_id) ON DELETE CASCADE,
-    class_id     TEXT NOT NULL,                  -- 1 trong 15 class
+    class_id     TEXT NOT NULL,                  -- 1 trong 16 class
     onset_sec    REAL NOT NULL,                  -- tương đối so với window_start
     offset_sec   REAL NOT NULL,
     confidence   REAL NOT NULL
@@ -897,13 +897,13 @@ Vấn đề: caption benchmark là **tiếng Anh** (để so sánh với AudioCa
 | Bước | Xử lý |
 |---|---|
 | Sinh caption | Model sinh **EN** (giữ so sánh được với benchmark) |
-| Dịch | Sinh `caption_vi` bằng LLM, có **glossary cố định 15 class** để thuật ngữ nhất quán tuyệt đối |
+| Dịch | Sinh `caption_vi` bằng LLM, có **glossary cố định 16 class** để thuật ngữ nhất quán tuyệt đối |
 | Index | Embed `caption_vi` bằng model đa ngữ (BGE-M3) |
 | Đánh giá caption | Trên `caption_en` với metric chuẩn |
 | Đánh giá RAG | Trên `caption_vi` với truy vấn tiếng Việt |
 | Kiểm tra | So khớp thuật ngữ EN↔VI theo glossary; sai lệch là lỗi phải sửa |
 
-Glossary 15 class là bắt buộc: nếu cùng một lớp lúc dịch là "tiếng kính vỡ", lúc là "tiếng vỡ kính", lúc là "kính bị đập", thì retrieval sẽ phân mảnh.
+Glossary 16 class là bắt buộc: nếu cùng một lớp lúc dịch là "tiếng kính vỡ", lúc là "tiếng vỡ kính", lúc là "kính bị đập", thì retrieval sẽ phân mảnh.
 
 ---
 

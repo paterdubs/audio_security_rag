@@ -267,7 +267,7 @@ Dán bảng này cạnh màn hình khi gán nhãn.
 ## 4. Quy ước xuyên suốt
 
 1. **Sự kiện chồng nhau thì gán tất cả.** Một vụ va chạm có thể đồng thời là `vehicle_crash` + `glass_breaking` + `scream`. Strong label cho phép chồng lấn — đừng chọn một.
-2. **Không có lớp "khác".** Clip không thuộc 15 lớp thì bị loại khỏi foreground bank kèm mã lý do, chứ không gán bừa.
+2. **Không có lớp "khác".** Clip không thuộc 16 lớp thì bị loại khỏi foreground bank kèm mã lý do, chứ không gán bừa.
 3. **Âm thanh phát lại từ loa/TV** (`media_playback`) là **slice đánh giá S4**, không phải một lớp. Clip loại này được đánh dấu bằng `slice_flags`, và lớp âm thanh vẫn gán bình thường.
 4. **Khoảng cách giữa hai event cùng lớp < 0.5 s → gộp một event.** Quy ước này áp dụng cho *mọi* lớp, không riêng `gunshot`.
 5. **Nghi ngờ ở bank → loại. Nghi ngờ ở gold test → phải quyết.** Hai chỗ này có logic ngược nhau; nhầm lẫn giữa chúng sẽ làm hỏng chỉ số Recall.
