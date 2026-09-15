@@ -1,6 +1,6 @@
-# taxonomy.md — Định nghĩa 15 lớp âm thanh
+# taxonomy.md — Định nghĩa 16 lớp âm thanh
 
-> **Vai trò:** định nghĩa chuẩn của 15 lớp. Mọi tranh cãi "clip này thuộc lớp nào" đều tra ở đây.
+> **Vai trò:** định nghĩa chuẩn của 16 lớp. Mọi tranh cãi "clip này thuộc lớp nào" đều tra ở đây.
 >
 > Liên quan: [ontology_map.yaml](../ml/configs/ontology_map.yaml) (ánh xạ sang nhãn dataset — **file máy đọc**) · [annotation_guideline.md](annotation_guideline.md) (cách gán biên thời gian) · [DATA_PLAN.md](DATA_PLAN.md)
 >
@@ -59,8 +59,8 @@ Tiếng phát thanh của người ở cường độ cực đại, **không th�
 | | |
 |---|---|
 | ✅ **Bao gồm** | Thét vì sợ hãi · Thét vì đau · Thét chói không rõ lời của người lớn hoặc trẻ em |
-| ❌ **Không bao gồm** | Quát tháo, gọi to **có lời** → `shout_yell` · Reo hò, cười to, hét vì vui → `laughter_cheering` · Trẻ con nô đùa la hét ở sân trường → `laughter_cheering` · Trẻ sơ sinh khóc → loại (`wrong_class`) |
-| 🔍 **Dấu hiệu phân biệt** | **so với `shout_yell`:** hỏi *"có nghe ra từ ngữ không?"* — nghe ra từ thì là `shout_yell`, chỉ là âm thanh thuần thì là `scream`. **so với `laughter_cheering`:** hỏi *"sắc thái là sợ hay vui?"* — nếu nghe thấy tiếng cười xen kẽ hoặc nhiều người cùng lúc thì gần như chắc chắn là vui. |
+| ❌ **Không bao gồm** | Quát tháo, gọi to **có lời** → `shout_yell` · Reo hò, cười to, hét vì vui → `applause_cheering` · Trẻ con nô đùa la hét ở sân trường → `applause_cheering` · Trẻ sơ sinh khóc → loại (`wrong_class`) |
+| 🔍 **Dấu hiệu phân biệt** | **so với `shout_yell`:** hỏi *"có nghe ra từ ngữ không?"* — nghe ra từ thì là `shout_yell`, chỉ là âm thanh thuần thì là `scream`. **so với `applause_cheering`:** hỏi *"sắc thái là sợ hay vui?"* — nếu nghe thấy tiếng cười xen kẽ hoặc nhiều người cùng lúc thì gần như chắc chắn là vui. |
 | 📌 **Ví dụ** | (1) Một tiếng thét nữ chói, ~1.2 s, không thành lời (2) Thét đau ngắn sau tiếng va đập (3) Thét kéo dài rồi chuyển thành khóc — gán phần thét, dừng ở chỗ chuyển |
 
 > Đây là ranh giới **bất đồng nhiều nhất**. Vì dự án chỉ có một người gán, cặp `scream` ↔ `shout_yell` gần như chắc chắn sẽ là cặp có tự-nhất-quán thấp nhất — dự kiến trước và báo cáo riêng theo lớp ([DATA_PLAN §8.2](DATA_PLAN.md) biện pháp B3).
@@ -102,7 +102,7 @@ Tiếng nói của người ở cường độ cao **có nội dung lời nói**
 | | |
 |---|---|
 | ✅ **Bao gồm** | Cãi nhau to tiếng · Quát tháo, ra lệnh · Gọi to từ xa · Doạ nạt |
-| ❌ **Không bao gồm** | Thét không thành lời → `scream` · Reo hò cổ vũ → `laughter_cheering` · Trẻ con la hét khi chơi → `laughter_cheering` · Nói chuyện bình thường, kể cả to → `speech_normal` |
+| ❌ **Không bao gồm** | Thét không thành lời → `scream` · Reo hò cổ vũ → `applause_cheering` · Trẻ con la hét khi chơi → `applause_cheering` · Nói chuyện bình thường, kể cả to → `speech_normal` |
 | 🔍 **Dấu hiệu phân biệt** | **so với `speech_normal`:** ranh giới là **cường độ và độ căng của giọng**, không phải nội dung. Người nói to trong phòng ồn vẫn là `speech_normal`; giọng căng, vỡ, gấp gáp mới là `shout_yell`. **so với `scream`:** nghe ra từ ngữ → `shout_yell`. |
 | 📌 **Ví dụ** | (1) Hai người cãi nhau, giọng căng, ngắt quãng (2) Một người gọi to tên ai đó qua bãi xe (3) Giọng ra lệnh gắt: "Đứng lại!" |
 
@@ -166,7 +166,7 @@ Thiết bị phát tín hiệu cảnh báo lặp lại: chuông báo cháy, báo
 
 ---
 
-## 2. Nhóm B — Lớp gây nhầm lẫn và nền (5 lớp)
+## 2. Nhóm B — Lớp gây nhầm lẫn và nền (6 lớp)
 
 > **Đọc kỹ:** các lớp này **không sinh cảnh báo**. Chúng có mặt trong taxonomy để model học cách *không* báo động. Gán nhãn cẩu thả ở Nhóm B sẽ trực tiếp làm tăng tỉ lệ báo động nhầm — đây không phải phần phụ.
 
@@ -190,18 +190,29 @@ Thiết bị phát tín hiệu cảnh báo lặp lại: chuông báo cháy, báo
 | 🔍 **Dấu hiệu phân biệt** | Thường có **tiếng nảy tiếp theo** (vật rơi nảy lên rơi lại), và đuôi tắt nhanh hơn kính vỡ nhiều. |
 | 📌 **Ví dụ** | (1) Chồng đĩa sứ rơi trong bếp (2) Cái xoong rơi xuống sàn gạch, nảy hai lần (3) Ghế nhựa đổ |
 
-### B3. `laughter_cheering` — Cười, reo hò
+### B3. `laughter` — Tiếng cười
 
 | | |
 |---|---|
-| ✅ **Bao gồm** | Cười một người hoặc nhiều người · Reo hò, cổ vũ · Vỗ tay · **Trẻ con la hét khi nô đùa** |
-| ❌ **Không bao gồm** | Thét sợ hãi → `scream` · Quát tháo → `shout_yell` · **Đám đông chung chung không rõ sắc thái** → `ambient_noise` |
-| 🔍 **Dấu hiệu phân biệt** | Hỏi *"nhiều người hay một người, và sắc thái vui hay sợ?"* — **nhiều giọng chồng nhau + có nhịp lặp lại (cười thành tràng, hò thành đợt) → `laughter_cheering`**. Thét sợ hãi thường là một giọng và không lặp nhịp. |
-| 📌 **Ví dụ** | (1) Tràng cười của nhóm người (2) Đám đông reo hò sau bàn thắng (3) Trẻ con chạy nhảy la hét ở sân trường |
+| ✅ **Bao gồm** | Cười một người hoặc nhiều người, MỘT nguồn giọng liên tục (có thể cười thành tràng) |
+| ❌ **Không bao gồm** | Thét sợ hãi → `scream` · Quát tháo → `shout_yell` · Reo hò/vỗ tay của đám đông → `applause_cheering` |
+| 🔍 **Dấu hiệu phân biệt** | Hỏi *"đây là một giọng cười, hay nhiều nguồn âm chồng lên nhau có nhịp lặp?"* — một giọng cười, dù thành tràng, vẫn khác về phổ với tiếng vỗ tay/đám đông. |
+| 📌 **Ví dụ** | (1) Một người cười lớn (2) Vài người cùng bật cười |
 
-> 📌 **Quyết định taxonomy có chủ ý:** "trẻ con la hét" xếp vào đây chứ không vào `scream`. Sân trường là một trong bốn khu vực triển khai; nếu trẻ con nô đùa bị tính là tiếng thét thì hệ thống sẽ báo động cả ngày và vô dụng.
+### B4. `applause_cheering` — Vỗ tay, reo hò, đám đông
 
-### B4. `speech_normal` — Tiếng nói bình thường
+| | |
+|---|---|
+| ✅ **Bao gồm** | Vỗ tay · Reo hò, cổ vũ · **Trẻ con la hét khi nô đùa** |
+| ❌ **Không bao gồm** | Thét sợ hãi → `scream` · Quát tháo → `shout_yell` · Cười (một giọng) → `laughter` · Đám đông chung chung không rõ sắc thái → `ambient_noise` |
+| 🔍 **Dấu hiệu phân biệt** | Hỏi *"nhiều giọng/nguồn chồng nhau, có nhịp lặp, sắc thái vui hay sợ?"* — **nhiều nguồn chồng nhau + nhịp lặp (vỗ tay, hò thành đợt) + sắc thái vui → `applause_cheering`**. Thét sợ hãi thường là một giọng và không lặp nhịp. |
+| 📌 **Ví dụ** | (1) Đám đông reo hò sau bàn thắng (2) Tràng vỗ tay (3) Trẻ con chạy nhảy la hét ở sân trường |
+
+> 📌 **Quyết định taxonomy có chủ ý:** "trẻ con la hét" xếp vào `applause_cheering` chứ không vào `scream` hay `laughter`. Sân trường là một trong bốn khu vực triển khai; nếu trẻ con nô đùa bị tính là tiếng thét thì hệ thống sẽ báo động cả ngày và vô dụng.
+>
+> 📌 **Vì sao tách làm hai lớp (2026-09-15):** tiếng cười là một giọng liên tục, còn vỗ tay/reo hò là nhiều nguồn chồng nhau có nhịp lặp — hai đặc trưng âm học khác nhau. Gộp chung (`laughter_cheering` cũ, trước 2026-09-15) từng làm model học một đặc trưng lẫn lộn cho hai âm rất khác nhau.
+
+### B5. `speech_normal` — Tiếng nói bình thường
 
 | | |
 |---|---|
@@ -214,7 +225,7 @@ Thiết bị phát tín hiệu cảnh báo lặp lại: chuông báo cháy, báo
 >
 > Ưu tiên clip **đa ngôn ngữ** để model không học "tiếng nói = tiếng Anh".
 
-### B5. `ambient_noise` — Nền
+### B6. `ambient_noise` — Nền
 
 | | |
 |---|---|
@@ -237,7 +248,9 @@ Dán bảng này cạnh màn hình khi gán nhãn.
 | `gunshot` ↔ `explosion` | Năng lượng dồn ở tần số thấp và đuôi > 1 s? | Có → `explosion` · Không → `gunshot` |
 | `gunshot` ↔ `door_slam` | Có đuôi cộng hưởng khung cửa, thời gian lên chậm? | Có → `door_slam` · Không → `gunshot` |
 | `scream` ↔ `shout_yell` | Nghe ra **từ ngữ** không? | Có → `shout_yell` · Không → `scream` |
-| `scream` ↔ `laughter_cheering` | Nhiều giọng chồng nhau, có nhịp lặp? | Có → `laughter_cheering` · Không → `scream` |
+| `scream` ↔ `applause_cheering` | Nhiều giọng chồng nhau, có nhịp lặp? | Có → `applause_cheering` · Không → `scream` |
+| `scream` ↔ `laughter` | Có nghe ra tiếng cười (dù chỉ một giọng) không? | Có → `laughter` · Không → `scream` |
+| `shout_yell` ↔ `laughter` | Có nghe ra tiếng cười (dù chỉ một giọng) không? | Có → `laughter` · Không → `shout_yell` |
 | `shout_yell` ↔ `speech_normal` | Giọng **căng/vỡ/gấp**? (không xét âm lượng) | Có → `shout_yell` · Không → `speech_normal` |
 | `glass_breaking` ↔ `object_drop_dishes` | Đuôi lách tách tần số cao kéo dài > 0.5 s? | Có → `glass_breaking` · Không → `object_drop_dishes` |
 | `siren` ↔ `alarm_bell` | Cao độ **trượt liên tục** hay **cố định/nhảy rời rạc**? | Trượt → `siren` · Cố định → `alarm_bell` |
@@ -247,7 +260,7 @@ Dán bảng này cạnh màn hình khi gán nhãn.
 | `glass_breaking` ↔ `vehicle_crash` | Có tiếng động cơ/phanh làm bối cảnh không? | Có → gán **cả hai** · Không → chỉ `glass_breaking` |
 | `door_slam` ↔ `object_drop_dishes` | Có tiếng **nảy lại** sau xung đầu tiên? | Có → `object_drop_dishes` · Không → `door_slam` |
 | `object_drop_dishes` ↔ `running_footsteps` | Một-hai xung rời rạc, hay **chuỗi đều nhịp**? | Chuỗi đều → `running_footsteps` · Rời rạc → `object_drop_dishes` |
-| `shout_yell` ↔ `laughter_cheering` | Nhiều giọng chồng nhau, có nhịp lặp, sắc thái vui? | Có → `laughter_cheering` · Không → `shout_yell` |
+| `shout_yell` ↔ `applause_cheering` | Nhiều giọng chồng nhau, có nhịp lặp, sắc thái vui? | Có → `applause_cheering` · Không → `shout_yell` |
 
 ---
 
@@ -277,7 +290,8 @@ Dán bảng này cạnh màn hình khi gán nhãn.
 | `alarm_bell` | A | 250 | 100 | 🟢 |
 | `fireworks` | B | 200 | 80 | 🟡 |
 | `object_drop_dishes` | B | 250 | 100 | 🟢 |
-| `laughter_cheering` | B | 250 | 100 | 🟢 |
+| `laughter` | B | 150 | 60 | 🟢 |
+| `applause_cheering` | B | 250 | 100 | 🟢 |
 | `speech_normal` | B | 300 | 120 | 🟢 |
 | `ambient_noise` | B | — | — | dùng background bank |
 

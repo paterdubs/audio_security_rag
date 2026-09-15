@@ -21,8 +21,8 @@ from common import REPO_ROOT, enable_utf8_output
 
 CONFIG_PATH = REPO_ROOT / "ml" / "configs" / "ontology_map.yaml"
 
-EXPECTED_N_CLASSES = 15
-EXPECTED_GROUP_SIZES = {"A": 10, "B": 5}
+EXPECTED_N_CLASSES = 16
+EXPECTED_GROUP_SIZES = {"A": 10, "B": 6}
 REQUIRED_CLASS_KEYS = (
     "group",
     "audioset_ids",

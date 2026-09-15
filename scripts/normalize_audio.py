@@ -191,13 +191,21 @@ def process_row(row: dict, config: dict, dry_run: bool,
 # ── Ghi loại bỏ ──────────────────────────────────────────────────────────────
 
 
-def write_review_flags(flags: dict[str, ReviewFlag], processed: set[str]) -> None:
-    """Hàng đợi cho người nghe ở giai đoạn 3 — không phải danh sách loại bỏ."""
+def write_review_flags(flags: dict[str, ReviewFlag], processed: set[str], source_prefix: str = "") -> None:
+    """Hàng đợi cho người nghe ở giai đoạn 3 — không phải danh sách loại bỏ.
+
+    `file_id in processed` không bắt được dòng CŨ mang class_id đã mất (ví dụ sau khi
+    tách một lớp): file_id đổi theo class_id, nên nó không còn khớp bất cứ gì trong
+    lần quét mới và nằm lại vĩnh viễn. Với `source_prefix`, bất kỳ dòng cùng nguồn mà
+    không nằm trong `processed` — tức đã bị đổi tên/xoá — cũng bị dọn theo.
+    """
     REVIEW_PATH.parent.mkdir(parents=True, exist_ok=True)
     kept: list[dict] = []
     if REVIEW_PATH.exists():
         with REVIEW_PATH.open(encoding="utf-8", newline="") as handle:
-            kept = [r for r in csv.DictReader(handle) if not (r["stage"] == STAGE and r["file_id"] in processed)]
+            kept = [r for r in csv.DictReader(handle)
+                    if not (r["stage"] == STAGE and (r["file_id"] in processed
+                            or (source_prefix and r["file_id"].startswith(source_prefix))))]
     with REVIEW_PATH.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=REVIEW_FIELDS)
         writer.writeheader()
@@ -268,8 +276,11 @@ def main() -> int:
 
     if not args.dry_run:
         processed = {r["file_id"] for r in rows}
+        # Chỉ dọn dòng mồ côi (class đã đổi tên) khi quét TOÀN BỘ nguồn, không --limit —
+        # xem drop_stale_rows trong build_manifest.py cho lý do đầy đủ.
+        source_prefix = f"{args.source}_" if args.source and args.limit is None else ""
         write_exclusions(STAGE, {fid: (r.reason_code, r.detail) for fid, r in rejections.items()}, processed)
-        write_review_flags(flags, processed)
+        write_review_flags(flags, processed, source_prefix)
     report(len(rows), rejections, flags, args.dry_run)
     return 0
 

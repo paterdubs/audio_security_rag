@@ -46,7 +46,7 @@ sources:
     license: "CC BY-NC 3.0"
     redistributable: labels_only       # audio KHÔNG được phát hành lại
     provides_classes: [glass_breaking, siren, alarm_bell, fireworks,
-                       laughter_cheering, running_footsteps, ambient_noise]
+                       laughter, applause_cheering, running_footsteps, ambient_noise]
     label_type: weak                   # 1 nhãn / clip 5 giây, không có onset/offset
     notes: >
       Rẻ nhất, tải trước tiên. 2000 clip / 50 lớp / 5 giây / 44.1 kHz.

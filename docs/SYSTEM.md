@@ -242,11 +242,12 @@ Nguyên tắc thiết kế: **10 lớp sự kiện an ninh + 5 lớp gây nhầm
 |---|---|---|---|---|
 | 11 | `fireworks` | Pháo, pháo hoa | 1, 2 | Bối cảnh Việt Nam: Tết, đám cưới, khai trương. **Nguồn báo động giả số 1** |
 | 12 | `object_drop_dishes` | Rơi vỡ đồ vật, chén đĩa | 4 | Rất phổ biến ở căng-tin/khu dân cư; DESED có lớp `Dishes` sẵn strong label |
-| 13 | `laughter_cheering` | Cười lớn, reo hò, trẻ chơi đùa | 3, 6 | Nguồn báo động giả chủ đạo ở trường học và khu dân cư |
+| 13a | `laughter` | Cười (một giọng) | 3 | Tách khỏi `applause_cheering` (2026-09-15): phổ và nhịp khác hẳn tiếng vỗ tay/đám đông |
+| 13b | `applause_cheering` | Vỗ tay, reo hò, trẻ chơi đùa | 3, 6 | Nguồn báo động giả chủ đạo ở trường học và khu dân cư |
 | 14 | `speech_normal` | Hội thoại bình thường | 6 | Lớp âm tính chủ đạo; đồng thời là tín hiệu "có người hiện diện" |
 | 15 | `ambient_noise` | Nền: mưa, gió, sấm, giao thông, HVAC, im lặng | tất cả | Lớp hấp thụ; ngăn model gán nhãn nguy hiểm cho mọi tiếng động lạ |
 
-**Luận điểm bảo vệ.** Phần lớn công trình về "audio surveillance" chỉ huấn luyện 3–8 lớp nguy hiểm rồi báo F1 cao. Khi triển khai, mọi âm thanh không thuộc tập huấn luyện đều bị ép vào một lớp nguy hiểm nào đó. Đưa 5 lớp nhầm lẫn vào taxonomy là **quyết định thiết kế có chủ đích**, và lợi ích của nó **đo được** bằng thí nghiệm ablation: huấn luyện có/không Nhóm B → so sánh False Alarm Rate trên test set ([§10](#10-kế-hoạch-thực-nghiệm), thí nghiệm E4).
+**Luận điểm bảo vệ.** Phần lớn công trình về "audio surveillance" chỉ huấn luyện 3–8 lớp nguy hiểm rồi báo F1 cao. Khi triển khai, mọi âm thanh không thuộc tập huấn luyện đều bị ép vào một lớp nguy hiểm nào đó. Đưa 6 lớp nhầm lẫn vào taxonomy là **quyết định thiết kế có chủ đích**, và lợi ích của nó **đo được** bằng thí nghiệm ablation: huấn luyện có/không Nhóm B → so sánh False Alarm Rate trên test set ([§10](#10-kế-hoạch-thực-nghiệm), thí nghiệm E4).
 
 ### Phân cấp Tier và ý nghĩa
 
@@ -813,7 +814,7 @@ $$R = \min\left(1,\ \max_{i}\left(w_{c_i} \cdot p_i\right) + \beta \cdot \text{c
 
 | Quy tắc | Nội dung |
 |---|---|
-| **Chặn Nhóm B** | Nếu lớp trội thuộc Nhóm B (`fireworks`, `laughter_cheering`, …) và không có lớp Nhóm A nào vượt $\theta_{high}$ → **ép severity ≤ LOW** |
+| **Chặn Nhóm B** | Nếu lớp trội thuộc Nhóm B (`fireworks`, `applause_cheering`, …) và không có lớp Nhóm A nào vượt $\theta_{high}$ → **ép severity ≤ LOW** |
 | **Chặn media playback** | Nếu bộ phân loại phụ đánh dấu `media_playback` → **giảm một bậc severity** và ghi rõ lý do vào sự kiện |
 | **Chặn confidence thấp** | Mọi detection có $p < \theta_{low}$ không được tham gia tính risk |
 | **Chống spam** | Cùng lớp, cùng địa điểm, lặp > N lần trong 10 phút → gộp thành một cảnh báo "lặp lại", không bắn N thông báo |

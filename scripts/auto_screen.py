@@ -333,6 +333,19 @@ def write_rows(path: Path, fields: list[str], rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
+def merge_scored(existing: list[dict], fresh: list[dict], rescanned_classes: set[str]) -> list[dict]:
+    """Gộp điểm mới vào điểm cũ theo file_id — KHÔNG ghi đè toàn bộ file.
+
+    `--class-id X` chỉ sàng lọc lớp X, nhưng write_rows ghi đè cả file: mọi lớp KHÁC
+    đã sàng lọc ở lần chạy trước biến mất khỏi screen_scores.csv (và theo đó khỏi
+    bank), dù chưa hề bị chạy lại. Bỏ dòng cũ CỦA CHÍNH các lớp vừa quét (để dòng
+    file_id không còn tồn tại — ví dụ vì đổi ontology — không nằm lại vĩnh viễn),
+    rồi giữ nguyên mọi lớp khác.
+    """
+    kept = [r for r in existing if r["class_id"] not in rescanned_classes]
+    return kept + fresh
+
+
 def guard_low_resolution_classes(scored: list[dict]) -> dict[str, int]:
     """Huỷ quyết định tự động loại ở những lớp mà tagger không đủ phân giải.
 
@@ -464,8 +477,10 @@ def main() -> int:
         print(f"  {padded_count} clip ngắn hơn 1s — đã kéo dài bằng cách lặp lại "
               f"(đệm im lặng sẽ làm 92% trong số đó bị loại oan, xem pad_to_minimum)")
     write_exclusions(STAGE, rejected, {c["file_id"] for c in clips})
-    write_rows(SCORES_PATH, SCORE_FIELDS, scored)
-    queue = sorted((r for r in scored if r["decision"] == "review"),
+    rescanned_classes = {c["class_id"] for c in clips}
+    all_scored = merge_scored(read_csv(SCORES_PATH), scored, rescanned_classes)
+    write_rows(SCORES_PATH, SCORE_FIELDS, all_scored)
+    queue = sorted((r for r in all_scored if r["decision"] == "review"),
                    key=lambda r: (priority_rank(Routing("review", r["priority"], "")),
                                   r["class_id"], -float(r["p_target"])))
     write_rows(QUEUE_PATH, QUEUE_FIELDS, queue)

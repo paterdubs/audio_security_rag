@@ -64,7 +64,7 @@ Cột **Nhãn có sẵn** cho biết ta được cho không cái gì; cột **Vi
 |---|---|---|---|---|---|---|
 | 1 | `gunshot` | MIVIA, AudioSet-strong, FSD50K | **Strong** (MIVIA, AS-strong) · Weak (FSD50K) | 200 | Cắt gọn FSD50K; tách loạt bắn | 🟡 Dễ lẫn `fireworks` |
 | 2 | `explosion` | AudioSet-strong, FSD50K | Strong (AS-strong) · Weak | 120 | Cắt gọn; loại nhầm pháo hoa | 🔴 **Thiếu dữ liệu** |
-| 3 | `scream` | MIVIA, AudioSet-strong, FSD50K | **Strong** (MIVIA) · Weak | 200 | Tách khỏi `shout_yell` và `laughter_cheering` | 🟡 Ranh giới lớp khó |
+| 3 | `scream` | MIVIA, AudioSet-strong, FSD50K | **Strong** (MIVIA) · Weak | 200 | Tách khỏi `shout_yell`, `laughter`, `applause_cheering` | 🟡 Ranh giới lớp khó |
 | 4 | `glass_breaking` | MIVIA, FSD50K, ESC-50 | **Strong** (MIVIA) · Weak | 250 | Cắt gọn; loại nhầm chén đĩa | 🟢 |
 | 5 | `vehicle_crash` | MIVIA Road ~~, AudioSet-strong~~ | **Strong** (MIVIA Road) | 80 | Phụ thuộc **tuyệt đối** vào MIVIA Road | 🔴 **Rủi ro cao nhất** |
 | 6 | `shout_yell` | AudioSet-strong, FSD50K | Strong (AS-strong) · Weak | 200 | Tách khỏi `scream` theo guideline | 🟡 |
@@ -79,7 +79,8 @@ Cột **Nhãn có sẵn** cho biết ta được cho không cái gì; cột **Vi
 |---|---|---|---|---|---|---|
 | 11 | `fireworks` | FSD50K, AudioSet-strong | Strong (AS-strong) · Weak | 200 | **Thu bổ sung tại VN** nếu thiếu | 🟡 Quan trọng, dễ thiếu |
 | 12 | `object_drop_dishes` | DESED (`Dishes`), FSD50K | **Strong** (DESED) | 250 | DESED cho trực tiếp | 🟢 |
-| 13 | `laughter_cheering` | FSD50K, AudioSet-strong | Strong (AS-strong) · Weak | 250 | Gom `Laughter`+`Cheering`+`Children shouting` | 🟢 |
+| 13a | `laughter` | FSD50K, AudioSet-strong, ESC-50 | Strong (AS-strong) · Weak | 150 | Tách khỏi `applause_cheering` (2026-09-15) — một giọng liên tục | 🟢 |
+| 13b | `applause_cheering` | FSD50K, AudioSet-strong, ESC-50 | Strong (AS-strong) · Weak | 250 | Gom `Cheering`+`Applause`+`Children shouting` | 🟢 |
 | 14 | `speech_normal` | DESED (`Speech`), AudioSet, LibriSpeech | **Strong** (DESED) | 300 | Rất dồi dào; cần đa dạng ngôn ngữ | 🟢 |
 | 15 | `ambient_noise` | TAU/DCASE scenes, UrbanSound8K, **thu tại chỗ** | — | *(dùng background bank)* | Xác minh **không chứa** sự kiện Nhóm A | 🟢 |
 
@@ -166,7 +167,7 @@ Foreground bank cần đúng clip **PP**. Lấy điều kiện *một lớp duy 
 | Lớp | Đơn lớp | PP | Tối thiểu | |
 |---|---:|---:|---:|---|
 | `alarm_bell` | 2560 | 441 | 100 | ✅ |
-| `laughter_cheering` | 1643 | 779 | 100 | ✅ |
+| `laughter_cheering` *(số cũ, trước tách lớp 15/09)* | 1643 | 779 | 100 | ⚠️ cần đo lại `laughter`/`applause_cheering` riêng |
 | `speech_normal` | 1906 | 912 | 120 | ✅ |
 | `glass_breaking` | 1073 | 516 | 100 | ✅ |
 | `door_slam` | 1244 | 397 | 100 | ✅ |
@@ -367,7 +368,7 @@ ESC-50 có sẵn cột `src_file` = bản ghi Freesound gốc, tức là `source
 |---|---|---:|---:|---:|
 | `fireworks` | `fireworks` | 40 | **16** | **2.5** |
 | `siren` | `siren` | 40 | 28 | 1.4 |
-| `clapping` | `laughter_cheering` | 40 | 33 | 1.2 |
+| `clapping` | `applause_cheering` | 40 | 33 | 1.2 |
 | `footsteps` | `running_footsteps` | 40 | 32 | 1.2 |
 | 4 lớp còn lại | | 160 | 145 | 1.1 |
 | **Tổng** | | **320** | **254** | **1.3** |
@@ -454,9 +455,9 @@ causal_chains:
   - name: emergency
     sequence: [alarm_bell, shout_yell, running_footsteps]
   - name: false_alarm_fireworks      # ★ chuỗi ÂM TÍNH, rất quan trọng
-    sequence: [fireworks, laughter_cheering]
+    sequence: [fireworks, applause_cheering]
   - name: false_alarm_dishes
-    sequence: [object_drop_dishes, laughter_cheering]
+    sequence: [object_drop_dishes, laughter]
 ```
 
 Hai chuỗi âm tính cuối dạy model rằng *một chuỗi sự kiện liên tiếp không mặc nhiên là sự cố an ninh*. Thiếu chúng, model sẽ học "cứ có chuỗi là nguy hiểm".

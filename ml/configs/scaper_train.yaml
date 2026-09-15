@@ -51,8 +51,8 @@ causal_chains:
   # mặc nhiên là sự cố an ninh. Thiếu chúng, model học "cứ có chuỗi là nguy hiểm"
   # và báo động giả mỗi đêm giao thừa.
   - name: false_alarm_fireworks
-    sequence: [fireworks, laughter_cheering]
+    sequence: [fireworks, applause_cheering]     # pháo giao thừa rồi tiếng đám đông hò reo
     gaps_sec: [[0.3, 2.0]]
   - name: false_alarm_dishes
-    sequence: [object_drop_dishes, laughter_cheering]
+    sequence: [object_drop_dishes, laughter]     # làm rơi bát đĩa rồi cười ngượng — một giọng
     gaps_sec: [[0.3, 2.0]]

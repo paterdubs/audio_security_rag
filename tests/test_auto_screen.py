@@ -287,3 +287,24 @@ def test_clip_duoc_cuu_vao_hang_doi_uu_tien_THUONG():
 
 def test_lop_khong_co_clip_nao_khong_lam_no():
     assert asc.guard_low_resolution_classes([]) == {}
+
+
+# ── Gộp điểm mới vào screen_scores.csv, không ghi đè cả file ────────────────
+
+
+def test_chay_lop_nay_khong_xoa_lop_khac():
+    """Đúng lỗi thật: chạy --class-id applause_cheering sau --class-id laughter đã
+    xoá sạch điểm của laughter khỏi screen_scores.csv vì write_rows ghi đè cả file."""
+    existing = [{"file_id": "a", "class_id": "laughter"}, {"file_id": "b", "class_id": "siren"}]
+    fresh = [{"file_id": "c", "class_id": "applause_cheering"}]
+    ket_qua = asc.merge_scored(existing, fresh, rescanned_classes={"applause_cheering"})
+    assert {r["file_id"] for r in ket_qua} == {"a", "b", "c"}
+
+
+def test_quet_lai_cung_lop_thi_thay_diem_cu():
+    existing = [{"file_id": "a", "class_id": "laughter", "p_target": 0.1}]
+    fresh = [{"file_id": "a", "class_id": "laughter", "p_target": 0.9}]
+    ket_qua = asc.merge_scored(existing, fresh, rescanned_classes={"laughter"})
+    assert ket_qua == [{"file_id": "a", "class_id": "laughter", "p_target": 0.9}]
+
+

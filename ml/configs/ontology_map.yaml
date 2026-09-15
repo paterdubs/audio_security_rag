@@ -16,8 +16,8 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 meta:
-  version: "0.1.0"
-  n_classes: 15
+  version: "0.2.0"
+  n_classes: 16   # 2026-09-15: laughter_cheering tách thành laughter + applause_cheering
   reference_files:
     audioset_ontology: data/reference/audioset_ontology.json
     audioset_strong_vocab: data/reference/audioset_strong_mid_to_display_name.tsv
@@ -81,7 +81,7 @@ classes:
     urbansound_labels: []
     desed_labels: []
     mivia_labels: ["scream"]                          # ⚠️
-    confusable_with: ["shout_yell", "laughter_cheering"]
+    confusable_with: ["shout_yell", "laughter", "applause_cheering"]
     target_foreground: 200
     min_acceptable: 80
     notes: >
@@ -135,11 +135,11 @@ classes:
     urbansound_labels: []
     desed_labels: []
     mivia_labels: []
-    confusable_with: ["scream", "laughter_cheering", "speech_normal"]
+    confusable_with: ["scream", "laughter", "applause_cheering", "speech_normal"]
     target_foreground: 200
     min_acceptable: 80
     notes: >
-      "/t/dd00135 Children shouting" CỐ Ý xếp sang laughter_cheering: trẻ con la hét
+      "/t/dd00135 Children shouting" CỐ Ý xếp sang applause_cheering: trẻ con la hét
       ở sân trường là cảnh bình thường, không phải sự kiện an ninh. Đây là quyết định
       taxonomy có ảnh hưởng trực tiếp đến FAR ở khu vực trường học.
 
@@ -241,12 +241,29 @@ classes:
     target_foreground: 250
     min_acceptable: 100
 
-  laughter_cheering:
+  laughter:
     group: B
-    audioset_ids: ["/m/01j3sz", "/m/053hz1", "/t/dd00135", "/m/028ght"]
-    audioset_names: ["Laughter", "Cheering", "Children shouting", "Applause"]
-    fsd50k_labels: ["Laughter", "Cheering", "Applause"]
-    esc50_labels: ["laughing", "clapping"]
+    audioset_ids: ["/m/01j3sz"]
+    audioset_names: ["Laughter"]
+    fsd50k_labels: ["Laughter"]
+    esc50_labels: ["laughing"]
+    urbansound_labels: []
+    desed_labels: []
+    mivia_labels: []
+    confusable_with: ["scream", "shout_yell"]
+    target_foreground: 150
+    min_acceptable: 60
+    notes: >
+      TÁCH KHỎI `laughter_cheering` cũ (D-tách-16, 2026-09-15): tiếng cười là MỘT
+      giọng liên tục, khác hẳn tiếng vỗ tay/reo hò về phổ và nhịp — gộp chung từng
+      làm model học sai đặc trưng chung cho hai âm rất khác nhau.
+
+  applause_cheering:
+    group: B
+    audioset_ids: ["/m/053hz1", "/t/dd00135", "/m/028ght"]
+    audioset_names: ["Cheering", "Children shouting", "Applause"]
+    fsd50k_labels: ["Cheering", "Applause"]
+    esc50_labels: ["clapping"]
     urbansound_labels: []
     desed_labels: []
     mivia_labels: []
@@ -254,6 +271,11 @@ classes:
     target_foreground: 250
     min_acceptable: 100
     notes: >
+      TÁCH KHỎI `laughter_cheering` cũ (D-tách-16, 2026-09-15): vỗ tay và reo hò
+      đều là NHIỀU giọng/nguồn chồng nhau có nhịp lặp, cùng nhóm âm học hơn tiếng cười.
+      "/t/dd00135 Children shouting" CỐ Ý xếp vào đây, không vào `laughter`: trẻ con
+      la hét ở sân trường giống đám đông cổ vũ hơn giống một người cười — quyết định
+      taxonomy có ảnh hưởng trực tiếp đến FAR ở khu vực trường học.
       CỐ Ý KHÔNG lấy "/m/03qtwd Crowd": lớp đó là "có đám đông", quá rộng, gồm cả
       đám đông đang hoảng loạn — đưa vào sẽ dạy model rằng đám đông = an toàn.
 
