@@ -234,7 +234,7 @@ sources:
 
   mivia_road_events:
     access: application_required
-    priority: 1
+    priority: 3                        # 15/09: KHÔNG còn là khối chặn — xem vehicle_crash_cc
     url: "https://mivia.unisa.it/datasets/audio-analysis/mivia-road-audio-events-data-set/"
     license: "Nghiên cứu, theo thoả thuận"
     redistributable: no
@@ -242,6 +242,27 @@ sources:
     label_type: strong
     status: REQUESTED           # đã gửi email 14/09/2026, đang chờ duyệt
     notes: >
-      ⏳ ĐÃ NỘP ĐƠN 14/09/2026. KHỐI CHẶN DUY NHẤT của lớp `vehicle_crash`. Đã xác minh ở D1: AudioSet
-      KHÔNG có lớp nào nghĩa là va chạm xe (xem ontology_map.yaml). Không có nguồn
-      này thì lớp `vehicle_crash` phải ra cổng quyết định D7.
+      ⏳ ĐÃ NỘP ĐƠN 14/09/2026. **15/09: không còn là khối chặn của `vehicle_crash`** —
+      đã tìm được `vehicle_crash_cc` (công khai, CC-BY) thay thế. Vẫn giữ đơn này vì
+      nếu duyệt thì có thêm nguồn thứ hai, đa dạng hoá dữ liệu tốt hơn, nhưng không
+      còn là điều kiện tiên quyết để lớp này tồn tại.
+
+  vehicle_crash_cc:
+    access: public_direct
+    priority: 1
+    url: "https://huggingface.co/datasets/Titung/car-crash-audio-cc/resolve/main/metadata.csv"
+    approx_size_gb: 0.03            # 46 clip / 27.6 MB
+    license: "CC-BY 3.0"
+    redistributable: yes
+    provides_classes: [vehicle_crash]
+    label_type: strong               # mỗi clip ĐÃ được cắt quanh sự kiện va chạm
+    notes: >
+      15/09/2026 — người dùng tìm thấy, THAY THẾ MIVIA Road làm nguồn chính cho
+      `vehicle_crash`. 46 clip cắt từ 38 video YouTube, license CC-BY 3.0 (phát hành
+      lại được, khác MIVIA "nghiên cứu, theo thoả thuận"). Kèm `metadata.csv` có
+      `video_id` cho từng clip — DÙNG LÀM `source_group_id` (N2): vài video góp nhiều
+      clip (hậu tố `_00`, `_01`... trong `file_name`), chia theo file sẽ rò rỉ.
+      Không cần MIVIA Road nữa để lớp này thoát cổng quyết định D7, nhưng cỡ mẫu nhỏ
+      (46 clip cho mục tiêu 80) nên vẫn nên giữ đơn MIVIA như nguồn dự phòng thứ hai.
+      Tải qua `scripts/fetch_vehicle_crash_cc.py` (không qua `download_sources.py`,
+      vì đây là nhiều file lẻ từ HF hub theo `metadata.csv`, không phải một archive).

@@ -9945,3 +9945,16 @@ fsd50k_speech_normal_3b33da9a,normalize,clipped,2.59% đoạn cắt phẳng,auto
 fsd50k_speech_normal_695feefe,normalize,too_long,550.25s > 30.0s,auto,2026-09-15T13:44:26+00:00
 fsd50k_speech_normal_69839c7b,normalize,silent,RMS 0.000502,auto,2026-09-15T13:44:26+00:00
 fsd50k_speech_normal_b253802f,normalize,too_long,160.11s > 30.0s,auto,2026-09-15T13:44:26+00:00
+vehicle_crash_cc_2af3499e,normalize,too_long,34.59s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_309b43cf,normalize,too_long,36.11s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_3619f004,normalize,too_long,36.11s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_68ff9e64,normalize,too_long,36.11s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_69153d92,normalize,too_long,36.11s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_7137cba5,normalize,too_long,33.48s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_7a5db2fa,normalize,too_long,36.11s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_8fab6d72,normalize,too_long,36.11s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_a509915d,normalize,too_long,36.27s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_b8dc2343,normalize,too_long,36.11s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_c685681a,normalize,too_long,36.11s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_d5ce1cb8,normalize,too_long,34.59s > 30.0s,auto,2026-09-15T15:12:44+00:00
+vehicle_crash_cc_f5522278,normalize,too_long,36.25s > 30.0s,auto,2026-09-15T15:12:44+00:00

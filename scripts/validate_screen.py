@@ -270,12 +270,16 @@ def cmd_stage(include_done: bool = False) -> int:
 
 
 def cmd_queue() -> int:
-    """Gộp `review_queue.csv` vào `screen_audit.csv` (origin=queue), KHÔNG đè mẫu cũ.
+    """Gộp `review_queue.csv` vào `screen_audit.csv` (origin=queue), KHÔNG mất verdict cũ.
 
     review_queue.csv là TOÀN BỘ clip máy không tự quyết được (DATA_PLAN §4.2) — khác
     hẳn mẫu 10% dùng để đo τ. Verdict của cả hai loại đều được `promote_to_bank.py`
     đọc chung từ `screen_audit.csv`, nhưng phải tách `origin` để không tính nhầm hàng
     đợi vào tỉ lệ lỗi auto-accept (xem error_rate()).
+
+    Sắp theo (class_id, file_id) — không giữ mẫu cũ ở đầu file: theo yêu cầu người
+    dùng, phiếu dùng để nghe lại TOÀN BỘ theo thứ tự lớp, không cần phân biệt phần nào
+    thêm trước/sau. Verdict cũ vẫn giữ nguyên giá trị, chỉ đổi VỊ TRÍ dòng.
     """
     queue = read_csv(QUEUE_PATH)
     if not queue:
@@ -286,20 +290,20 @@ def cmd_queue() -> int:
     known_ids = {row["file_id"] for row in existing}
     new_rows = [{**row, "verdict": "", "note": "", "origin": ORIGIN_QUEUE}
                 for row in queue if row["file_id"] not in known_ids]
+    combined = [{**row, "origin": row.get("origin") or ORIGIN_SAMPLE} for row in existing] + new_rows
+    combined.sort(key=lambda r: (r["class_id"], r["file_id"]))
 
     AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with AUDIT_PATH.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=AUDIT_FIELDS, extrasaction="ignore")
         writer.writeheader()
-        for row in existing:
-            writer.writerow({**row, "origin": row.get("origin") or ORIGIN_SAMPLE})
-        writer.writerows(new_rows)
+        writer.writerows(combined)
 
     print(f"▶ thêm {len(new_rows)}/{len(queue)} clip từ review_queue.csv vào screen_audit.csv")
     if len(new_rows) < len(queue):
         print(f"  {len(queue) - len(new_rows)} clip đã có trong phiếu từ trước — bỏ qua")
-    print(f"\n✓ {AUDIT_PATH.relative_to(REPO_ROOT)}: {len(existing)} → {len(existing) + len(new_rows)} dòng")
-    print("Giờ chạy: python scripts/validate_screen.py --stage")
+    print(f"\n✓ {AUDIT_PATH.relative_to(REPO_ROOT)}: {len(existing)} → {len(combined)} dòng, sắp theo class_id")
+    print("Giờ chạy: python scripts/validate_screen.py --stage --all")
     return 0
 
 

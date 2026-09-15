@@ -504,6 +504,66 @@ def _us8k_entry(row: dict, audio_path: Path) -> RawEntry:
     )
 
 
+# ── Adapter: vehicle_crash_cc (qua HF hub, xem fetch_vehicle_crash_cc.py) ────
+# Thay thế MIVIA Road làm nguồn chính cho `vehicle_crash` (15/09/2026, xem sources.yaml).
+
+VCC_ROOT = RAW_DIR / "vehicle_crash_cc"
+VCC_METADATA = VCC_ROOT / "metadata.csv"
+VCC_LICENSE = "CC-BY"
+VCC_CLASS = "vehicle_crash"
+
+
+def adapt_vehicle_crash_cc(ontology: dict, limit: int | None) -> Iterator[RawEntry]:
+    """Toàn bộ nguồn chỉ có một lớp (`label` trong metadata.csv luôn là "Car Crash"),
+    nên không cần tra `ontology` qua reverse_label_map như các nguồn nhiều lớp khác.
+
+    `video_id` PHẢI dùng làm source_group_id: vài video góp nhiều clip (hậu tố `_00`,
+    `_01`... trong `file_name`) — chia theo file là rò rỉ N2, đúng kiểu lỗi đã bắt được
+    ở DESED (hai id Freesound trỏ cùng audio) và FSD50K (chung uploader).
+    """
+    if not VCC_METADATA.exists():
+        return
+    with VCC_METADATA.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+
+    produced = 0
+    for row in rows:
+        if limit is not None and produced >= limit:
+            return
+        audio_path = VCC_ROOT / row["file_name"]
+        if not audio_path.exists():
+            continue
+        yield _vcc_entry(row, audio_path)
+        produced += 1
+
+
+def _vcc_entry(row: dict, audio_path: Path) -> RawEntry:
+    checksum = sha256_of(audio_path)
+    duration, sample_rate, channels = audio_properties(audio_path)
+
+    return RawEntry(
+        file_id=f"vehicle_crash_cc_{checksum[:8]}",
+        path_raw=str(audio_path.relative_to(REPO_ROOT)).replace("\\", "/"),
+        source_dataset="vehicle_crash_cc",
+        source_id=row["file_name"],
+        source_group_id=f"youtube_{row['video_id']}",
+        claimed_class=VCC_CLASS,
+        # File đã tải VỐN LÀ đúng đoạn [start_sec, end_sec] của video gốc — coi cả file
+        # là một sự kiện đã cắt sẵn, giống DESED soundbank, KHÔNG dùng lại start_sec làm
+        # onset (đó là mốc trong video gốc, không phải trong file đã tải).
+        label_type_orig="isolated_event",
+        orig_onset="0.0",
+        orig_offset=f"{duration:.3f}",
+        duration=duration,
+        sample_rate_orig=sample_rate,
+        channels=channels,
+        license=VCC_LICENSE,
+        attribution=f"{row.get('channel', '?')} (youtube:{row['video_id']})",
+        redistributable=REDISTRIBUTABLE.get(VCC_LICENSE, DEFAULT_REDISTRIBUTABLE),
+        checksum_sha256=checksum,
+    )
+
+
 # ── Adapter: AudioSet-strong (qua yt-dlp, xem fetch_audioset_strong.py) ──────
 
 AS_STRONG_ROOT = RAW_DIR / "audioset_strong"
@@ -570,6 +630,7 @@ ADAPTERS = {
     "fsd50k": adapt_fsd50k,
     "urbansound8k": adapt_urbansound8k,
     "audioset_strong": adapt_audioset_strong,
+    "vehicle_crash_cc": adapt_vehicle_crash_cc,
 }
 
 

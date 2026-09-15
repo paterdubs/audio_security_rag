@@ -252,6 +252,33 @@ def test_gop_hang_doi_khong_dung_lai_dong_da_co(tmp_path, monkeypatch):
     assert a["verdict"] == "ok"                            # verdict cũ của "a" còn nguyên
 
 
+def test_gop_hang_doi_sap_theo_class_id_khong_giu_mau_cu_o_dau(tmp_path, monkeypatch):
+    monkeypatch.setattr(vs, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(vs, "AUDIT_PATH", tmp_path / "screen_audit.csv")
+    monkeypatch.setattr(vs, "QUEUE_PATH", tmp_path / "review_queue.csv")
+
+    import csv
+    with vs.AUDIT_PATH.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=vs.AUDIT_FIELDS, extrasaction="ignore")
+        w.writeheader()
+        w.writerow({**_audited("ok", "siren"), "file_id": "z_siren"})   # mẫu cũ, "z" đứng cuối theo file_id
+
+    queue_fields = ["priority", "file_id", "class_id", "p_target", "p_confusable",
+                    "top_confusable", "onset", "offset", "path_norm"]
+    with vs.QUEUE_PATH.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=queue_fields)
+        w.writeheader()
+        w.writerow({"priority": "normal", "file_id": "a_gunshot", "class_id": "gunshot",
+                    "p_target": "0.5", "p_confusable": "0.1", "top_confusable": "",
+                    "onset": "", "offset": "", "path_norm": "x/a.wav"})
+
+    assert vs.cmd_queue() == 0
+    rows = vs.read_csv(vs.AUDIT_PATH)
+    # "gunshot" (lớp mới thêm) phải đứng TRƯỚC "siren" (mẫu cũ) — sắp theo class_id,
+    # không phải theo thứ tự thêm vào file.
+    assert [r["class_id"] for r in rows] == ["gunshot", "siren"]
+
+
 def test_chua_co_review_queue_thi_bao_loi(tmp_path, monkeypatch):
     monkeypatch.setattr(vs, "AUDIT_PATH", tmp_path / "screen_audit.csv")
     monkeypatch.setattr(vs, "QUEUE_PATH", tmp_path / "khong_ton_tai.csv")

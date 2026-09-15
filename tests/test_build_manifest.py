@@ -403,3 +403,56 @@ def test_thieu_audio_thi_bo_qua_khong_chet(tmp_path, monkeypatch):
         "events": [{"class_id": "gunshot", "onset": 1.0, "offset": 2.0}],
     }])
     assert list(bm.adapt_audioset_strong({}, None)) == []
+
+
+# ── Adapter: vehicle_crash_cc ──────────────────────────────────────────────────
+
+
+def test_video_id_la_source_group_id(tmp_path, monkeypatch):
+    """Vài video góp nhiều clip (hậu tố _00, _01...) — chia theo file là rò rỉ N2."""
+    root = tmp_path / "data" / "raw" / "vehicle_crash_cc"
+    (root / "clips").mkdir(parents=True)
+    for name in ["abc_00.wav", "abc_01.wav"]:
+        (root / "clips" / name).write_bytes(b"RIFF")
+    (root / "metadata.csv").write_text(
+        "file_name,label,start_sec,end_sec,duration_sec,title,channel,video_id,source_url,license\n"
+        "clips/abc_00.wav,Car Crash,0.0,5.0,5.0,T,C,abc,u,lic\n"
+        "clips/abc_01.wav,Car Crash,5.0,10.0,5.0,T,C,abc,u,lic\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bm, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(bm, "VCC_ROOT", root)
+    monkeypatch.setattr(bm, "VCC_METADATA", root / "metadata.csv")
+    monkeypatch.setattr(bm, "sha256_of", lambda p: p.stem + "0" * 60)
+    monkeypatch.setattr(bm, "audio_properties", lambda p: (5.0, 16000, 1))
+
+    rows = list(bm.adapt_vehicle_crash_cc({}, None))
+    assert len(rows) == 2
+    assert {r.claimed_class for r in rows} == {"vehicle_crash"}
+    assert {r.source_group_id for r in rows} == {"youtube_abc"}      # cùng nhóm, không tách
+
+
+def test_onset_offset_la_ca_file_khong_phai_start_sec(tmp_path, monkeypatch):
+    """start_sec/end_sec là mốc trong VIDEO GỐC — file đã tải VỐN ĐÃ đúng đoạn đó."""
+    root = tmp_path / "data" / "raw" / "vehicle_crash_cc"
+    (root / "clips").mkdir(parents=True)
+    (root / "clips" / "abc_00.wav").write_bytes(b"RIFF")
+    (root / "metadata.csv").write_text(
+        "file_name,label,start_sec,end_sec,duration_sec,title,channel,video_id,source_url,license\n"
+        "clips/abc_00.wav,Car Crash,67.22,103.33,36.11,T,C,abc,u,lic\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(bm, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(bm, "VCC_ROOT", root)
+    monkeypatch.setattr(bm, "VCC_METADATA", root / "metadata.csv")
+    monkeypatch.setattr(bm, "sha256_of", lambda p: "deadbeef" * 8)
+    monkeypatch.setattr(bm, "audio_properties", lambda p: (36.11, 16000, 1))
+
+    row = next(bm.adapt_vehicle_crash_cc({}, None))
+    assert row.orig_onset == "0.0"
+    assert row.orig_offset == "36.110"
+
+
+def test_chua_co_metadata_thi_khong_sinh_gi(tmp_path, monkeypatch):
+    monkeypatch.setattr(bm, "VCC_METADATA", tmp_path / "khong_ton_tai.csv")
+    assert list(bm.adapt_vehicle_crash_cc({}, None)) == []

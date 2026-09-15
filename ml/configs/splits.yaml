@@ -15,10 +15,13 @@ seed: "kltn-2026-splits-v1"     # đổi chuỗi này = chia lại toàn bộ. �
 # vào gold_test thì bài test không còn đo được điều ta cần đo. Vì vậy đây là ràng
 # buộc cứng, không phải gợi ý; nguồn lạ sẽ làm script dừng chứ không rơi vào mặc định.
 eligibility:
-  desed_soundbank: [foreground_bank_train]
-  fsd50k:          [foreground_bank_train]
-  esc50:           [foreground_bank_train]
-  urbansound8k:    [foreground_bank_train]
+  desed_soundbank:  [foreground_bank_train]
+  fsd50k:           [foreground_bank_train]
+  esc50:            [foreground_bank_train]
+  urbansound8k:     [foreground_bank_train]
+  # Mỗi clip là một mẩu sự kiện ĐÃ CẮT RỜI quanh va chạm (isolated_event, giống
+  # desed_soundbank) — không phải cảnh thật, nên không dùng cho gold_test được.
+  vehicle_crash_cc: [foreground_bank_train]
   audioset_strong: [dev, gold_test]
   desed_real:      [dev, gold_test]
   mivia:           [dev, gold_test]
