@@ -29,6 +29,7 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import numpy as np
 import yaml
 
 from common import REPO_ROOT, enable_utf8_output
@@ -60,6 +61,8 @@ class ClipPlan:
     slices: set[str] = field(default_factory=set)
     n_events: int = 0
     chain: str | None = None
+    area_type: str = ""
+    rir_used: str = ""
 
 
 # ── Cổng chống rò rỉ ─────────────────────────────────────────────────────────
@@ -122,7 +125,8 @@ def slice_probabilities(config: dict) -> dict[str, float]:
     return probability
 
 
-def plan_clips(config: dict, n_clips: int, seed: int, chains: list[dict] | None = None) -> list[ClipPlan]:
+def plan_clips(config: dict, n_clips: int, seed: int, chains: list[dict] | None = None,
+               areas: list[str] | None = None) -> list[ClipPlan]:
     """Kế hoạch cho n_clips, tất định theo seed.
 
     Mỗi slice rút Bernoulli ĐỘC LẬP theo tỉ lệ của nó, nên một clip có thể vừa
@@ -138,6 +142,8 @@ def plan_clips(config: dict, n_clips: int, seed: int, chains: list[dict] | None 
     plans = []
     for index in range(n_clips):
         plan = ClipPlan(index=index)
+        # Khu vực nền chọn TRƯỚC, vì loại phòng dùng để tích chập phải khớp với nó.
+        plan.area_type = rng.choice(areas) if areas else ""
         plan.n_events = sample_event_count(rng, config["events"]["count_weights"])
         silent = plan.n_events == 0
         for name in SLICE_NAMES:
@@ -233,6 +239,47 @@ def slice_report(plans: list[ClipPlan], config: dict) -> str:
 # ── Sinh audio ───────────────────────────────────────────────────────────────
 
 
+# Nền của khu vực nào thì phải mang tiếng vang của khu vực đó. Ghép ngẫu nhiên sẽ cho
+# ra clip nền nhà xe mà vang như phòng học — model học được rằng vang và bối cảnh
+# không liên quan gì nhau, trong khi ngoài đời chúng đi liền.
+AREA_TO_RIR_SPACE = {
+    "school": "medium_room",        # hành lang, sảnh lớp
+    "parking": "large_room",        # nhà xe, vang dài
+    "residential": "small_room",    # nhà ở, sân nhỏ
+    "factory": "large_room",        # xưởng
+}
+
+
+def apply_rir(audio: np.ndarray, rir: np.ndarray) -> np.ndarray:
+    """Tích chập clip với RIR, giữ NGUYÊN độ dài và mức to.
+
+    Hai điều bắt buộc, cả hai đều âm thầm nếu làm sai:
+
+    1. CẮT VỀ ĐÚNG ĐỘ DÀI CŨ. Tích chập cho ra tín hiệu dài thêm bằng đuôi RIR (tới 2
+       giây). Không cắt thì clip 10 giây thành 12 giây, trong khi .jams vẫn mô tả một
+       clip 10 giây — mọi mốc thời gian sau đó lệch.
+    2. GIỮ MỨC TO. RIR đã chuẩn hoá theo năng lượng nên về lý thuyết mức giữ nguyên,
+       nhưng cộng hưởng có thể đẩy đỉnh vượt 1.0. Hạ xuống theo đỉnh, KHÔNG chuẩn hoá
+       lại toàn bộ — chuẩn hoá lại sẽ phá tỉ số SNR mà Scaper vừa đặt.
+    """
+    wet = np.convolve(audio, rir, mode="full")[: len(audio)]
+    peak = float(np.abs(wet).max())
+    if peak > 0.99:
+        wet = wet * (0.99 / peak)
+    return wet.astype(np.float32)
+
+
+def pick_rir(rng: random.Random, area_type: str) -> Path | None:
+    """Một RIR ngẫu nhiên thuộc loại phòng khớp với khu vực nền."""
+    space = AREA_TO_RIR_SPACE.get(area_type)
+    folder = RIR_DIR / space if space else None
+    if not folder or not folder.exists():
+        return None
+    files = sorted(folder.glob("*.wav"))
+    return rng.choice(files) if files else None
+
+
+
 def class_dirs(root: Path) -> list[str]:
     return sorted(p.name for p in root.iterdir() if p.is_dir() and any(p.glob("*.wav"))) if root.exists() else []
 
@@ -261,7 +308,10 @@ def populate(generator, plan: ClipPlan, config: dict, rng: random.Random,
     if "low_snr" in plan.slices:
         snr_high = float(config["forced_slices"]["low_snr"]["max_snr_db"])
 
-    generator.add_background(label=("choose", []), source_file=("choose", []), source_time=("const", 0))
+    # Chỉ đích danh khu vực thay vì để Scaper bốc ngẫu nhiên: kế hoạch đã chọn khu vực
+    # rồi, và RIR sắp tích chập phải khớp với chính khu vực đó.
+    area = ("const", plan.area_type) if plan.area_type else ("choose", [])
+    generator.add_background(label=area, source_file=("choose", []), source_time=("const", 0))
 
     placed = 0
     if plan.chain:
@@ -295,6 +345,8 @@ def generate_split(config: dict, split: str, plans: list[ClipPlan], seed: int,
     for sub in ("audio", "jams", "tsv"):
         (out / sub).mkdir(parents=True, exist_ok=True)
 
+    import soundfile
+
     reverb_ok = bool(class_dirs(RIR_DIR))
     if not reverb_ok:
         print("  ⚠️ chưa có bank RIR — bỏ lát cắt `reverb`, sẽ phải sinh lại khi có")
@@ -305,10 +357,15 @@ def generate_split(config: dict, split: str, plans: list[ClipPlan], seed: int,
         name = f"{split}_{plan.index:06d}"
         generator = build_scaper(config, seed + plan.index)
         populate(generator, plan, config, rng, chains)
+        audio_path = out / "audio" / f"{name}.wav"
         generator.generate(
-            audio_path=str(out / "audio" / f"{name}.wav"),
+            audio_path=str(audio_path),
             jams_path=str(out / "jams" / f"{name}.jams"),
-            reverb=0.4 if ("reverb" in plan.slices and reverb_ok) else None,
+            # CỐ Ý để None: `reverb` của Scaper là hiệu ứng vang tổng hợp của SoX, KHÔNG
+            # phải tích chập RIR. DATA_PLAN §7 yêu cầu tích chập, và nó khác hẳn — RIR
+            # đo tại phòng thật mang cả hình dạng phản xạ sớm lẫn cách phòng hút tần số
+            # cao, thứ mà hiệu ứng tổng hợp không tái tạo được. Tích chập làm ở dưới.
+            reverb=None,
             # BẮT BUỘC. Nền ở -23 LUFS cộng SNR tối đa +25 dB cho sự kiện ở +2 dBFS,
             # tức méo cứng. Đo thật trên 5 clip đầu: 3/5 clip méo, tới 4016 mẫu chạm
             # trần. Sinh ra train set mà chính cổng chất lượng của ta sẽ loại (>0.1%
@@ -317,6 +374,15 @@ def generate_split(config: dict, split: str, plans: list[ClipPlan], seed: int,
             # fix_clipping hạ đều cả soundscape nên GIỮ NGUYÊN tỉ số SNR đã đặt.
             fix_clipping=True,
         )
+
+        if "reverb" in plan.slices and reverb_ok:
+            rir_path = pick_rir(rng, plan.area_type)
+            if rir_path:
+                audio, rate = soundfile.read(str(audio_path))
+                rir, _ = soundfile.read(str(rir_path))
+                soundfile.write(audio_path, apply_rir(audio, rir), rate, subtype="PCM_16")
+                plan.rir_used = rir_path.stem
+
         written += 1
         if written % 100 == 0:
             print(f"  {written}/{len(plans)}…", flush=True)
@@ -334,6 +400,8 @@ def write_plan_index(split: str, plans: list[ClipPlan]) -> None:
                 "slices": sorted(plan.slices),
                 "n_events": plan.n_events,
                 "chain": plan.chain,
+                "area_type": plan.area_type,
+                "rir_used": plan.rir_used,
             }, ensure_ascii=False) + "\n")
 
 
@@ -365,11 +433,11 @@ def main() -> int:
         print("   nghĩa sai về kịch bản đó, nên bỏ hẳn và ghi lại ở đây.")
         print()
 
-    plans = plan_clips(config, n_clips, seed, chains)
+    areas = class_dirs(BACKGROUND_DIR)
+    plans = plan_clips(config, n_clips, seed, chains, areas)
     print(f"▶ {args.split}: {n_clips} clip × {config['duration_sec']}s "
           f"= {n_clips * float(config['duration_sec']) / 3600:.1f} h · seed {seed}\n")
     print(slice_report(plans, config))
-    write_plan_index(args.split, plans)
 
     foreground = sorted(FOREGROUND_DIR.rglob("*.wav"))
     if not foreground:
@@ -395,6 +463,9 @@ def main() -> int:
         return 0
 
     written = generate_split(config, args.split, plans, seed, chains)
+    # Ghi SAU khi sinh: `rir_used` chỉ có giá trị sau bước tích chập. Ghi trước thì
+    # cột đó luôn rỗng và không truy ngược được clip nào dùng RIR nào khi phân tích lỗi.
+    write_plan_index(args.split, plans)
     print(f"\n✓ đã sinh {written} clip → {(OUTPUT_DIR / args.split).relative_to(REPO_ROOT)}")
     return 0
 

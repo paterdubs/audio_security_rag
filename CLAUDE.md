@@ -58,7 +58,7 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 - **Adapter DESED xong**: +571 clip cho `alarm_bell`/`object_drop_dishes`/`speech_normal`; phát hiện và ghi lại 8 nhóm trùng **bắc cầu** giữa hai id Freesound
 - **Xác minh xong `fsd50k_labels`** bằng mã AudioSet (không đoán tên) + adapter FSD50K, đã kiểm thử: **4633 clip đạt hai cổng chọn**
 - Bank hiện tại: **5260 clip / 5.7 giờ** đã chuẩn hoá; 11/13 lớp foreground đã đủ. Còn thiếu: `vehicle_crash` (chờ MIVIA), `shout_yell` (56/80)
-- 261 test, tất cả đạt (`pytest tests/ -q`)
+- 285 test, tất cả đạt (`pytest tests/ -q`)
 
 ### 🔄 Đang làm
 - Tải nền: `urbansound8k` · `fsd50k_dev_audio` (18.4 GB — đoạn dài nhất) · `tau2019_partial`

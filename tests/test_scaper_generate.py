@@ -11,6 +11,7 @@ import random
 import sys
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
@@ -219,3 +220,62 @@ def test_chi_chon_trong_cac_chuoi_con_dung_duoc():
     plans = sg.plan_clips(CONFIG, 500, seed=3, chains=chi_mot)
     ten = {p.chain for p in plans if p.chain}
     assert ten <= {"break_in"}
+
+
+# ── Tích chập RIR ────────────────────────────────────────────────────────────
+
+
+def test_tich_chap_giu_nguyen_do_dai():
+    """Tích chập cho ra tín hiệu dài thêm bằng đuôi RIR (tới 2 giây). Không cắt về độ
+    dài cũ thì clip 10 giây thành 12 giây trong khi .jams vẫn mô tả clip 10 giây."""
+    audio = np.random.default_rng(0).normal(0, 0.1, 16000).astype(np.float32)
+    rir = np.random.default_rng(1).normal(0, 0.05, 8000).astype(np.float32)
+    assert len(sg.apply_rir(audio, rir)) == len(audio)
+
+
+def test_tich_chap_khong_de_vuot_tran():
+    # Cộng hưởng có thể đẩy đỉnh vượt 1.0; vượt trần là méo cứng đi thẳng vào train set.
+    audio = np.ones(4000, dtype=np.float32) * 0.9
+    rir = np.ones(500, dtype=np.float32)
+    assert np.abs(sg.apply_rir(audio, rir)).max() <= 1.0
+
+
+def test_tich_chap_khong_chuan_hoa_lai_toan_bo():
+    """Chỉ hạ khi vượt trần, KHÔNG chuẩn hoá lại: chuẩn hoá lại sẽ phá tỉ số SNR mà
+    Scaper vừa đặt cẩn thận, và SNR là tham số định nghĩa lát cắt low_snr."""
+    audio = (np.random.default_rng(0).normal(0, 0.01, 4000)).astype(np.float32)
+    rir = np.zeros(100, dtype=np.float32)
+    rir[0] = 1.0                       # RIR đơn vị: đầu ra phải gần y hệt đầu vào
+    ra = sg.apply_rir(audio, rir)
+    assert np.abs(ra).max() == pytest.approx(np.abs(audio).max(), rel=1e-5)
+
+
+def test_clip_im_lang_tich_chap_khong_no():
+    assert len(sg.apply_rir(np.zeros(1000, dtype=np.float32), np.zeros(100, dtype=np.float32))) == 1000
+
+
+# ── Khu vực nền quyết định loại phòng ────────────────────────────────────────
+
+
+def test_moi_khu_vuc_deu_co_loai_phong_tuong_ung():
+    """Ghép ngẫu nhiên sẽ cho clip nền nhà xe mà vang như phòng học — model học được
+    rằng vang và bối cảnh không liên quan gì nhau, trong khi ngoài đời chúng đi liền."""
+    import yaml
+    khu_vuc = yaml.safe_load((sg.REPO_ROOT / "ml/configs/background_map.yaml").read_text(encoding="utf-8"))
+    thieu = set(khu_vuc["area_types"]) - set(sg.AREA_TO_RIR_SPACE)
+    assert not thieu, f"khu vực chưa có loại phòng: {sorted(thieu)}"
+
+
+def test_nha_xe_va_xuong_dung_phong_lon():
+    # Hai không gian này vang dài nhất trong bốn khu vực triển khai.
+    assert sg.AREA_TO_RIR_SPACE["parking"] == "large_room"
+    assert sg.AREA_TO_RIR_SPACE["factory"] == "large_room"
+
+
+def test_ke_hoach_gan_khu_vuc_cho_moi_clip():
+    plans = sg.plan_clips(CONFIG, 200, seed=5, areas=["school", "parking"])
+    assert all(p.area_type in {"school", "parking"} for p in plans)
+
+
+def test_khong_co_bank_nen_thi_de_trong_chu_khong_bia():
+    assert all(p.area_type == "" for p in sg.plan_clips(CONFIG, 20, seed=5, areas=[]))
