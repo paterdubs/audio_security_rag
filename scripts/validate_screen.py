@@ -202,18 +202,65 @@ def cmd_score() -> int:
     return 0 if report(errors, total, audited) else 1
 
 
+def cmd_stage() -> int:
+    """Chép 245 clip ra một thư mục, đặt tên theo ĐÚNG thứ tự dòng trong phiếu.
+
+    Mở từng file theo đường dẫn trong CSV là ~30 giây mỗi clip, gần hết một buổi cho
+    245 clip. Nghe theo playlist thì chỉ còn thao tác nghe và gõ một từ. Tên file mang
+    sẵn số thứ tự dòng nên không bao giờ lệch hàng — lệch một dòng là toàn bộ phần sau
+    ghi sai lớp mà không có gì báo.
+
+    CỐ Ý không đặt tên lớp vào file: người nghe phải tự nhận ra lớp trước, rồi mới đối
+    chiếu với cột class_id trong phiếu. Thấy chữ `gunshot` ngay trên tên file thì lại
+    rơi vào đúng cái bẫy neo mà phiếu mù sinh ra để tránh.
+    """
+    import shutil
+
+    audited = read_csv(AUDIT_PATH)
+    if not audited:
+        print("❌ chưa có screen_audit.csv — chạy --sample trước")
+        return 1
+
+    stage_dir = REPO_ROOT / "data" / "interim" / "audit_playlist"
+    if stage_dir.exists():
+        shutil.rmtree(stage_dir)
+    stage_dir.mkdir(parents=True)
+
+    missing = 0
+    for index, row in enumerate(audited, 1):
+        source = Path(row["path_norm"])
+        if not source.exists():
+            missing += 1
+            continue
+        shutil.copy2(source, stage_dir / f"{index:03d}.wav")
+
+    print(f"▶ đã chép {len(audited) - missing}/{len(audited)} clip → "
+          f"{stage_dir.relative_to(REPO_ROOT)}")
+    if missing:
+        print(f"  ⚠️ {missing} clip không tìm thấy file đã chuẩn hoá")
+    print("\nSố trên tên file = SỐ THỨ TỰ DÒNG trong screen_audit.csv (dòng 1 = 001.wav).")
+    print("Mở cả thư mục bằng VLC (Ctrl+A → Enter) rồi nghe tuần tự, điền cột `verdict`")
+    print("theo đúng thứ tự đó. Đừng sắp xếp lại phiếu — lệch một dòng là hỏng phần sau.")
+    return 0
+
+
 def main() -> int:
     enable_utf8_output()
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--sample", action="store_true", help="rút mẫu, tạo phiếu duyệt")
+    group.add_argument("--stage", action="store_true", help="chép clip ra thư mục đánh số để nghe playlist")
     group.add_argument("--score", action="store_true", help="đọc phiếu đã duyệt, tính tỉ lệ lỗi")
     parser.add_argument("--fraction", type=float, default=SAMPLE_FRACTION)
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--force", action="store_true", help="ghi đè phiếu cũ")
     args = parser.parse_args()
 
-    return cmd_sample(args) if args.sample else cmd_score()
+    if args.sample:
+        return cmd_sample(args)
+    if args.stage:
+        return cmd_stage()
+    return cmd_score()
 
 
 if __name__ == "__main__":
