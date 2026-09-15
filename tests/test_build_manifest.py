@@ -345,3 +345,61 @@ def test_thu_tu_on_dinh_de_git_diff_doc_duoc():
 
 def test_lan_quet_dau_tien_khong_co_gi_de_giu():
     assert bm.merge_dedup_groups([], [_nhom("aa")]) == [_nhom("aa")]
+
+
+# ── Adapter: AudioSet-strong ──────────────────────────────────────────────────
+
+
+def test_mot_o_nhieu_su_kien_sinh_nhieu_dong_cung_mot_file(tmp_path, monkeypatch):
+    """Khác mọi adapter khác: một file .wav sinh NHIỀU dòng manifest, mỗi dòng
+    một sự kiện. Thiếu điều này thì gold_test không đo được EOR (nhiều sự kiện
+    chồng lấn trong một clip)."""
+    audio = tmp_path / "clip.wav"
+    audio.write_bytes(b"RIFF")
+    monkeypatch.setattr(bm, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(bm, "sha256_of", lambda p: "cafebabe" * 8)
+    monkeypatch.setattr(bm, "audio_properties", lambda p: (10.0, 16000, 1))
+    monkeypatch.setattr(bm, "load_audioset_strong_segments", lambda: [{
+        "file_id": "as_strong_abc_0", "path": "clip.wav", "ytid": "abc",
+        "events": [
+            {"class_id": "gunshot", "onset": 1.0, "offset": 2.0},
+            {"class_id": "shout_yell", "onset": 4.0, "offset": 6.0},
+        ],
+    }])
+
+    rows = list(bm.adapt_audioset_strong({}, None))
+    assert len(rows) == 2
+    assert {r.claimed_class for r in rows} == {"gunshot", "shout_yell"}
+    assert {r.path_raw for r in rows} == {"clip.wav"}
+    # Cùng video → cùng nhóm chống rò rỉ, dù khác sự kiện/khác dòng manifest.
+    assert {r.source_group_id for r in rows} == {"youtube_abc"}
+
+
+# ── Xoá dòng cũ khi quét lại một nguồn ───────────────────────────────────────
+
+
+def test_doi_ontology_khong_de_lai_dong_cu_mang_class_da_mat():
+    """Đúng lỗi thật gặp khi tách laughter_cheering: file_id đổi theo class_id, nên
+    dòng cũ không bị .update() ghi đè và nằm lại vĩnh viễn, trùng checksum."""
+    old_rows = {
+        "esc50_laughter_cheering_aaaa": {"source_dataset": "esc50", "checksum_sha256": "aaaa"},
+        "esc50_alarm_bell_bbbb": {"source_dataset": "esc50", "checksum_sha256": "bbbb"},
+        "fsd50k_gunshot_cccc": {"source_dataset": "fsd50k", "checksum_sha256": "cccc"},
+    }
+    ket_qua = bm.drop_stale_rows(old_rows, "esc50", limit=None)
+    assert set(ket_qua) == {"fsd50k_gunshot_cccc"}
+
+
+def test_chay_thu_co_limit_khong_xoa_gi():
+    """--limit là chạy thử, chỉ quét một phần — xoá lúc đó sẽ mất phần chưa quét tới."""
+    old_rows = {"esc50_a": {"source_dataset": "esc50"}, "esc50_b": {"source_dataset": "esc50"}}
+    assert bm.drop_stale_rows(old_rows, "esc50", limit=50) == old_rows
+
+
+def test_thieu_audio_thi_bo_qua_khong_chet(tmp_path, monkeypatch):
+    monkeypatch.setattr(bm, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(bm, "load_audioset_strong_segments", lambda: [{
+        "file_id": "as_strong_abc_0", "path": "khong_ton_tai.wav", "ytid": "abc",
+        "events": [{"class_id": "gunshot", "onset": 1.0, "offset": 2.0}],
+    }])
+    assert list(bm.adapt_audioset_strong({}, None)) == []

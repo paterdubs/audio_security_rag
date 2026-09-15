@@ -504,11 +504,72 @@ def _us8k_entry(row: dict, audio_path: Path) -> RawEntry:
     )
 
 
+# ── Adapter: AudioSet-strong (qua yt-dlp, xem fetch_audioset_strong.py) ──────
+
+AS_STRONG_ROOT = RAW_DIR / "audioset_strong"
+AS_STRONG_SEGMENTS = AS_STRONG_ROOT / "segments.jsonl"
+AS_STRONG_LICENSE = "YouTube"
+
+
+def load_audioset_strong_segments() -> list[dict]:
+    if not AS_STRONG_SEGMENTS.exists():
+        return []
+    with AS_STRONG_SEGMENTS.open(encoding="utf-8") as handle:
+        return [json.loads(line) for line in handle if line.strip()]
+
+
+def adapt_audioset_strong(ontology: dict, limit: int | None) -> Iterator[RawEntry]:
+    """Một ổ 10 giây có thể chứa NHIỀU sự kiện — không giống các adapter khác,
+    một dòng manifest ở đây là MỘT SỰ KIỆN, và nhiều dòng có thể trỏ cùng một file
+    .wav. `source_group_id` = ytid nên các dòng cùng video luôn đi cùng một split
+    (make_splits.py gộp theo group, không theo file) — cắt rời chúng ra là rò rỉ.
+    """
+    segments = load_audioset_strong_segments()
+    produced = 0
+    missing = 0
+    for segment in segments:
+        audio_path = REPO_ROOT / segment["path"]
+        if not audio_path.exists():
+            missing += 1
+            continue
+        checksum = None
+        for event in segment["events"]:
+            if limit is not None and produced >= limit:
+                if missing:
+                    print(f"  ⚠️ {missing} ổ chưa có audio — đã chạy fetch_audioset_strong.py chưa?")
+                return
+            if checksum is None:
+                checksum = sha256_of(audio_path)
+                duration, sample_rate, channels = audio_properties(audio_path)
+            yield RawEntry(
+                file_id=f"as_strong_{event['class_id']}_{segment['file_id']}_{event['onset']}",
+                path_raw=str(audio_path.relative_to(REPO_ROOT)).replace("\\", "/"),
+                source_dataset="audioset_strong",
+                source_id=segment["file_id"],
+                source_group_id=f"youtube_{segment['ytid']}",
+                claimed_class=event["class_id"],
+                label_type_orig="strong",
+                orig_onset=f"{event['onset']:.3f}",
+                orig_offset=f"{event['offset']:.3f}",
+                duration=duration,
+                sample_rate_orig=sample_rate,
+                channels=channels,
+                license=AS_STRONG_LICENSE,
+                attribution=f"youtube:{segment['ytid']}",
+                redistributable="labels_only",
+                checksum_sha256=checksum,
+            )
+            produced += 1
+    if missing:
+        print(f"  ⚠️ {missing} ổ chưa có audio — đã chạy fetch_audioset_strong.py chưa?")
+
+
 ADAPTERS = {
     "esc50": adapt_esc50,
     "desed_soundbank": adapt_desed_soundbank,
     "fsd50k": adapt_fsd50k,
     "urbansound8k": adapt_urbansound8k,
+    "audioset_strong": adapt_audioset_strong,
 }
 
 
@@ -520,6 +581,19 @@ def load_existing(path: Path) -> dict[str, dict]:
         return {}
     with path.open(encoding="utf-8", newline="") as handle:
         return {row["file_id"]: row for row in csv.DictReader(handle)}
+
+
+def drop_stale_rows(rows: dict[str, dict], source: str, limit: int | None) -> dict[str, dict]:
+    """Bỏ dòng cũ của `source` trước khi nạp lại — chỉ khi quét TOÀN BỘ nguồn.
+
+    file_id chứa claimed_class, nên một lần đổi ánh xạ ontology (tách/đổi tên lớp)
+    làm file_id đổi theo; `dict.update()` theo file_id không bao giờ xoá được dòng
+    cũ mang class_id đã mất — nó nằm lại vĩnh viễn, trùng checksum với dòng mới.
+    Với --limit (chạy thử) thì KHÔNG xoá: xoá lúc đó sẽ mất luôn phần chưa quét tới.
+    """
+    if limit is not None:
+        return rows
+    return {fid: row for fid, row in rows.items() if row["source_dataset"] != source}
 
 
 def write_manifest(path: Path, rows: dict[str, dict]) -> None:
@@ -661,6 +735,7 @@ def main() -> int:
 
     rows = load_existing(MANIFEST_PATH)
     before = len(rows)
+    rows = drop_stale_rows(rows, args.source, args.limit)
     rows.update({e.file_id: asdict(e) for e in entries})
     write_manifest(MANIFEST_PATH, rows)
 

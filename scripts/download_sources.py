@@ -369,7 +369,7 @@ def fetch_source(name: str, spec: dict, keep_archive: bool) -> bool:
         print(f"  ⏭  {name}: cần nộp đơn — {spec.get('url', '')}")
         return True
     if access == "youtube_scrape":
-        print(f"  ⏭  {name}: cần yt-dlp, xử lý bằng script riêng (chưa viết)")
+        print(f"  ⏭  {name}: chạy `python scripts/fetch_audioset_strong.py` (yt-dlp riêng, không qua đây)")
         return True
     if spec.get("status") == "BLOCKED":
         print(f"  ⛔ {name}: đang bị chặn, xem `notes` trong sources.yaml")
