@@ -25,6 +25,7 @@ from common import REPO_ROOT, enable_utf8_output
 
 SCORES_PATH = REPO_ROOT / "data" / "manifests" / "screen_scores.csv"
 AUDIT_PATH = REPO_ROOT / "data" / "manifests" / "screen_audit.csv"
+QUEUE_PATH = REPO_ROOT / "data" / "manifests" / "review_queue.csv"
 NORMALIZED_DIR = REPO_ROOT / "data" / "interim" / "normalized"
 
 SAMPLE_FRACTION = 0.10       # DATA_PLAN §4.4
@@ -36,7 +37,13 @@ SEED = 20260914              # cố định để mẫu tái lập được; ghi
 # nghe thì kết luận đã bị neo vào đó, và toàn bộ phép kiểm định mất giá trị — nó chỉ
 # còn đo được mức độ người duyệt đồng ý với máy khi đã biết máy nghĩ gì.
 # Điểm vẫn nằm nguyên trong screen_scores.csv và được ghép lại theo file_id ở --score.
-AUDIT_FIELDS = ["file_id", "class_id", "onset", "offset", "path_norm", "verdict", "note"]
+AUDIT_FIELDS = ["file_id", "class_id", "onset", "offset", "path_norm", "verdict", "note", "origin"]
+# "sample" = mẫu 10% dùng để TÍNH tỉ lệ lỗi τ (DATA_PLAN §4.4) · "queue" = hàng đợi người
+# duyệt thật (DATA_PLAN §4.2, mọi clip máy không tự quyết được). Trộn chung sẽ làm tỉ lệ
+# lỗi auto-accept sai: hàng đợi vốn KHÔNG PHẢI clip auto-accept, đưa vào đo τ là sai đối
+# tượng đo.
+ORIGIN_SAMPLE = "sample"
+ORIGIN_QUEUE = "queue"
 # Người duyệt chỉ điền cột `verdict` bằng một trong ba giá trị này.
 VERDICTS = {"ok": "máy đúng", "wrong_class": "sai lớp", "bad_audio": "audio không dùng được"}
 
@@ -78,7 +85,8 @@ def build_audit_sheet(scored: list[dict], fraction: float, seed: int) -> list[di
     accepted = [r for r in scored if r["decision"] == "auto_accept"]
     if not accepted:
         raise SystemExit("❌ chưa có clip nào được tự động nhận — chạy scripts/auto_screen.py trước")
-    return [{**row, "verdict": "", "note": ""} for row in stratified_sample(accepted, fraction, seed)]
+    return [{**row, "verdict": "", "note": "", "origin": ORIGIN_SAMPLE}
+            for row in stratified_sample(accepted, fraction, seed)]
 
 
 # ── Tính tỉ lệ lỗi ───────────────────────────────────────────────────────────
@@ -106,15 +114,21 @@ def error_rate(audited: list[dict]) -> tuple[int, int, list[dict]]:
     Bộ sàng lọc trả lời câu hỏi "clip này có đúng lớp không". Một clip đúng lớp nhưng
     thu hỏng là lỗi của bước chuẩn hoá, không phải của ngưỡng τ. Gộp chung sẽ làm tỉ
     lệ lỗi phồng lên và đẩy ta đi nâng ngưỡng để chữa một bệnh khác.
+
+    CHỈ tính trên `origin=sample`: đây là mẫu 10% rút từ auto-accept để đo τ. Hàng đợi
+    `origin=queue` là clip máy KHÔNG tự nhận — trộn vào sẽ tính sai đối tượng đo (dòng
+    cũ trước khi có cột `origin` không có giá trị này, coi như "sample" để tương thích
+    ngược, vì trước đây file chỉ chứa mẫu kiểm định).
     """
-    missing = [row for row in audited if row.get("verdict", "").strip() not in VERDICTS]
-    judged = [row for row in audited if row.get("verdict", "").strip() in VERDICTS]
+    scope = [row for row in audited if row.get("origin", ORIGIN_SAMPLE) == ORIGIN_SAMPLE]
+    missing = [row for row in scope if row.get("verdict", "").strip() not in VERDICTS]
+    judged = [row for row in scope if row.get("verdict", "").strip() in VERDICTS]
     errors = sum(1 for row in judged if row["verdict"].strip() == "wrong_class")
     return errors, len(judged), missing
 
 
 def report(errors: int, total: int, audited: list[dict]) -> bool:
-    """In kết quả, trả True nếu đạt ngưỡng chấp nhận."""
+    """In kết quả, trả True nếu đạt ngưỡng chấp nhận. `audited` = chỉ phần origin=sample."""
     rate = errors / total if total else 0.0
     low, high = wilson_interval(errors, total)
     bad_audio = sum(1 for r in audited if r.get("verdict", "").strip() == "bad_audio")
@@ -192,23 +206,26 @@ def cmd_score() -> int:
 
     errors, total, missing = error_rate(audited)
     if missing:
-        print(f"⚠️ {len(missing)}/{len(audited)} dòng chưa điền `verdict`, đang bỏ qua:")
+        print(f"⚠️ {len(missing)}/{len(audited)} dòng mẫu kiểm định chưa điền `verdict`, đang bỏ qua:")
         for row in missing[:3]:
             print(f"      {row['file_id']}")
     if total == 0:
         print("❌ chưa dòng nào được duyệt — không tính được gì")
         return 1
 
-    return 0 if report(errors, total, audited) else 1
+    sample_only = [row for row in audited if row.get("origin", ORIGIN_SAMPLE) == ORIGIN_SAMPLE]
+    return 0 if report(errors, total, sample_only) else 1
 
 
 def cmd_stage() -> int:
-    """Chép 245 clip ra một thư mục, đặt tên theo ĐÚNG thứ tự dòng trong phiếu.
+    """Chép clip CHƯA CÓ VERDICT ra một thư mục, đặt tên theo ĐÚNG thứ tự dòng trong phiếu.
 
-    Mở từng file theo đường dẫn trong CSV là ~30 giây mỗi clip, gần hết một buổi cho
-    245 clip. Nghe theo playlist thì chỉ còn thao tác nghe và gõ một từ. Tên file mang
-    sẵn số thứ tự dòng nên không bao giờ lệch hàng — lệch một dòng là toàn bộ phần sau
-    ghi sai lớp mà không có gì báo.
+    Mở từng file theo đường dẫn trong CSV là ~30 giây mỗi clip. Nghe theo playlist thì
+    chỉ còn thao tác nghe và gõ một từ. Tên file mang sẵn SỐ THỨ TỰ DÒNG THẬT trong
+    screen_audit.csv (không đánh số lại từ 1 trên phần còn lại) — bỏ qua dòng đã điền
+    verdict thay vì đánh số lại từ đầu, để `003.wav` luôn trỏ đúng dòng 3, dù dòng 1–2
+    đã xong từ buổi trước. Đánh số lại là lệch hàng, và lệch một dòng thì toàn bộ phần
+    sau ghi sai lớp mà không có gì báo.
 
     CỐ Ý không đặt tên lớp vào file: người nghe phải tự nhận ra lớp trước, rồi mới đối
     chiếu với cột class_id trong phiếu. Thấy chữ `gunshot` ngay trên tên file thì lại
@@ -218,7 +235,7 @@ def cmd_stage() -> int:
 
     audited = read_csv(AUDIT_PATH)
     if not audited:
-        print("❌ chưa có screen_audit.csv — chạy --sample trước")
+        print("❌ chưa có screen_audit.csv — chạy --sample hoặc --queue trước")
         return 1
 
     stage_dir = REPO_ROOT / "data" / "interim" / "audit_playlist"
@@ -226,21 +243,61 @@ def cmd_stage() -> int:
         shutil.rmtree(stage_dir)
     stage_dir.mkdir(parents=True)
 
-    missing = 0
+    missing, done = 0, 0
     for index, row in enumerate(audited, 1):
+        if row.get("verdict", "").strip() in VERDICTS:
+            done += 1
+            continue
         source = Path(row["path_norm"])
         if not source.exists():
             missing += 1
             continue
         shutil.copy2(source, stage_dir / f"{index:03d}.wav")
 
-    print(f"▶ đã chép {len(audited) - missing}/{len(audited)} clip → "
-          f"{stage_dir.relative_to(REPO_ROOT)}")
+    staged = len(audited) - missing - done
+    print(f"▶ đã chép {staged}/{len(audited)} clip → {stage_dir.relative_to(REPO_ROOT)}")
+    if done:
+        print(f"  {done} dòng đã có verdict từ trước — bỏ qua, không chép lại")
     if missing:
         print(f"  ⚠️ {missing} clip không tìm thấy file đã chuẩn hoá")
-    print("\nSố trên tên file = SỐ THỨ TỰ DÒNG trong screen_audit.csv (dòng 1 = 001.wav).")
+    print("\nSố trên tên file = SỐ THỨ TỰ DÒNG THẬT trong screen_audit.csv (dòng 1 = 001.wav,")
+    print("kể cả khi dòng đó bị bỏ qua vì đã xong — số không đánh lại từ đầu).")
     print("Mở cả thư mục bằng VLC (Ctrl+A → Enter) rồi nghe tuần tự, điền cột `verdict`")
     print("theo đúng thứ tự đó. Đừng sắp xếp lại phiếu — lệch một dòng là hỏng phần sau.")
+    return 0
+
+
+def cmd_queue() -> int:
+    """Gộp `review_queue.csv` vào `screen_audit.csv` (origin=queue), KHÔNG đè mẫu cũ.
+
+    review_queue.csv là TOÀN BỘ clip máy không tự quyết được (DATA_PLAN §4.2) — khác
+    hẳn mẫu 10% dùng để đo τ. Verdict của cả hai loại đều được `promote_to_bank.py`
+    đọc chung từ `screen_audit.csv`, nhưng phải tách `origin` để không tính nhầm hàng
+    đợi vào tỉ lệ lỗi auto-accept (xem error_rate()).
+    """
+    queue = read_csv(QUEUE_PATH)
+    if not queue:
+        print("❌ chưa có review_queue.csv — chạy scripts/auto_screen.py trước")
+        return 1
+
+    existing = read_csv(AUDIT_PATH)
+    known_ids = {row["file_id"] for row in existing}
+    new_rows = [{**row, "verdict": "", "note": "", "origin": ORIGIN_QUEUE}
+                for row in queue if row["file_id"] not in known_ids]
+
+    AUDIT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with AUDIT_PATH.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=AUDIT_FIELDS, extrasaction="ignore")
+        writer.writeheader()
+        for row in existing:
+            writer.writerow({**row, "origin": row.get("origin") or ORIGIN_SAMPLE})
+        writer.writerows(new_rows)
+
+    print(f"▶ thêm {len(new_rows)}/{len(queue)} clip từ review_queue.csv vào screen_audit.csv")
+    if len(new_rows) < len(queue):
+        print(f"  {len(queue) - len(new_rows)} clip đã có trong phiếu từ trước — bỏ qua")
+    print(f"\n✓ {AUDIT_PATH.relative_to(REPO_ROOT)}: {len(existing)} → {len(existing) + len(new_rows)} dòng")
+    print("Giờ chạy: python scripts/validate_screen.py --stage")
     return 0
 
 
@@ -249,6 +306,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--sample", action="store_true", help="rút mẫu, tạo phiếu duyệt")
+    group.add_argument("--queue", action="store_true", help="gộp review_queue.csv vào phiếu để duyệt")
     group.add_argument("--stage", action="store_true", help="chép clip ra thư mục đánh số để nghe playlist")
     group.add_argument("--score", action="store_true", help="đọc phiếu đã duyệt, tính tỉ lệ lỗi")
     parser.add_argument("--fraction", type=float, default=SAMPLE_FRACTION)
@@ -258,6 +316,8 @@ def main() -> int:
 
     if args.sample:
         return cmd_sample(args)
+    if args.queue:
+        return cmd_queue()
     if args.stage:
         return cmd_stage()
     return cmd_score()

@@ -194,3 +194,88 @@ def test_phieu_khong_chua_diem_cua_may():
 def test_phieu_co_du_thu_de_nghe_va_phan_xet():
     # Thiếu path_norm thì người duyệt không có file để mở.
     assert {"file_id", "class_id", "path_norm", "verdict"} <= set(vs.AUDIT_FIELDS)
+
+
+# ── Hàng đợi review_queue KHÔNG được tính vào tỉ lệ lỗi τ ───────────────────
+
+
+def test_hang_doi_khong_tinh_vao_ti_le_loi():
+    """review_queue không phải mẫu auto-accept — trộn vào sẽ đo sai đối tượng."""
+    mau = [_audited("ok"), {**_audited("wrong_class", "gunshot"), "origin": "sample"}]
+    hang_doi = [{**_audited("wrong_class", "siren"), "origin": "queue"}]
+    errors, total, _ = vs.error_rate(mau + hang_doi)
+    assert total == 2      # chỉ 2 dòng sample, không tính dòng queue
+    assert errors == 1
+
+
+def test_dong_khong_co_origin_duoc_coi_la_sample():
+    """Tương thích ngược: 245 dòng cũ trước khi có cột `origin` phải vẫn tính được."""
+    cu = _audited("ok")
+    cu.pop("origin", None)
+    errors, total, _ = vs.error_rate([cu])
+    assert total == 1
+
+
+# ── cmd_queue: gộp review_queue.csv, không đè mẫu đã có ─────────────────────
+
+
+def test_gop_hang_doi_khong_dung_lai_dong_da_co(tmp_path, monkeypatch):
+    monkeypatch.setattr(vs, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(vs, "AUDIT_PATH", tmp_path / "screen_audit.csv")
+    monkeypatch.setattr(vs, "QUEUE_PATH", tmp_path / "review_queue.csv")
+
+    import csv
+    with vs.AUDIT_PATH.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=vs.AUDIT_FIELDS, extrasaction="ignore")
+        w.writeheader()
+        w.writerow({**_audited("ok", "siren"), "file_id": "a"})
+
+    queue_fields = ["priority", "file_id", "class_id", "p_target", "p_confusable",
+                    "top_confusable", "onset", "offset", "path_norm"]
+    with vs.QUEUE_PATH.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=queue_fields)
+        w.writeheader()
+        w.writerow({"priority": "normal", "file_id": "a", "class_id": "siren",
+                    "p_target": "0.5", "p_confusable": "0.1", "top_confusable": "",
+                    "onset": "", "offset": "", "path_norm": "x/a.wav"})
+        w.writerow({"priority": "normal", "file_id": "b", "class_id": "gunshot",
+                    "p_target": "0.5", "p_confusable": "0.1", "top_confusable": "",
+                    "onset": "", "offset": "", "path_norm": "x/b.wav"})
+
+    assert vs.cmd_queue() == 0
+    rows = vs.read_csv(vs.AUDIT_PATH)
+    assert {r["file_id"] for r in rows} == {"a", "b"}      # "a" không nhân đôi
+    b = next(r for r in rows if r["file_id"] == "b")
+    assert b["origin"] == "queue"
+    assert b["verdict"] == ""
+    a = next(r for r in rows if r["file_id"] == "a")
+    assert a["verdict"] == "ok"                            # verdict cũ của "a" còn nguyên
+
+
+def test_chua_co_review_queue_thi_bao_loi(tmp_path, monkeypatch):
+    monkeypatch.setattr(vs, "AUDIT_PATH", tmp_path / "screen_audit.csv")
+    monkeypatch.setattr(vs, "QUEUE_PATH", tmp_path / "khong_ton_tai.csv")
+    assert vs.cmd_queue() == 1
+
+
+# ── cmd_stage: bỏ qua dòng đã có verdict, không đánh số lại ─────────────────
+
+
+def test_stage_bo_qua_dong_da_xong(tmp_path, monkeypatch):
+    monkeypatch.setattr(vs, "AUDIT_PATH", tmp_path / "screen_audit.csv")
+
+    audio_dir = tmp_path / "audio"
+    audio_dir.mkdir()
+    (audio_dir / "b.wav").write_bytes(b"RIFF")
+
+    import csv
+    with vs.AUDIT_PATH.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=vs.AUDIT_FIELDS, extrasaction="ignore")
+        w.writeheader()
+        w.writerow({**_audited("ok", "siren"), "file_id": "a", "path_norm": str(audio_dir / "a.wav")})
+        w.writerow({**_audited("", "gunshot"), "file_id": "b", "path_norm": str(audio_dir / "b.wav")})
+
+    monkeypatch.setattr(vs, "REPO_ROOT", tmp_path)
+    assert vs.cmd_stage() == 0
+    staged = sorted(p.name for p in (tmp_path / "data" / "interim" / "audit_playlist").glob("*.wav"))
+    assert staged == ["002.wav"]      # dòng 1 ("a") đã xong nên bị bỏ, số 2 giữ đúng vị trí
