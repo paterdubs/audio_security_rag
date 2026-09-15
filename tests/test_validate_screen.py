@@ -279,3 +279,24 @@ def test_stage_bo_qua_dong_da_xong(tmp_path, monkeypatch):
     assert vs.cmd_stage() == 0
     staged = sorted(p.name for p in (tmp_path / "data" / "interim" / "audit_playlist").glob("*.wav"))
     assert staged == ["002.wav"]      # dòng 1 ("a") đã xong nên bị bỏ, số 2 giữ đúng vị trí
+
+
+def test_stage_all_chep_lai_ca_dong_da_xong(tmp_path, monkeypatch):
+    monkeypatch.setattr(vs, "AUDIT_PATH", tmp_path / "screen_audit.csv")
+    monkeypatch.setattr(vs, "REPO_ROOT", tmp_path)
+
+    audio_dir = tmp_path / "audio"
+    audio_dir.mkdir()
+    (audio_dir / "a.wav").write_bytes(b"RIFF")
+    (audio_dir / "b.wav").write_bytes(b"RIFF")
+
+    import csv
+    with vs.AUDIT_PATH.open("w", encoding="utf-8", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=vs.AUDIT_FIELDS, extrasaction="ignore")
+        w.writeheader()
+        w.writerow({**_audited("ok", "siren"), "file_id": "a", "path_norm": str(audio_dir / "a.wav")})
+        w.writerow({**_audited("", "gunshot"), "file_id": "b", "path_norm": str(audio_dir / "b.wav")})
+
+    assert vs.cmd_stage(include_done=True) == 0
+    staged = sorted(p.name for p in (tmp_path / "data" / "interim" / "audit_playlist").glob("*.wav"))
+    assert staged == ["001.wav", "002.wav"]      # --all: cả dòng đã xong cũng được chép lại

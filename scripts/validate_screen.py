@@ -217,15 +217,17 @@ def cmd_score() -> int:
     return 0 if report(errors, total, sample_only) else 1
 
 
-def cmd_stage() -> int:
-    """Chép clip CHƯA CÓ VERDICT ra một thư mục, đặt tên theo ĐÚNG thứ tự dòng trong phiếu.
+def cmd_stage(include_done: bool = False) -> int:
+    """Chép clip ra một thư mục, đặt tên theo ĐÚNG thứ tự dòng trong phiếu.
 
     Mở từng file theo đường dẫn trong CSV là ~30 giây mỗi clip. Nghe theo playlist thì
     chỉ còn thao tác nghe và gõ một từ. Tên file mang sẵn SỐ THỨ TỰ DÒNG THẬT trong
-    screen_audit.csv (không đánh số lại từ 1 trên phần còn lại) — bỏ qua dòng đã điền
-    verdict thay vì đánh số lại từ đầu, để `003.wav` luôn trỏ đúng dòng 3, dù dòng 1–2
-    đã xong từ buổi trước. Đánh số lại là lệch hàng, và lệch một dòng thì toàn bộ phần
-    sau ghi sai lớp mà không có gì báo.
+    screen_audit.csv, không đánh số lại từ 1 — lệch một dòng là toàn bộ phần sau ghi
+    sai lớp mà không có gì báo.
+
+    Mặc định BỎ QUA dòng đã điền verdict (đỡ chép lại vô ích khi nghe tiếp buổi trước).
+    `include_done=True` chép LẠI TOÀN BỘ, kể cả dòng đã xong — dùng khi muốn có một
+    playlist đầy đủ, liền mạch từ 001 trở đi mà không quan tâm phần nào đã duyệt.
 
     CỐ Ý không đặt tên lớp vào file: người nghe phải tự nhận ra lớp trước, rồi mới đối
     chiếu với cột class_id trong phiếu. Thấy chữ `gunshot` ngay trên tên file thì lại
@@ -245,7 +247,7 @@ def cmd_stage() -> int:
 
     missing, done = 0, 0
     for index, row in enumerate(audited, 1):
-        if row.get("verdict", "").strip() in VERDICTS:
+        if not include_done and row.get("verdict", "").strip() in VERDICTS:
             done += 1
             continue
         source = Path(row["path_norm"])
@@ -260,7 +262,7 @@ def cmd_stage() -> int:
         print(f"  {done} dòng đã có verdict từ trước — bỏ qua, không chép lại")
     if missing:
         print(f"  ⚠️ {missing} clip không tìm thấy file đã chuẩn hoá")
-    print("\nSố trên tên file = SỐ THỨ TỰ DÒNG THẬT trong screen_audit.csv (dòng 1 = 001.wav,")
+    print("\nSố trên tên file = SỐ THỨ TỰ DÒNG THẬT trong screen_audit.csv (dòng 1 = 001.wav")
     print("kể cả khi dòng đó bị bỏ qua vì đã xong — số không đánh lại từ đầu).")
     print("Mở cả thư mục bằng VLC (Ctrl+A → Enter) rồi nghe tuần tự, điền cột `verdict`")
     print("theo đúng thứ tự đó. Đừng sắp xếp lại phiếu — lệch một dòng là hỏng phần sau.")
@@ -312,6 +314,8 @@ def main() -> int:
     parser.add_argument("--fraction", type=float, default=SAMPLE_FRACTION)
     parser.add_argument("--seed", type=int, default=SEED)
     parser.add_argument("--force", action="store_true", help="ghi đè phiếu cũ")
+    parser.add_argument("--all", action="store_true",
+                        help="với --stage: chép cả dòng đã có verdict, không bỏ qua")
     args = parser.parse_args()
 
     if args.sample:
@@ -319,7 +323,7 @@ def main() -> int:
     if args.queue:
         return cmd_queue()
     if args.stage:
-        return cmd_stage()
+        return cmd_stage(include_done=args.all)
     return cmd_score()
 
 
