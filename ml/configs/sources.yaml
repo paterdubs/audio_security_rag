@@ -136,6 +136,27 @@ sources:
       ⚠️ Nhãn của TAU là cảnh (park, metro_station, street_traffic...), KHÔNG bảo đảm
       không chứa sự kiện Nhóm A. Bắt buộc chạy screen_background.py với ngưỡng 0.15.
 
+  rir_openslr28:
+    access: public_direct
+    priority: 2
+    url: "https://www.openslr.org/resources/28/rirs_noises.zip"
+    archive_name: rirs_noises.zip
+    expected_bytes: 1311166223        # lấy từ Content-Length, đã xác minh 15/09/2026
+    approx_size_gb: 1.31
+    peak_disk_gb: 4.0
+    license: "Apache 2.0"
+    redistributable: yes
+    provides_classes: []              # không phải lớp âm thanh — là bank RIR
+    notes: >
+      Room Impulse Response and Noise Database (OpenSLR SLR28). Bộ RIR chuẩn mà Kaldi
+      và ESPnet dùng, gồm RIR THẬT đo tại phòng thật (RWCP, AIR, REVERB) và RIR mô
+      phỏng theo ba cỡ phòng.
+      ⚠️ Dùng làm giải pháp TẠM. RIR thật của hành lang/nhà xe/xưởng tại IUH (buổi thu
+      1) mới khớp không gian triển khai; bộ này chỉ để lát cắt reverb có thứ mà chạy
+      trước khi có RIR thật. Phải nêu trong phần Hạn chế.
+      ⚠️ Nguồn ngoài Zenodo nên KHÔNG có checksum công bố — chỉ đối chiếu được kích
+      thước. Ghi lại SHA-256 sau lần tải đầu để lần sau còn so.
+
   # ══════════ Nhóm 3 — cần quyết định / cần đơn từ ══════════
 
   fsd50k_dev_audio:

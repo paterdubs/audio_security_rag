@@ -353,7 +353,14 @@ def resolve_targets(spec: dict) -> list[tuple[str, dict]]:
         if missing:
             raise KeyError(f"Zenodo record không có file: {missing}")
         return [(f, catalog[f]) for f in spec["files"]]
-    return [(spec["archive_name"], {"url": spec["url"], "size": 0, "md5": ""})]
+    # Nguồn ngoài Zenodo: không có API công bố kích thước/checksum, nên phải KHAI TAY
+    # trong sources.yaml. Bỏ trống thì mọi cổng kiểm tra tính toàn vẹn đều tắt, và file
+    # tải thiếu sẽ đi thẳng vào pipeline — đúng kiểu lỗi đã xảy ra với FSD50K.z05.
+    return [(spec["archive_name"], {
+        "url": spec["url"],
+        "size": int(spec.get("expected_bytes", 0)),
+        "md5": spec.get("md5", ""),
+    })]
 
 
 def fetch_source(name: str, spec: dict, keep_archive: bool) -> bool:
