@@ -28,6 +28,7 @@ from common import REPO_ROOT, enable_utf8_output
 SCORES_PATH = REPO_ROOT / "data" / "manifests" / "screen_scores.csv"
 AUDIT_PATH = REPO_ROOT / "data" / "manifests" / "screen_audit.csv"
 SPLITS_PATH = REPO_ROOT / "data" / "manifests" / "splits.csv"
+RAW_MANIFEST_PATH = REPO_ROOT / "data" / "manifests" / "raw_manifest.csv"
 BANK_DIR = REPO_ROOT / "data" / "banks" / "foreground"
 MANIFEST_PATH = REPO_ROOT / "data" / "manifests" / "foreground_manifest.csv"
 
@@ -115,7 +116,7 @@ def trim_bounds(onset: str, offset: str, duration: float) -> tuple[float, float]
     return start, end
 
 
-def promote(row: dict, dry_run: bool) -> dict | None:
+def promote(row: dict, dry_run: bool, source_dataset_by_file: dict[str, str]) -> dict | None:
     source = Path(row["path_norm"])
     if not source.exists():
         return None
@@ -132,7 +133,10 @@ def promote(row: dict, dry_run: bool) -> dict | None:
     return {
         "file_id": row["file_id"],
         "class_id": row["class_id"],
-        "source_dataset": row["file_id"].split("_")[0],
+        # KHÔNG suy ra source_dataset bằng file_id.split("_")[0] — sai với mọi nguồn
+        # có gạch dưới trong tên (`vehicle_crash_cc` ra "vehicle", `desed_soundbank`
+        # ra "desed"). Tra lại raw_manifest.csv, nguồn chân lý duy nhất cho cột này.
+        "source_dataset": source_dataset_by_file.get(row["file_id"], "?"),
         "onset": round(start, 3),
         "offset": round(end, 3),
         "duration_bank": round(end - start, 3),
@@ -198,11 +202,12 @@ def main() -> int:
         if BANK_DIR.exists():
             shutil.rmtree(BANK_DIR)
 
+    source_dataset_by_file = {r["file_id"]: r["source_dataset"] for r in read_csv(RAW_MANIFEST_PATH)}
     promoted, missing = [], 0
     for number, row in enumerate(chosen, 1):
         if number % 500 == 0:
             print(f"  {number}/{len(chosen)}…", flush=True)
-        entry = promote(row, args.dry_run)
+        entry = promote(row, args.dry_run, source_dataset_by_file)
         if entry is None:
             missing += 1
         else:

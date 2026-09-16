@@ -130,3 +130,30 @@ def test_khong_truyen_in_split_thi_giu_hanh_vi_cu():
     scored = [_score_row("a", "siren", decision="auto_accept")]
     chosen, skipped = ptb.selectable(scored, include_reviewed=False)
     assert [r["file_id"] for r in chosen] == ["a"]
+
+
+# ── promote(): source_dataset tra từ raw_manifest, không suy từ file_id ────
+
+
+def test_source_dataset_tra_dung_khong_doan_tu_ten_file(tmp_path, monkeypatch):
+    """file_id.split('_')[0] sai với mọi nguồn có gạch dưới trong tên: đo thật,
+    "vehicle_crash_cc_xxx" ra "vehicle" thay vì "vehicle_crash_cc"."""
+    normalized = tmp_path / "clip.wav"
+    _write_minimal_wav(normalized)
+    row = {**_score_row("vehicle_crash_cc_a1b2", "vehicle_crash"), "path_norm": str(normalized)}
+    monkeypatch.setattr(ptb, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(ptb, "BANK_DIR", tmp_path / "bank")
+
+    entry = ptb.promote(row, dry_run=True, source_dataset_by_file={"vehicle_crash_cc_a1b2": "vehicle_crash_cc"})
+    assert entry["source_dataset"] == "vehicle_crash_cc"
+
+
+def test_source_dataset_thieu_thi_dau_hoi_khong_chet(tmp_path, monkeypatch):
+    normalized = tmp_path / "clip.wav"
+    _write_minimal_wav(normalized)
+    row = {**_score_row("a", "siren"), "path_norm": str(normalized)}
+    monkeypatch.setattr(ptb, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(ptb, "BANK_DIR", tmp_path / "bank")
+
+    entry = ptb.promote(row, dry_run=True, source_dataset_by_file={})
+    assert entry["source_dataset"] == "?"
