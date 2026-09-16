@@ -64,7 +64,37 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-asr}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-audio_security}
+      REDIS_URL: redis://redis:6379/0
+      INFERENCE_URL: http://inference:8001
+      EMBED_DIM: ${EMBED_DIM:-1024}
+      RAG_ANSWER_PROVIDER: ${RAG_ANSWER_PROVIDER:-template}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RAG_TOP_K: ${RAG_TOP_K:-5}
+      AUDIO_RETENTION_DAYS: ${AUDIO_RETENTION_DAYS:-30}
+      AUDIO_DIR: /data/event_audio
+      ONTOLOGY_PATH: /config/ontology_map.yaml
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount READ-ONLY: taxonomy là nguồn chân lý duy nhất, service chỉ được đọc.
+      - ./ml/configs/ontology_map.yaml:/config/ontology_map.yaml:ro
+      - event_audio:/data/event_audio
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   pgdata:
   redisdata:
   mlflow_data:
+  event_audio:

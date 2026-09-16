@@ -1,0 +1,12 @@
+# Script chay trong container Linux PHAI la LF. Git tren Windows mac dinh doi sang CRLF
+# khi checkout, va shebang "#!/bin/sh\r" lam container chet voi thong bao cuc ky kho hieu:
+#   exec ./entrypoint.sh: no such file or directory
+# (file CO ton tai — thu khong ton tai la interpreter "/bin/sh\r").
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Manifest du lieu: giu nguyen, khong de Git dong vao ky tu xuong dong.
+data/manifests/*.csv -text
+data/reference/* -text

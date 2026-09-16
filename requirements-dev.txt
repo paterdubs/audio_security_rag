@@ -20,6 +20,7 @@ asyncpg==0.30.0          # chạy thử migration từ host vào container db (c
 pgvector==0.3.6
 greenlet==3.1.1
 httpx==0.28.1            # HTTP client + FastAPI TestClient
+python-multipart==0.0.20 # FastAPI cần để nhận multipart/form-data (upload file)
 PyYAML==6.0.2
 
 # --- kiểm thử & chất lượng ---
