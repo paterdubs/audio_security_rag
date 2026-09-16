@@ -32,6 +32,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
+import soundfile
 import yaml
 
 from common import REPO_ROOT, enable_utf8_output, write_exclusions
@@ -44,6 +45,7 @@ AUDIO_DIR = RAW_ROOT / "audio"
 SEGMENTS_PATH = RAW_ROOT / "segments.jsonl"
 
 WINDOW_SECONDS = 10.0          # AudioSet strong nhãn theo cửa sổ 10 giây gốc của AudioSet
+MAX_DURATION_DRIFT_SEC = 1.0    # lệch quá mức này thì coi như cắt sai, loại
 STAGE = "fetch_audioset_strong"
 
 
@@ -135,6 +137,14 @@ def download_window(ytid: str, window_start_ms: int, dest: Path) -> bool:
 
     --download-sections cắt TRƯỚC KHI tải hết video — video 30 phút mà chỉ cần
     10 giây, tải cả video là phí băng thông gấp trăm lần không cần thiết.
+
+    --force-keyframes-at-cuts BẮT BUỘC: không có nó, ffmpeg copy-stream cắt tại
+    keyframe GẦN NHẤT (có thể lệch hàng giây), cho ra file dài gấp đôi mà không báo
+    lỗi gì — đã đo thật: một clip ra 19.994s thay vì 10s, làm onset/offset trong
+    segments.jsonl (tính theo cửa sổ [0,10] giả định) không còn khớp audio thật.
+
+    Kiểm lại ĐỘ DÀI THẬT sau khi tải, không chỉ tin exit code — exit code 0 không
+    đảm bảo cắt đúng vị trí, chỉ đảm bảo ffmpeg không crash.
     """
     start = window_start_ms / 1000
     end = start + WINDOW_SECONDS
@@ -143,6 +153,7 @@ def download_window(ytid: str, window_start_ms: int, dest: Path) -> bool:
         [
             "yt-dlp", "-f", "bestaudio",
             "--download-sections", f"*{start}-{end}",
+            "--force-keyframes-at-cuts",
             "--extract-audio", "--audio-format", "wav",
             "-o", str(dest.with_suffix("")) + ".%(ext)s",
             "--no-playlist", "--quiet", "--no-warnings",
@@ -150,7 +161,17 @@ def download_window(ytid: str, window_start_ms: int, dest: Path) -> bool:
         ],
         capture_output=True, text=True,
     )
-    return result.returncode == 0 and dest.exists()
+    if result.returncode != 0 or not dest.exists():
+        return False
+    try:
+        duration = soundfile.info(str(dest)).duration
+    except Exception:
+        dest.unlink(missing_ok=True)
+        return False
+    if abs(duration - WINDOW_SECONDS) > MAX_DURATION_DRIFT_SEC:
+        dest.unlink(missing_ok=True)
+        return False
+    return True
 
 
 def stratified_keys(segments: dict[tuple[str, int], list[dict]], per_class_limit: int) -> list[tuple[str, int]]:

@@ -99,25 +99,50 @@ def test_them_dong_da_co_khong_bi_nhan_doi(tmp_path, monkeypatch):
 # ── Tải audio: gọi đúng cửa sổ, không tải nguyên video ──────────────────────
 
 
+class _FakeInfo:
+    def __init__(self, duration):
+        self.duration = duration
+
+
+def _fake_run_writing_wav(cmd, **kwargs):
+    dest = Path(cmd[cmd.index("-o") + 1].replace(".%(ext)s", ".wav"))
+    dest.write_bytes(b"RIFF")
+
+    class Result:
+        returncode = 0
+    return Result()
+
+
 def test_tai_audio_goi_dung_khoang_thoi_gian(tmp_path, monkeypatch):
     captured = {}
 
     def fake_run(cmd, **kwargs):
         captured["cmd"] = cmd
-        dest = Path(cmd[cmd.index("-o") + 1].replace(".%(ext)s", ".wav"))
-        dest.write_bytes(b"RIFF")
-
-        class Result:
-            returncode = 0
-        return Result()
+        return _fake_run_writing_wav(cmd, **kwargs)
 
     monkeypatch.setattr(fas.subprocess, "run", fake_run)
+    monkeypatch.setattr(fas.soundfile, "info", lambda path: _FakeInfo(10.0))
     dest = tmp_path / "clip.wav"
     ok = fas.download_window("abc123", 5000, dest)
 
     assert ok
     section = captured["cmd"][captured["cmd"].index("--download-sections") + 1]
     assert section == "*5.0-15.0"
+
+
+def test_ep_keyframe_de_cat_dung_vi_tri(tmp_path, monkeypatch):
+    """Không có --force-keyframes-at-cuts, ffmpeg cắt tại keyframe gần nhất — đã đo
+    thật một clip ra 19.994s thay vì 10s, làm nhãn onset/offset lệch khỏi audio."""
+    captured = {}
+
+    def fake_run(cmd, **kwargs):
+        captured["cmd"] = cmd
+        return _fake_run_writing_wav(cmd, **kwargs)
+
+    monkeypatch.setattr(fas.subprocess, "run", fake_run)
+    monkeypatch.setattr(fas.soundfile, "info", lambda path: _FakeInfo(10.0))
+    fas.download_window("abc123", 0, tmp_path / "clip.wav")
+    assert "--force-keyframes-at-cuts" in captured["cmd"]
 
 
 def test_tai_audio_that_bai_tra_ve_false(tmp_path, monkeypatch):
@@ -129,6 +154,26 @@ def test_tai_audio_that_bai_tra_ve_false(tmp_path, monkeypatch):
     monkeypatch.setattr(fas.subprocess, "run", fake_run)
     ok = fas.download_window("abc123", 0, tmp_path / "clip.wav")
     assert not ok
+
+
+def test_do_dai_lech_qua_xa_10s_thi_loai(tmp_path, monkeypatch):
+    """Exit code 0 không đảm bảo cắt đúng vị trí — chỉ đảm bảo ffmpeg không crash.
+    Phải tự đo lại độ dài thật, không tin exit code."""
+    monkeypatch.setattr(fas.subprocess, "run", _fake_run_writing_wav)
+    monkeypatch.setattr(fas.soundfile, "info", lambda path: _FakeInfo(19.994))
+    dest = tmp_path / "clip.wav"
+    ok = fas.download_window("abc123", 200000, dest)
+    assert not ok
+    assert not dest.exists()      # file sai độ dài phải bị xoá, không để lại rác
+
+
+def test_do_dai_gan_dung_van_duoc_giu(tmp_path, monkeypatch):
+    """Cho phép lệch nhỏ do làm tròn container, không đòi đúng tuyệt đối 10.000s."""
+    monkeypatch.setattr(fas.subprocess, "run", _fake_run_writing_wav)
+    monkeypatch.setattr(fas.soundfile, "info", lambda path: _FakeInfo(10.008))
+    dest = tmp_path / "clip.wav"
+    assert fas.download_window("abc123", 0, dest)
+    assert dest.exists()
 
 
 # ── Đọc vocab mid → display name ────────────────────────────────────────────
