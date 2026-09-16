@@ -37,6 +37,7 @@ classes:
 
   gunshot:
     group: A
+    tier: Critical
     audioset_ids: ["/m/032s66", "/m/04zjc", "/m/073cg4"]
     audioset_names: ["Gunshot, gunfire", "Machine gun", "Cap gun"]
     fsd50k_labels: ["Gunshot_and_gunfire"]
@@ -53,6 +54,7 @@ classes:
 
   explosion:
     group: A
+    tier: Critical
     audioset_ids: ["/m/014zdl", "/m/0_1c"]
     audioset_names: ["Explosion", "Artillery fire"]
     fsd50k_labels: ["Explosion"]
@@ -74,6 +76,7 @@ classes:
 
   scream:
     group: A
+    tier: Critical
     audioset_ids: ["/m/03qc9zr"]
     audioset_names: ["Screaming"]
     fsd50k_labels: ["Screaming"]
@@ -90,6 +93,7 @@ classes:
 
   glass_breaking:
     group: A
+    tier: Critical
     audioset_ids: ["/m/039jq", "/m/07rn7sz", "/m/07pc8lb"]
     audioset_names: ["Glass", "Shatter", "Breaking"]
     fsd50k_labels: ["Glass", "Shatter"]
@@ -106,6 +110,7 @@ classes:
 
   vehicle_crash:
     group: A
+    tier: Critical
     audioset_ids: ["/m/07pjjrj", "/m/0h9mv", "/m/07rknqz"]
     audioset_names: ["Smash, crash", "Tire squeal", "Skidding"]
     audioset_weak_only: ["/m/07rknqz"]                # Skidding KHÔNG có trong bộ strong 456 lớp
@@ -128,6 +133,7 @@ classes:
 
   shout_yell:
     group: A
+    tier: High
     audioset_ids: ["/m/07p6fty", "/m/07sr1lc"]
     audioset_names: ["Shout", "Yell"]
     fsd50k_labels: ["Shout", "Yell"]
@@ -145,6 +151,7 @@ classes:
 
   door_slam:
     group: A
+    tier: High
     audioset_ids: ["/m/02dgv", "/m/07rjzl8"]
     audioset_names: ["Door", "Slam"]
     fsd50k_labels: ["Door", "Slam"]
@@ -163,6 +170,7 @@ classes:
 
   running_footsteps:
     group: A
+    tier: Medium
     audioset_ids: ["/m/07pbtc8", "/m/06h7j"]
     audioset_names: ["Walk, footsteps", "Run"]
     fsd50k_labels: ["Walk_and_footsteps", "Run"]
@@ -181,6 +189,7 @@ classes:
 
   siren:
     group: A
+    tier: Medium
     audioset_ids: ["/m/03kmc9", "/m/04qvtq", "/m/012n7d", "/m/012ndj", "/m/0dgbq"]
     audioset_names:
       ["Siren", "Police car (siren)", "Ambulance (siren)",
@@ -196,6 +205,7 @@ classes:
 
   alarm_bell:
     group: A
+    tier: Medium
     audioset_ids: ["/m/07pp_mv", "/m/0c3f7m", "/m/01y3hg", "/m/02mfyn", "/m/046dlr",
                    "/m/0395lw", "/m/03wwcy"]
     audioset_names:
@@ -216,6 +226,7 @@ classes:
 
   fireworks:
     group: B
+    tier: Negative
     audioset_ids: ["/m/0g6b5", "/g/122z_qxw"]
     audioset_names: ["Fireworks", "Firecracker"]
     fsd50k_labels: ["Fireworks"]
@@ -230,6 +241,7 @@ classes:
 
   object_drop_dishes:
     group: B
+    tier: Negative
     audioset_ids: ["/m/04brg2", "/m/07qnq_y"]
     audioset_names: ["Dishes, pots, and pans", "Thump, thud"]
     fsd50k_labels: ["Dishes_and_pots_and_pans", "Thump_and_thud"]
@@ -243,6 +255,7 @@ classes:
 
   laughter:
     group: B
+    tier: Negative
     audioset_ids: ["/m/01j3sz"]
     audioset_names: ["Laughter"]
     fsd50k_labels: ["Laughter"]
@@ -260,6 +273,7 @@ classes:
 
   applause_cheering:
     group: B
+    tier: Negative
     audioset_ids: ["/m/053hz1", "/t/dd00135", "/m/028ght"]
     audioset_names: ["Cheering", "Children shouting", "Applause"]
     fsd50k_labels: ["Cheering", "Applause"]
@@ -281,6 +295,7 @@ classes:
 
   speech_normal:
     group: B
+    tier: Negative
     audioset_ids: ["/m/09x0r", "/m/05zppz", "/m/02zsn", "/m/0ytgt", "/m/01h8n0"]
     audioset_names:
       ["Speech", "Male speech, man speaking", "Female speech, woman speaking",
@@ -300,6 +315,7 @@ classes:
 
   ambient_noise:
     group: B
+    tier: Negative
     audioset_ids: []
     audioset_names: []
     fsd50k_labels: []

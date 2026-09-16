@@ -1,0 +1,30 @@
+# Môi trường DEV cho services/ — cài vào .venv-services, KHÔNG cài vào .venv.
+#
+# ⚠️ Vì sao phải tách venv: requirements-data.txt ghim numpy==1.26.4 vì scaper dùng
+# np.Inf (bị gỡ ở numpy 2.0). Cài fastapi/sqlalchemy vào cùng chỗ sẽ có lúc kéo numpy
+# 2.x về và làm chết toàn bộ bước sinh train set — đã xảy ra thật 14/09/2026.
+#
+#   python -m venv .venv-services
+#   .venv-services/Scripts/python.exe -m pip install -r requirements-dev.txt
+#
+# File này CHỈ đủ để chạy test logic thuần của service. Dependency chạy thật (torch,
+# sentence-transformers, asyncpg…) nằm trong services/*/requirements.txt và chỉ được cài
+# bên trong Docker image.
+
+fastapi==0.115.6
+pydantic==2.10.4
+pydantic-settings==2.7.0
+sqlalchemy==2.0.36
+alembic==1.14.0
+asyncpg==0.30.0          # chạy thử migration từ host vào container db (cổng 5432 đã publish)
+pgvector==0.3.6
+greenlet==3.1.1
+httpx==0.28.1            # HTTP client + FastAPI TestClient
+PyYAML==6.0.2
+
+# --- kiểm thử & chất lượng ---
+pytest==8.3.4
+pytest-asyncio==0.25.0
+ruff==0.8.4
+black==24.10.0
+mypy==1.14.0

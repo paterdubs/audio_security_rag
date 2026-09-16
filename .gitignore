@@ -12,7 +12,19 @@ data/banks/
 !data/gold/
 
 .venv/
+.venv-services/
 __pycache__/
 *.pyc
 .pytest_cache/
 .ipynb_checkpoints/
+.mypy_cache/
+.ruff_cache/
+
+# Bí mật: .env chứa mật khẩu DB và API key. Chỉ .env.example được theo dõi.
+.env
+.env.*
+!.env.example
+
+# Frontend
+services/frontend/node_modules/
+services/frontend/dist/

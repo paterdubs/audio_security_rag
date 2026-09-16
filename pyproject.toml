@@ -1,0 +1,39 @@
+# Cấu hình công cụ dùng chung. CỐ Ý không có [project]/[build-system]: repo này không
+# phải một package cài được bằng pip — `scripts/` chạy trực tiếp, `services/` chạy trong
+# container riêng. Thêm build-system vào sẽ tạo ra một bước đóng gói không ai dùng.
+
+[tool.pytest.ini_options]
+# testpaths là BẮT BUỘC, không phải trang trí: `pytest` chạy ở gốc repo sẽ bò vào
+# data/raw/esc50/ESC-50-master/tests/test_dataset.py (ESC-50 tự mang theo test của nó)
+# và chết ngay ở bước collection. Đã xảy ra thật 15/09.
+testpaths = ["tests"]
+norecursedirs = ["data", ".venv", ".venv-services", "services/frontend", "node_modules"]
+addopts = "-q"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+line-length = 120          # dòng code thật dài nhất hiện có là 130 ký tự; 120 bắt đúng phần cần sửa
+target-version = "py312"
+exclude = ["data", ".venv", ".venv-services", "services/frontend"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = [
+    "E501",   # độ dài dòng: black lo phần code; comment phân cách tiếng Việt cố ý dài
+    "B008",   # Depends() trong tham số mặc định là pattern chuẩn của FastAPI
+]
+
+[tool.black]
+line-length = 120
+target-version = ["py312"]
+# CHỈ format services/. `scripts/` (4000+ dòng) chưa từng chạy qua black; format lại
+# ngay bây giờ sẽ tạo một diff khổng lồ trùng lên code dữ liệu đang chạy dở hai job nền.
+# Đưa scripts/ vào black là một commit riêng, có chủ đích — xem "Nợ kỹ thuật" trong PLAN.md.
+include = '^/services/.*\.py$'
+
+[tool.mypy]
+python_version = "3.12"
+files = ["services"]       # services/ viết mới nên annotate đủ; scripts/ thì không, đừng đòi
+ignore_missing_imports = true
+disallow_untyped_defs = true
+warn_unused_ignores = true

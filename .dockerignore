@@ -1,0 +1,17 @@
+# Build context phải NHỎ. data/ là hàng chục GB — đưa vào context thì mỗi lần build
+# Docker phải đọc hết chỗ đó trước khi chạy dòng lệnh đầu tiên.
+data/
+.venv/
+.venv-services/
+.git/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+__pycache__/
+*.pyc
+notebooks/
+services/frontend/node_modules/
+services/frontend/dist/
+.env
+.env.*
+!.env.example

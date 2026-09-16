@@ -1,0 +1,70 @@
+# Triển khai một node — SYSTEM.md §4.2, §9.5.
+#
+# Mọi service PHẢI có healthcheck và `depends_on: condition: service_healthy`:
+# `api` gọi `inference` ngay lúc khởi động (warmup BGE-M3 mất hàng chục giây), nếu chỉ
+# `depends_on` trần thì api lên trước khi model nạp xong và request đầu tiên chết.
+#
+#   docker compose up -d db redis      # B1: hạ tầng nền
+#   docker compose up -d --build       # đầy đủ
+
+name: audio-security-rag
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-asr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?phai dat POSTGRES_PASSWORD trong .env}
+      POSTGRES_DB: ${POSTGRES_DB:-audio_security}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # -U/-d tường minh: pg_isready mặc định dùng user `root` trong container này và
+      # báo healthy SAI trước khi database của ta thực sự sẵn sàng.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-asr} -d ${POSTGRES_DB:-audio_security}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.17.2
+    command: >
+      mlflow server
+      --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    healthcheck:
+      # Image mlflow không có curl; dùng python có sẵn trong image.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  mlflow_data:

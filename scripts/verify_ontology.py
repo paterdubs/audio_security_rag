@@ -23,8 +23,15 @@ CONFIG_PATH = REPO_ROOT / "ml" / "configs" / "ontology_map.yaml"
 
 EXPECTED_N_CLASSES = 16
 EXPECTED_GROUP_SIZES = {"A": 10, "B": 6}
+# Tier điều khiển trọng số risk scoring (SYSTEM.md §6.4) — services/api/app/risk.py đọc
+# từ đây chứ KHÔNG chép lại bảng lớp lần thứ hai. Nhóm A phải là Critical/High/Medium,
+# Nhóm B luôn là Negative: một lớp Nhóm B mang tier khác sẽ sinh cảnh báo cho chính thứ
+# nó tồn tại để dập.
+VALID_TIERS = {"Critical", "High", "Medium", "Negative"}
+
 REQUIRED_CLASS_KEYS = (
     "group",
+    "tier",
     "audioset_ids",
     "audioset_names",
     "fsd50k_labels",
@@ -81,6 +88,14 @@ def check_structure(classes: dict) -> list[Issue]:
             issues.append(Issue(ERROR, "C11", f"{name}: thiếu khoá {missing}"))
         if spec.get("target_foreground", 0) < spec.get("min_acceptable", 0):
             issues.append(Issue(ERROR, "C07", f"{name}: target_foreground < min_acceptable"))
+
+        tier, group = spec.get("tier"), spec.get("group")
+        if tier is not None and tier not in VALID_TIERS:
+            issues.append(Issue(ERROR, "C12", f"{name}: tier {tier!r} không thuộc {sorted(VALID_TIERS)}"))
+        elif group == "B" and tier != "Negative":
+            issues.append(Issue(ERROR, "C12", f"{name}: lớp Nhóm B phải có tier Negative, đang là {tier!r}"))
+        elif group == "A" and tier == "Negative":
+            issues.append(Issue(ERROR, "C12", f"{name}: lớp Nhóm A không được mang tier Negative"))
 
     for group, expected in EXPECTED_GROUP_SIZES.items():
         actual = sum(1 for spec in classes.values() if spec.get("group") == group)

@@ -1,0 +1,19 @@
+# Dependency của service `api` — CHỈ cài trong Docker image, không cài vào .venv.
+# Cố ý KHÔNG có torch/sentence-transformers: mọi thứ cần model nằm ở service `inference`,
+# api gọi qua HTTP. Nhờ vậy image này nhẹ và khởi động nhanh.
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+sqlalchemy==2.0.36
+asyncpg==0.30.0          # driver async cho PostgreSQL
+alembic==1.14.0
+pgvector==0.3.6          # kiểu cột Vector cho SQLAlchemy
+greenlet==3.1.1          # SQLAlchemy async cần, pip không luôn tự kéo về
+
+httpx==0.28.1            # gọi service inference
+python-multipart==0.0.20  # FastAPI cần để nhận multipart/form-data (upload file)
+PyYAML==6.0.2            # đọc ontology_map.yaml
+redis==5.2.1             # W7 dùng Redis Streams; có sẵn để healthcheck broker
