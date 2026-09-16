@@ -27,6 +27,7 @@ from common import REPO_ROOT, enable_utf8_output
 
 SCORES_PATH = REPO_ROOT / "data" / "manifests" / "screen_scores.csv"
 AUDIT_PATH = REPO_ROOT / "data" / "manifests" / "screen_audit.csv"
+SPLITS_PATH = REPO_ROOT / "data" / "manifests" / "splits.csv"
 BANK_DIR = REPO_ROOT / "data" / "banks" / "foreground"
 MANIFEST_PATH = REPO_ROOT / "data" / "manifests" / "foreground_manifest.csv"
 
@@ -57,8 +58,22 @@ def human_verdicts() -> dict[str, str]:
             for row in read_csv(AUDIT_PATH) if row.get("verdict", "").strip()}
 
 
-def selectable(scored: list[dict], include_reviewed: bool) -> tuple[list[dict], dict[str, int]]:
-    """(clip được đưa vào bank, lý do loại và số lượng)."""
+def foreground_train_ids() -> set[str]:
+    return {row["file_id"] for row in read_csv(SPLITS_PATH) if row["split"] == "foreground_bank_train"}
+
+
+def selectable(scored: list[dict], include_reviewed: bool, in_split: set[str] | None = None) -> tuple[list[dict], dict[str, int]]:
+    """(clip được đưa vào bank, lý do loại và số lượng).
+
+    `in_split`: tập file_id hiện đang thuộc `foreground_bank_train` trong splits.csv.
+    Verdict "ok" KHÔNG được cứu một clip đã rớt khỏi tập này — splits.csv được sinh
+    lại từ raw_manifest.csv TRỪ exclusions.csv, nên một clip vắng mặt ở đó nghĩa là nó
+    đã bị loại chính thức ở một cổng nào đó (thường là chính auto_screen đã ghi
+    wrong_class vào exclusions.csv). Verdict cũ (từ trước khi lớp đổi tên/bị rescan)
+    không biết gì về lần loại sau đó — tin nó vô điều kiện là đưa một clip đã bị loại
+    chính thức lọt vào bank, đúng lỗi thật đã xảy ra (1 clip `applause_cheering` máy
+    chấm p_target=0.0029, top_confusable=scream, vẫn lọt vào vì verdict "ok" cũ).
+    """
     verdicts = human_verdicts()
     chosen, skipped = [], {}
 
@@ -69,6 +84,9 @@ def selectable(scored: list[dict], include_reviewed: bool) -> tuple[list[dict], 
         verdict = verdicts.get(row["file_id"])
         if verdict in ("wrong_class", "bad_audio"):
             bo(f"người loại ({verdict})")
+            continue
+        if in_split is not None and row["file_id"] not in in_split:
+            bo("đã bị loại khỏi foreground_bank_train (exclusions.csv) — verdict cũ không cứu được")
             continue
         if row["decision"] == "auto_accept" or verdict == "ok":
             chosen.append(row)
@@ -162,11 +180,23 @@ def main() -> int:
         print("❌ chưa có screen_scores.csv — chạy scripts/auto_screen.py trước")
         return 1
 
-    chosen, skipped = selectable(scored, args.include_reviewed)
+    chosen, skipped = selectable(scored, args.include_reviewed, foreground_train_ids())
     if not chosen:
         print("❌ không clip nào đủ điều kiện vào bank")
         return 1
     print(f"▶ {len(chosen)}/{len(scored)} clip đủ điều kiện")
+
+    if not args.dry_run:
+        # Xoá TOÀN BỘ bank cũ TRƯỚC KHI promote — script này luôn tính lại từ đầu
+        # (screen_scores.csv + verdict người), không ghi tăng dần. Không xoá thì thư
+        # mục lớp đã đổi tên/xoá (ví dụ `laughter_cheering` sau khi tách lớp 15/09)
+        # để lại file .wav mồ côi — không nằm trong foreground_manifest.csv (file đó
+        # được ghi lại đúng), nhưng vẫn nằm THẬT trên đĩa, và bất cứ script nào quét
+        # trực tiếp thư mục bank (như scaper_generate.py --plan-only) sẽ thấy chúng
+        # và báo "rò rỉ" sai — đã xảy ra thật, 250 file `laughter_cheering` còn sót.
+        import shutil
+        if BANK_DIR.exists():
+            shutil.rmtree(BANK_DIR)
 
     promoted, missing = [], 0
     for number, row in enumerate(chosen, 1):
