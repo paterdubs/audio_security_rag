@@ -66,8 +66,8 @@ Cột **Nhãn có sẵn** cho biết ta được cho không cái gì; cột **Vi
 | 2 | `explosion` | AudioSet-strong, FSD50K | Strong (AS-strong) · Weak | 120 | Cắt gọn; loại nhầm pháo hoa | 🔴 **Thiếu dữ liệu** |
 | 3 | `scream` | MIVIA, AudioSet-strong, FSD50K | **Strong** (MIVIA) · Weak | 200 | Tách khỏi `shout_yell`, `laughter`, `applause_cheering` | 🟡 Ranh giới lớp khó |
 | 4 | `glass_breaking` | MIVIA, FSD50K, ESC-50 | **Strong** (MIVIA) · Weak | 250 | Cắt gọn; loại nhầm chén đĩa | 🟢 |
-| 5 | `vehicle_crash` | MIVIA Road ~~, AudioSet-strong~~ | **Strong** (MIVIA Road) | 80 | Phụ thuộc **tuyệt đối** vào MIVIA Road | 🔴 **Rủi ro cao nhất** |
-| 6 | `shout_yell` | AudioSet-strong, FSD50K | Strong (AS-strong) · Weak | 200 | Tách khỏi `scream` theo guideline | 🟡 |
+| 5 | `vehicle_crash` | **`vehicle_crash_cc`** (HF, CC-BY) ~~, MIVIA Road~~ | Strong (đã cắt sẵn quanh sự kiện) | 80 | 16/09: thay MIVIA Road bằng nguồn công khai — không còn phụ thuộc đơn xin duyệt | 🟢 33/30, đạt tối thiểu |
+| 6 | `shout_yell` | AudioSet-strong, FSD50K | Strong (AS-strong) · Weak | 200 | Tách khỏi `scream` theo guideline | 🟡 56/80 — **ADR-0005: chốt giữ, không bổ sung** |
 | 7 | `door_slam` | FSD50K, AudioSet-strong ~~, ESC-50~~ | Strong (AS-strong) · Weak | 250 | Cắt gọn; gom `Door`+`Slam` | 🟢 |
 | 8 | `running_footsteps` | FSD50K, AudioSet-strong, ESC-50 ⚠️ | Strong (AS-strong) · Weak | 250 | Phân biệt đi bộ / chạy | 🟡 |
 | 9 | `siren` | UrbanSound8K, ESC-50, AudioSet | Weak + salience | 300 | Cắt đoạn; tách `siren` vs `alarm_bell` | 🟢 |
@@ -84,7 +84,7 @@ Cột **Nhãn có sẵn** cho biết ta được cho không cái gì; cột **Vi
 | 14 | `speech_normal` | DESED (`Speech`), AudioSet, LibriSpeech | **Strong** (DESED) | 300 | Rất dồi dào; cần đa dạng ngôn ngữ | 🟢 |
 | 15 | `ambient_noise` | TAU/DCASE scenes, UrbanSound8K, **thu tại chỗ** | — | *(dùng background bank)* | Xác minh **không chứa** sự kiện Nhóm A | 🟢 |
 
-**Ba lớp đỏ cần xử lý sớm:** `vehicle_crash` (phụ thuộc MIVIA Road → **nộp đơn ngày đầu**), `explosion` (khan hiếm tự nhiên), `fireworks` (dữ liệu quốc tế có thể khác pháo VN).
+**Cập nhật 16/09:** `vehicle_crash` không còn 🔴 — đã có `vehicle_crash_cc` thay MIVIA Road, đạt mức tối thiểu (33/30). Còn `explosion` (khan hiếm tự nhiên, nhưng đã đạt tối thiểu qua FSD50K) và `fireworks` (dữ liệu quốc tế có thể khác pháo VN, chưa kiểm chứng) cần lưu ý.
 
 ### Bảng ánh xạ ontology — file cấu hình, không phải tài liệu
 

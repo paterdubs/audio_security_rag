@@ -63,7 +63,9 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 - **Bank RIR xong**: 505 RIR từ OpenSLR SLR28 (`build_rir_bank.py`), xếp nhóm theo RT60 đo được: small_room 151 · medium_room 198 · large_room 156
 - **`scripts/fetch_audioset_strong.py` viết + kiểm thử xong** (yt-dlp) — nguồn duy nhất cho `dev`/`gold_test` không phụ thuộc MIVIA/thu thực địa. **Chưa chạy tải audio thật** — xem §Nợ kỹ thuật ở PLAN.md
 - **15/09 — tách `laughter_cheering` → `laughter` + `applause_cheering`** (16 lớp), chạy lại toàn bộ pipeline thật, giữ nguyên 245 verdict kiểm định đã có (xem log §10)
-- Foreground bank hiện tại: **2434 clip / ~92 phút** đã qua sàng lọc + duyệt tự động, 13/16 lớp có mặt. Còn thiếu hẳn: `vehicle_crash` (chờ MIVIA), yếu: `shout_yell`, `object_drop_dishes`, `door_slam`, `explosion`, `running_footsteps`
+- **16/09 — `vehicle_crash_cc` (HF, CC-BY) thay MIVIA Road**: 46 clip, `video_id` làm source_group_id, đưa vào bank qua adapter riêng
+- **16/09 — duyệt hết hàng đợi người (2077 clip)**: 246 nghe thật + **1831 duyệt hàng loạt `ok`** theo quyết định người dùng (KHÔNG nghe từng clip — ghi rõ trong `note` cột của `screen_audit.csv`, coi là hạn chế phải nêu, xem ADR-0005)
+- Foreground bank hiện tại: **4268 clip / ~138 phút**, **15/16 lớp đạt mức tối thiểu**. Duy nhất `shout_yell` (56/80) dưới mức — **ADR-0005: chốt giữ nguyên, không bổ sung thêm**, đã có người dùng xác nhận
 - 304 test, tất cả đạt (`pytest tests/ -q` — **chạy trong `tests/`, không chạy ở gốc repo vì ESC-50 tự mang theo `tests/test_dataset.py` gây lỗi collection**)
 
 ### 🔄 Đang làm
@@ -82,8 +84,10 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 Song song: thu thực địa tại IUH (buổi 1: RIR hành lang/nhà xe/xưởng cho S3 + `gold_test`; buổi 2: `media_playback` cho S4 và kiểm tra phổ pháo hoa VN).
 
 ### ⛔ Đang bị chặn
-- `vehicle_crash` — ⏳ đã nộp đơn MIVIA Road 14/09, chờ duyệt 1–2 tuần. Không có đường vòng.
 - `dev`/`gold_test` — rỗng, chặn ở việc 👤 cài yt-dlp/ffmpeg (không phải việc AI làm được), xem việc tiếp theo #1.
+
+`vehicle_crash` KHÔNG còn bị chặn — 16/09 đã có nguồn thay thế (`vehicle_crash_cc`, 33
+clip qua sàng lọc, vượt mức tối thiểu 30). Đơn MIVIA Road vẫn giữ như nguồn dự phòng.
 
 ---
 
@@ -288,6 +292,14 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
 - **Chạy lại thật** toàn bộ pipeline (không mô phỏng): `build_manifest` (esc50, fsd50k) → `normalize_audio` → `make_splits` → `check_leakage` → `auto_screen` (rescan toàn bộ `foreground_bank_train`, 4444 clip) → `promote_to_bank`. 25 dòng kiểm định cũ của `laughter_cheering` trong `screen_audit.csv` được patch theo checksum, **giữ nguyên** 244 verdict `ok` + 1 `wrong_class` đã có.
 - **Hai lỗi im lặng lộ ra khi làm việc này** (xem quy tắc mới ở §5): `build_manifest.py` để lại dòng mồ côi khi đổi ontology (sửa: `drop_stale_rows`) · `auto_screen.py --class-id X` ghi đè toàn bộ `screen_scores.csv` chỉ với điểm của X — **đã xoá sạch điểm mọi lớp khác đã sàng lọc trước đó**, phải rescan lại toàn bộ 4444 clip để phục hồi (sửa: `merge_scored`). `normalize_audio.py` có lỗi tương tự ở `review_flags.csv` (sửa: `source_prefix`).
 - Foreground bank sau khi rebuild: **2434/4444 clip** (13/16 lớp có mặt). 300 → 304 test.
+
+### 2026-09-16 — `vehicle_crash_cc` thay MIVIA, duyệt hết hàng đợi, ADR-0005
+
+- **`vehicle_crash_cc`** (huggingface.co/datasets/Titung/car-crash-audio-cc, CC-BY 3.0): người dùng tìm thấy, thay MIVIA Road làm nguồn chính cho `vehicle_crash`. 46 clip / 38 video → adapter mới (`adapt_vehicle_crash_cc`) dùng `video_id` làm `source_group_id`. Chạy thật: 33/46 qua chuẩn hoá (13 clip compilation >30s bị loại tự động) → sàng lọc → 3 tự nhận + 30 vào hàng đợi (PANNs không có nhãn cho va chạm xe, đúng dự đoán).
+- **`validate_screen.py --queue`**: gộp `review_queue.csv` vào `screen_audit.csv`, thêm cột `origin` (sample/queue) để KHÔNG tính lẫn hàng đợi vào tỉ lệ lỗi τ đo trên mẫu auto-accept — hai population khác nhau về độ tin cậy, trộn là đo sai đối tượng. Theo yêu cầu người dùng, đổi cách sắp xếp phiếu sang `(class_id, file_id)`, không giữ 245 dòng mẫu cũ ở đầu. Thêm `--stage --all` để chép lại toàn bộ playlist bất kể đã duyệt hay chưa.
+- **Quyết định quan trọng nhất của ngày**: người dùng chọn duyệt **hàng loạt** toàn bộ 1831 dòng còn trống trong hàng đợi thành `ok`, KHÔNG nghe từng clip — dựa trên tỉ lệ lỗi 0.4% đo được ở mẫu auto-accept. Đã cảnh báo rõ: tỉ lệ đó đo trên population khác (máy tự tin), không suy diễn được sang hàng đợi (máy không tự tin, có lớp bị guard ghi nhận tagger mù >50%). Người dùng xác nhận vẫn muốn làm sau khi nghe cảnh báo → đã thực hiện, ghi note `bulk_ok_2026-09-16` vào từng dòng để truy vết, coi là **hạn chế phải công bố trong khoá luận**, không phải một phần của con số kiểm định 0.4%.
+- Bank sau khi promote (`--include-reviewed`): **4268 clip, 15/16 lớp đạt mức tối thiểu**. Chỉ `shout_yell` (56/80) dưới mức — **ADR-0005**: chốt giữ nguyên, không bổ sung thêm, người dùng xác nhận trực tiếp. `vehicle_crash` (33/30) vừa đủ.
+- Viết ADR đầu tiên của dự án: `docs/decisions/ADR-0005-shout-yell-duoi-muc-toi-thieu.md` (số 0005 vì 0001–0004 đã dành cho 4 quyết định kiến trúc W1 chưa viết).
 
 ---
 
