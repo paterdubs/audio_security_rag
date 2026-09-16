@@ -105,15 +105,15 @@ def mid_to_class_map(ontology: dict, known_mids: set[str]) -> dict[str, str]:
 
 
 def select_segments(rows: list[dict], mid_to_class: dict[str, str]) -> dict[tuple[str, int], list[dict]]:
-    """{(ytid, window_start_ms): [{class_id, onset, offset}]} — chỉ nhãn PRESENT khớp 16 lớp.
+    """{(ytid, window_start_ms): [{class_id, onset, offset}]} — chỉ nhãn khớp 16 lớp.
 
-    UNCERTAIN bị loại: đây là nhãn gold dùng để TÍNH ĐIỂM model, lẫn nhãn không chắc vào
-    ground truth thì mọi số EHR/EOR đo trên nó đều sai mà không lộ triệu chứng.
+    File TSV thật của AudioSet strong CHỈ có 4 cột (segment_id, start_time_seconds,
+    end_time_seconds, label) — KHÔNG có cột present/uncertain như bản đặc tả cũ từng
+    giả định. Mọi dòng trong file đã LÀ nhãn strong xác nhận, không cần lọc thêm theo
+    độ chắc chắn. (Sửa 16/09: giả định sai này làm select_segments() luôn trả rỗng.)
     """
     segments: dict[tuple[str, int], list[dict]] = {}
     for row in rows:
-        if row.get("present") != "PRESENT":
-            continue
         class_id = mid_to_class.get(row["label"])
         if class_id is None:
             continue
@@ -153,6 +153,26 @@ def download_window(ytid: str, window_start_ms: int, dest: Path) -> bool:
     return result.returncode == 0 and dest.exists()
 
 
+def stratified_keys(segments: dict[tuple[str, int], list[dict]], per_class_limit: int) -> list[tuple[str, int]]:
+    """Chọn tối đa `per_class_limit` ổ cho MỖI lớp, không lấy phẳng N ổ đầu.
+
+    66229 ổ tổng, nhưng lệch rất mạnh (speech_normal 54068 ổ, fireworks chỉ 728) —
+    lấy N ổ đầu theo thứ tự bất kỳ sẽ toàn `speech_normal`/`laughter`, bỏ đói mọi lớp
+    hiếm. Một ổ có thể thoả nhiều lớp cùng lúc, nên tổng số ổ chọn được có thể ÍT HƠN
+    n_lớp × per_class_limit — đó là bình thường, không phải lỗi.
+    """
+    by_class: dict[str, list[tuple[str, int]]] = {}
+    for key, events in segments.items():
+        for event in events:
+            by_class.setdefault(event["class_id"], []).append(key)
+
+    selected: set[tuple[str, int]] = set()
+    for class_id in sorted(by_class):
+        keys = sorted(set(by_class[class_id]))
+        selected.update(keys[:per_class_limit])
+    return sorted(selected)
+
+
 # ── Điều phối ────────────────────────────────────────────────────────────────
 
 
@@ -169,7 +189,7 @@ def append_segments(new_rows: list[dict]) -> None:
                 handle.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
-def run(limit: int | None, labels_only: bool) -> int:
+def run(limit: int | None, labels_only: bool, per_class_limit: int | None) -> int:
     sources = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))["sources"]["audioset_strong"]
     ontology = yaml.safe_load(ONTOLOGY_PATH.read_text(encoding="utf-8"))
 
@@ -189,7 +209,9 @@ def run(limit: int | None, labels_only: bool) -> int:
     if labels_only:
         return 0
 
-    keys = sorted(segments)[:limit] if limit is not None else sorted(segments)
+    keys = stratified_keys(segments, per_class_limit) if per_class_limit is not None else sorted(segments)
+    if limit is not None:
+        keys = keys[:limit]
     ok, failed = 0, {}
     new_rows = []
     for ytid, window_start_ms in keys:
@@ -217,10 +239,12 @@ def run(limit: int | None, labels_only: bool) -> int:
 def main() -> int:
     enable_utf8_output()
     parser = argparse.ArgumentParser()
-    parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--limit", type=int, default=None, help="chặn TỔNG số ổ tải, sau khi phân tầng")
+    parser.add_argument("--per-class-limit", type=int, default=None,
+                        help="tối đa bấy nhiêu ổ CHO MỖI LỚP (phân tầng) — 66229 ổ tổng lệch rất mạnh")
     parser.add_argument("--labels-only", action="store_true")
     args = parser.parse_args()
-    return run(args.limit, args.labels_only)
+    return run(args.limit, args.labels_only, args.per_class_limit)
 
 
 if __name__ == "__main__":

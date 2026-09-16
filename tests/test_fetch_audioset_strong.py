@@ -41,25 +41,21 @@ def test_chi_giu_mid_co_trong_vocab_strong():
 
 
 # ── Chọn segment ─────────────────────────────────────────────────────────────
+#
+# File TSV thật của AudioSet strong CHỈ có 4 cột (segment_id, start_time_seconds,
+# end_time_seconds, label) — không có cột present/uncertain. Đã kiểm tra thật 16/09
+# sau khi select_segments() luôn trả rỗng vì giả định sai có cột đó.
 
 
-def _row(segment_id, label, present, start="1.0", end="3.0"):
-    return {"segment_id": segment_id, "label": label, "present": present,
+def _row(segment_id, label, start="1.0", end="3.0"):
+    return {"segment_id": segment_id, "label": label,
             "start_time_seconds": start, "end_time_seconds": end}
-
-
-def test_loai_nhan_uncertain():
-    """UNCERTAIN vào ground truth thì mọi số EHR/EOR đo trên gold_test đều sai lệch
-    mà không có triệu chứng gì lộ ra ở bước sau."""
-    rows = [_row("v1_0", "/m/032s66", "UNCERTAIN")]
-    segments = fas.select_segments(rows, {"/m/032s66": "gunshot"})
-    assert segments == {}
 
 
 def test_gop_nhieu_su_kien_cung_mot_o():
     rows = [
-        _row("v1_0", "/m/032s66", "PRESENT", "1.0", "2.0"),
-        _row("v1_0", "/m/07p6fty", "PRESENT", "4.0", "6.0"),
+        _row("v1_0", "/m/032s66", "1.0", "2.0"),
+        _row("v1_0", "/m/07p6fty", "4.0", "6.0"),
     ]
     mid_to_class = {"/m/032s66": "gunshot", "/m/07p6fty": "shout_yell"}
     segments = fas.select_segments(rows, mid_to_class)
@@ -69,7 +65,7 @@ def test_gop_nhieu_su_kien_cung_mot_o():
 
 
 def test_mid_khong_khop_lop_nao_thi_bo_qua():
-    rows = [_row("v1_0", "/m/lung_tung", "PRESENT")]
+    rows = [_row("v1_0", "/m/lung_tung")]
     segments = fas.select_segments(rows, {"/m/032s66": "gunshot"})
     assert segments == {}
 
@@ -143,3 +139,27 @@ def test_doc_vocab_bo_qua_dong_khong_phai_mid(tmp_path):
     path.write_text("MID\tdisplay_name\n/m/032s66\tGunshot, gunfire\n", encoding="utf-8")
     mapping = fas.load_mid_to_display_name(path)
     assert mapping == {"/m/032s66": "Gunshot, gunfire"}
+
+
+# ── Chọn mẫu phân tầng theo lớp ──────────────────────────────────────────────
+
+
+def test_lop_hiem_khong_bi_lop_dong_lan_at():
+    """66229 ổ tổng nhưng lệch rất mạnh (speech_normal >> fireworks) — lấy N ổ đầu
+    theo thứ tự bất kỳ sẽ toàn speech_normal, bỏ đói lớp hiếm."""
+    segments = {(f"v{i}", 0): [{"class_id": "speech_normal"}] for i in range(1000)}
+    segments[("rare", 0)] = [{"class_id": "fireworks"}]
+    keys = fas.stratified_keys(segments, per_class_limit=5)
+    assert ("rare", 0) in keys
+
+
+def test_moi_lop_toi_da_per_class_limit_o():
+    segments = {(f"v{i}", 0): [{"class_id": "siren"}] for i in range(50)}
+    keys = fas.stratified_keys(segments, per_class_limit=10)
+    assert len(keys) == 10
+
+
+def test_mot_o_thoa_nhieu_lop_khong_bi_dem_hai_lan():
+    segments = {("v1", 0): [{"class_id": "siren"}, {"class_id": "alarm_bell"}]}
+    keys = fas.stratified_keys(segments, per_class_limit=5)
+    assert keys == [("v1", 0)]
