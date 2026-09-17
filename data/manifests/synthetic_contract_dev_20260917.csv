@@ -1,0 +1,477 @@
+file_id,stage,reason_code,detail,decided_by,decided_at
+dev_000000,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000001,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000002,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000003,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000008,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000013,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000014,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000021,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000021,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000023,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000024,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000025,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000031,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000038,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000038,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000042,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000043,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000046,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000048,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000054,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000056,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000059,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000071,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000075,verify_synthetic,slice_long_event,dài nhất 1.01s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000077,verify_synthetic,slice_long_event,dài nhất 0.94s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000094,verify_synthetic,slice_long_event,dài nhất 0.33s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000094,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000096,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000098,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000101,verify_synthetic,slice_long_event,dài nhất 1.00s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000108,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000113,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000114,verify_synthetic,slice_long_event,dài nhất 0.92s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000123,verify_synthetic,slice_long_event,dài nhất 0.90s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000126,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000127,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000141,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000143,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000145,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000149,verify_synthetic,slice_long_event,dài nhất 1.03s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000149,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000150,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000151,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000153,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000158,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000160,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000161,verify_synthetic,slice_long_event,dài nhất 0.98s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000163,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000163,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000166,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000171,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000173,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000174,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000180,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000184,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000186,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000190,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000191,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000192,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000193,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000196,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000197,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000198,verify_synthetic,slice_long_event,dài nhất 1.00s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000199,verify_synthetic,slice_long_event,dài nhất 0.99s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000201,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000208,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000220,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000223,verify_synthetic,slice_long_event,dài nhất 0.95s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000225,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000232,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000236,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000238,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000239,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000243,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000244,verify_synthetic,slice_long_event,dài nhất 1.08s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000245,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000247,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000249,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000253,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000256,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000257,verify_synthetic,slice_long_event,dài nhất 1.00s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000257,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000260,verify_synthetic,slice_long_event,dài nhất 0.98s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000261,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000263,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000264,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000267,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000270,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000274,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000277,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000284,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000286,verify_synthetic,slice_long_event,dài nhất 1.10s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000287,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000287,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000293,verify_synthetic,slice_long_event,dài nhất 0.48s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000295,verify_synthetic,slice_long_event,dài nhất 0.97s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000300,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000301,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000303,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000317,verify_synthetic,slice_long_event,dài nhất 1.05s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000317,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000319,verify_synthetic,slice_long_event,dài nhất 0.99s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000320,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000322,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000328,verify_synthetic,slice_long_event,dài nhất 0.96s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000329,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000331,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000331,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000334,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000335,verify_synthetic,slice_long_event,dài nhất 1.04s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000337,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000341,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000342,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000343,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000346,verify_synthetic,slice_long_event,dài nhất 1.00s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000350,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000356,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000358,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000361,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000367,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000377,verify_synthetic,slice_long_event,dài nhất 1.08s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000385,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000387,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000392,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000396,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000397,verify_synthetic,slice_long_event,dài nhất 0.92s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000397,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000402,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000410,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000412,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000415,verify_synthetic,slice_long_event,dài nhất 0.80s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000420,verify_synthetic,slice_long_event,dài nhất 0.99s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000421,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000432,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000435,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000436,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000438,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000443,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000444,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000448,verify_synthetic,slice_long_event,dài nhất 1.08s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000450,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000475,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000481,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000482,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000484,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000489,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000492,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000493,verify_synthetic,slice_long_event,dài nhất 1.05s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000493,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000495,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000502,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000507,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000512,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000514,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000519,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000520,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000523,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000529,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000534,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000542,verify_synthetic,slice_long_event,dài nhất 0.99s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000543,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000545,verify_synthetic,slice_long_event,dài nhất 0.75s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000546,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000554,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000555,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000558,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000559,verify_synthetic,slice_long_event,dài nhất 0.94s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000561,verify_synthetic,slice_long_event,dài nhất 0.91s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000563,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000564,verify_synthetic,slice_long_event,dài nhất 1.01s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000566,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000570,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000573,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000577,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000577,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000580,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000584,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000592,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000595,verify_synthetic,slice_long_event,dài nhất 0.95s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000595,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000599,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000601,verify_synthetic,slice_long_event,dài nhất 1.08s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000601,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000606,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000617,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000619,verify_synthetic,slice_long_event,dài nhất 0.92s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000620,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000621,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000625,verify_synthetic,slice_long_event,dài nhất 1.00s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000625,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000628,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000631,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000631,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000636,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000637,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000643,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000645,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000647,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000649,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000652,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000654,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000655,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000661,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000664,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000669,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000675,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000683,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000684,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000691,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000693,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000696,verify_synthetic,slice_long_event,dài nhất 0.95s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000699,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000699,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000701,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000702,verify_synthetic,slice_long_event,dài nhất 1.03s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000702,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000703,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000706,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000707,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000709,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000713,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000717,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000723,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000724,verify_synthetic,slice_long_event,dài nhất 1.05s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000734,verify_synthetic,slice_long_event,dài nhất 0.91s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000734,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000735,verify_synthetic,slice_long_event,dài nhất 1.03s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000736,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000739,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000741,verify_synthetic,slice_long_event,dài nhất 1.05s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000741,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000743,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000745,verify_synthetic,slice_long_event,dài nhất 0.85s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000746,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000749,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000750,verify_synthetic,slice_long_event,dài nhất 0.99s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000755,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000758,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000759,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000764,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000766,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000779,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000782,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000792,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000793,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000802,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000806,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000808,verify_synthetic,slice_long_event,dài nhất 0.99s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000811,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000812,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000813,verify_synthetic,slice_long_event,dài nhất 1.01s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000813,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000815,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000816,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000816,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000817,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000822,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000825,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000826,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000827,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000828,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000828,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000830,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000831,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000832,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000837,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000842,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000844,verify_synthetic,slice_long_event,dài nhất 1.03s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000850,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000855,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000857,verify_synthetic,slice_long_event,dài nhất 1.04s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000858,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000861,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000863,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000865,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000870,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000872,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000873,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000874,verify_synthetic,slice_long_event,dài nhất 1.03s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000875,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000882,verify_synthetic,slice_long_event,dài nhất 1.01s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000884,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000892,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000894,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000901,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000903,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000910,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000919,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000920,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000931,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000934,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000935,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000937,verify_synthetic,slice_long_event,dài nhất 1.00s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000937,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000941,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000945,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000947,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000949,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000951,verify_synthetic,slice_long_event,dài nhất 1.04s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000953,verify_synthetic,slice_long_event,dài nhất 0.98s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000954,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000955,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000957,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000962,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000964,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000965,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000975,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000976,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000978,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000981,verify_synthetic,slice_long_event,dài nhất 1.04s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000987,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000988,verify_synthetic,slice_long_event,dài nhất 0.99s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000988,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000993,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000995,verify_synthetic,slice_long_event,dài nhất 0.98s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_000995,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000996,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_000999,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001007,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001007,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001011,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001012,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001015,verify_synthetic,slice_long_event,dài nhất 1.05s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001019,verify_synthetic,slice_long_event,dài nhất 0.86s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001020,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001020,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001021,verify_synthetic,slice_long_event,dài nhất 0.92s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001022,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001024,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001034,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001036,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001038,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001043,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001044,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001047,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001050,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001051,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001055,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001057,verify_synthetic,slice_long_event,dài nhất 1.01s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001057,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001060,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001075,verify_synthetic,slice_long_event,dài nhất 1.00s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001075,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001077,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001080,verify_synthetic,slice_long_event,dài nhất 0.94s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001082,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001083,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001090,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001091,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001093,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001094,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001097,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001099,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001101,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001104,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001106,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001106,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001107,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001118,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001125,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001126,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001140,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001143,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001144,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001147,verify_synthetic,slice_long_event,dài nhất 1.00s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001155,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001155,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001157,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001159,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001161,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001163,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001165,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001168,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001172,verify_synthetic,slice_long_event,dài nhất 1.04s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001175,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001184,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001187,verify_synthetic,slice_long_event,dài nhất 1.03s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001187,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001189,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001190,verify_synthetic,slice_long_event,dài nhất 0.96s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001192,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001194,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001197,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001202,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001203,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001204,verify_synthetic,slice_long_event,dài nhất 0.83s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001208,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001210,verify_synthetic,slice_long_event,dài nhất 0.73s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001213,verify_synthetic,slice_long_event,dài nhất 1.01s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001213,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001214,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001215,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001215,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001221,verify_synthetic,slice_long_event,dài nhất 1.03s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001226,verify_synthetic,slice_long_event,dài nhất 1.03s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001227,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001230,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001231,verify_synthetic,slice_long_event,dài nhất 0.92s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001234,verify_synthetic,slice_long_event,dài nhất 0.98s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001235,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001237,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001244,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001247,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001248,verify_synthetic,slice_long_event,dài nhất 0.95s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001249,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001250,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001253,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001254,verify_synthetic,slice_long_event,dài nhất 1.06s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001257,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001273,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001274,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001275,verify_synthetic,slice_long_event,dài nhất 1.04s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001276,verify_synthetic,slice_long_event,dài nhất 1.01s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001281,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001287,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001288,verify_synthetic,slice_long_event,dài nhất 1.05s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001288,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001291,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001293,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001297,verify_synthetic,slice_long_event,dài nhất 1.02s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001301,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001304,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001306,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001307,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001310,verify_synthetic,slice_long_event,dài nhất 1.05s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001310,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001319,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001322,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001324,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001334,verify_synthetic,slice_long_event,dài nhất 1.05s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001337,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001338,verify_synthetic,slice_long_event,dài nhất 0.85s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001341,verify_synthetic,slice_long_event,dài nhất 0.72s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001346,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001348,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001350,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001353,verify_synthetic,slice_long_event,dài nhất 0.87s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001355,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001359,verify_synthetic,slice_long_event,dài nhất 0.94s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001359,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001360,verify_synthetic,slice_long_event,dài nhất 1.01s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001361,verify_synthetic,slice_long_event,dài nhất 1.08s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001362,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001363,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001364,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001366,verify_synthetic,slice_long_event,dài nhất 1.08s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001370,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001372,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001373,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001375,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001378,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001380,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001381,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001383,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001389,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001391,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001393,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001395,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001397,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001398,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001399,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001401,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001405,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001409,verify_synthetic,slice_long_event,dài nhất 1.09s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001411,verify_synthetic,slice_long_event,dài nhất 1.07s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001413,verify_synthetic,slice_long_event,dài nhất 0.79s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001413,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001419,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001427,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001430,verify_synthetic,slice_long_event,dài nhất 1.01s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001430,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001431,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001432,verify_synthetic,slice_long_event,dài nhất 0.99s < 8.0s,auto,2026-09-17T05:24:21.802437+00:00
+dev_001433,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+dev_001435,verify_synthetic,slice_overlap,không cặp nào chồng lấn ≥30%,auto,2026-09-17T05:24:21.802437+00:00
+<dev>,verify_synthetic,duration_truncated,"p90 độ dài sự kiện toàn bộ = 1.08s, nhưng bank có lớp dài hơn nhiều: applause_cheering (3.0s), siren (4.0s), vehicle_crash (4.4s). Kiểm tra event_duration trong scaper_generate.py",auto,2026-09-17T05:24:21.802437+00:00

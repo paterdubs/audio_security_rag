@@ -1,0 +1,360 @@
+{
+  "annotations": [
+    {
+      "annotation_metadata": {
+        "curator": {
+          "name": "",
+          "email": ""
+        },
+        "annotator": {},
+        "version": "",
+        "corpus": "",
+        "annotation_tools": "",
+        "annotation_rules": "",
+        "validation": "",
+        "data_source": ""
+      },
+      "namespace": "scaper",
+      "data": [
+        {
+          "time": 0.0,
+          "duration": 10.0,
+          "value": {
+            "label": "school",
+            "source_file": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\banks\\background\\school\\bg_school_tau2019_01209.wav",
+            "source_time": 0,
+            "event_time": 0,
+            "event_duration": 10.0,
+            "snr": 0,
+            "role": "background",
+            "pitch_shift": null,
+            "time_stretch": null
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 2.535595601002462,
+          "duration": 1.0582225629349242,
+          "value": {
+            "label": "glass_breaking",
+            "source_file": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\banks\\foreground\\glass_breaking\\fsd50k_glass_breaking_4dc0e24f.wav",
+            "source_time": 0,
+            "event_time": 2.535595601002462,
+            "event_duration": 1.0,
+            "snr": 0.013231562495699123,
+            "role": "foreground",
+            "pitch_shift": -0.6750550028301903,
+            "time_stretch": 1.0582225629349242
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 4.35,
+          "duration": 0.981488645759631,
+          "value": {
+            "label": "glass_breaking",
+            "source_file": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\banks\\foreground\\glass_breaking\\fsd50k_glass_breaking_f3bb5499.wav",
+            "source_time": 0,
+            "event_time": 4.35,
+            "event_duration": 1.0,
+            "snr": 4.600010282132006,
+            "role": "foreground",
+            "pitch_shift": 0.5414925745564936,
+            "time_stretch": 0.981488645759631
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 6.717,
+          "duration": 1.0710447288839244,
+          "value": {
+            "label": "scream",
+            "source_file": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\banks\\foreground\\scream\\fsd50k_scream_a41b063d.wav",
+            "source_time": 0,
+            "event_time": 6.717,
+            "event_duration": 1.0,
+            "snr": -2.7313740605223567,
+            "role": "foreground",
+            "pitch_shift": -0.784663798057555,
+            "time_stretch": 1.0710447288839244
+          },
+          "confidence": 1.0
+        },
+        {
+          "time": 8.647,
+          "duration": 0.9132360550831191,
+          "value": {
+            "label": "running_footsteps",
+            "source_file": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\banks\\foreground\\running_footsteps\\fsd50k_running_footsteps_4dff06ce.wav",
+            "source_time": 0,
+            "event_time": 8.647,
+            "event_duration": 1.0,
+            "snr": 4.215369988346131,
+            "role": "foreground",
+            "pitch_shift": 0.9943122832957421,
+            "time_stretch": 0.9132360550831191
+          },
+          "confidence": 1.0
+        }
+      ],
+      "sandbox": {
+        "scaper": {
+          "duration": 10.0,
+          "original_duration": 10.0,
+          "fg_path": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\banks\\foreground",
+          "bg_path": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\banks\\background",
+          "fg_spec": [
+            [
+              [
+                "const",
+                "glass_breaking"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "const",
+                4.35
+              ],
+              [
+                "const",
+                1.0
+              ],
+              [
+                "uniform",
+                -5.0,
+                5.0
+              ],
+              "foreground",
+              [
+                "uniform",
+                -1.0,
+                1.0
+              ],
+              [
+                "uniform",
+                0.9,
+                1.1
+              ]
+            ],
+            [
+              [
+                "const",
+                "scream"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "const",
+                6.717
+              ],
+              [
+                "const",
+                1.0
+              ],
+              [
+                "uniform",
+                -5.0,
+                5.0
+              ],
+              "foreground",
+              [
+                "uniform",
+                -1.0,
+                1.0
+              ],
+              [
+                "uniform",
+                0.9,
+                1.1
+              ]
+            ],
+            [
+              [
+                "const",
+                "running_footsteps"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "const",
+                8.647
+              ],
+              [
+                "const",
+                1.0
+              ],
+              [
+                "uniform",
+                -5.0,
+                5.0
+              ],
+              "foreground",
+              [
+                "uniform",
+                -1.0,
+                1.0
+              ],
+              [
+                "uniform",
+                0.9,
+                1.1
+              ]
+            ],
+            [
+              [
+                "choose",
+                []
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "uniform",
+                0,
+                10.0
+              ],
+              [
+                "const",
+                1.0
+              ],
+              [
+                "uniform",
+                -5.0,
+                5.0
+              ],
+              "foreground",
+              [
+                "uniform",
+                -1.0,
+                1.0
+              ],
+              [
+                "uniform",
+                0.9,
+                1.1
+              ]
+            ]
+          ],
+          "bg_spec": [
+            [
+              [
+                "const",
+                "school"
+              ],
+              [
+                "choose",
+                []
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "const",
+                0
+              ],
+              [
+                "const",
+                10.0
+              ],
+              [
+                "const",
+                0
+              ],
+              "background",
+              null,
+              null
+            ]
+          ],
+          "fg_labels": [
+            "alarm_bell",
+            "applause_cheering",
+            "door_slam",
+            "explosion",
+            "fireworks",
+            "glass_breaking",
+            "gunshot",
+            "laughter",
+            "object_drop_dishes",
+            "running_footsteps",
+            "scream",
+            "shout_yell",
+            "siren",
+            "speech_normal",
+            "vehicle_crash"
+          ],
+          "bg_labels": [
+            "factory",
+            "parking",
+            "residential",
+            "school"
+          ],
+          "protected_labels": [],
+          "sr": 16000,
+          "ref_db": -23,
+          "n_channels": 1,
+          "fade_in_len": 0.01,
+          "fade_out_len": 0.01,
+          "n_events": 4,
+          "polyphony_max": 1,
+          "polyphony_gini": 0.4010014937618608,
+          "allow_repeated_label": true,
+          "allow_repeated_source": true,
+          "reverb": null,
+          "scaper_version": "1.6.5",
+          "soundscape_audio_path": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\synthetic\\train\\audio\\train_002959.wav",
+          "isolated_events_audio_path": [],
+          "audio_path": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\synthetic\\train\\audio\\train_002959.wav",
+          "jams_path": "D:\\IUH_K18\\HK1N5\\KLTN\\audio-security-rag\\data\\synthetic\\train\\jams\\train_002959.jams",
+          "fix_clipping": true,
+          "peak_normalization": false,
+          "save_isolated_events": false,
+          "isolated_events_path": null,
+          "disable_sox_warnings": true,
+          "no_audio": false,
+          "txt_path": null,
+          "txt_sep": "\t",
+          "disable_instantiation_warnings": false,
+          "peak_normalization_scale_factor": 0.5662588475683157,
+          "ref_db_change": -4.939699984965749,
+          "ref_db_generated": -27.93969998496575,
+          "quick_pitch_time": false
+        }
+      },
+      "time": 0,
+      "duration": 10.0
+    }
+  ],
+  "file_metadata": {
+    "title": "",
+    "artist": "",
+    "release": "",
+    "duration": 10.0,
+    "identifiers": {},
+    "jams_version": "0.3.5"
+  },
+  "sandbox": {}
+}

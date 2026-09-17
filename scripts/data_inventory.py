@@ -18,10 +18,10 @@ import csv
 import json
 import statistics
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 import yaml
-
 from common import REPO_ROOT, enable_utf8_output
 
 ONTOLOGY_PATH = REPO_ROOT / "ml" / "configs" / "ontology_map.yaml"
@@ -162,7 +162,11 @@ def render(fg: list[dict], bg: list[dict], rir: list[dict],
     lines = [
         "# data_inventory.md — Tổng kết dữ liệu (sinh tự động)",
         "",
-        "> **KHÔNG sửa tay.** Chạy `python scripts/data_inventory.py` để sinh lại.",
+        "> **KHÔNG sửa tay.** Chạy `.venv/Scripts/python.exe scripts/data_inventory.py` để sinh lại.",
+        f"> Snapshot UTC: {datetime.now(UTC).isoformat(timespec='seconds')}. Xem [STATUS.md](STATUS.md).",
+        "> Bảng bank đọc manifest; synthetic đọc slice_index, không chứng nhận audio/slice đạt QA.",
+        "> Real dev/gold đọc splits.csv + raw_manifest.csv; AudioSet 937 WAV/segments đã tải rồi dừng 17/09 nhưng chưa nhập manifest nên không được tính.",
+        "> Taxonomy 16 lớp, SED 15 đầu ra; ambient_noise không cần foreground. Shout_yell giữ 56/80 theo ADR-0005.",
         "",
         "## Foreground bank",
         "",
@@ -187,6 +191,7 @@ def render(fg: list[dict], bg: list[dict], rir: list[dict],
     lines.append("")
 
     lines += ["## Train/dev tổng hợp (Scaper)", "",
+              "Lát cắt dưới đây là kế hoạch, không phải số clip vượt kiểm định hợp đồng. Không có index thì chưa hiện trong bảng.", "",
               "| Tập | Clip | Giờ | Clip im lặng | Lát cắt |", "|---|---:|---:|---:|---|"]
     for row in synth:
         slice_str = ", ".join(f"{k}={v}" for k, v in sorted(row["slice_counts"].items()))

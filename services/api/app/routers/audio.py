@@ -21,6 +21,7 @@ from app.event_ids import next_event_id
 from app.inference_client import InferenceClient
 from app.models import EventDetection, Location, SecurityEvent
 from app.ontology import class_tiers
+from app.rag.document import build_document
 from app.risk import Detection, score_event
 from app.routers.alerts import broadcast_event
 from app.schemas import DetectionOut, UploadResponse
@@ -56,7 +57,8 @@ async def upload_audio(
 
     # Location phải có thật: FK sẽ chặn, nhưng báo lỗi 400 rõ ràng tốt hơn là để lỗi
     # ràng buộc khoá ngoại nổ ra dưới tầng DB.
-    if await session.get(Location, location_id) is None:
+    location = await session.get(Location, location_id)
+    if location is None:
         known = list((await session.scalars(select(Location.location_id))).all())
         raise HTTPException(status_code=400, detail=f"location_id {location_id!r} không có. Đang có: {known}")
 
@@ -105,11 +107,24 @@ async def upload_audio(
             )
         )
 
-    # Embedding: embed caption_vi (KHÔNG phải caption_en) vì người dùng hỏi tiếng Việt —
-    # §7.4. Lỗi embedding không được làm mất sự kiện: sự kiện vẫn phải vào DB và vẫn
-    # cảnh báo được, chỉ là tạm thời chưa truy xuất được bằng RAG.
+    # Embedding: nhúng tiếng Việt (KHÔNG phải caption_en) vì người dùng hỏi tiếng Việt — §7.4.
+    #
+    # Nhúng VĂN BẢN GIÀU THÔNG TIN chứ không phải mỗi caption: caption trần là câu template
+    # nên mọi sự kiện giống nhau 0.83–0.92 và RAG trả về cùng một sự kiện cho mọi câu hỏi.
+    # Xem app/rag/document.py để có số đo đầy đủ.
+    #
+    # Lỗi embedding không được làm mất sự kiện: sự kiện vẫn phải vào DB và vẫn cảnh báo
+    # được, chỉ là tạm thời chưa truy xuất được bằng RAG.
+    document = build_document(
+        caption_vi=result.caption_vi,
+        class_ids=[d["class_id"] for d in result.detections],
+        window_start=now,
+        location_name=location.name,
+        area_type=location.area_type,
+        severity=risk.severity,
+    )
     try:
-        vectors = await InferenceClient().embed([result.caption_vi])
+        vectors = await InferenceClient().embed([document])
         event.embedding = vectors[0]
     except Exception:  # noqa: BLE001
         event.embedding = None

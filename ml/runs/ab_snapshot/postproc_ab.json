@@ -1,0 +1,81 @@
+{
+  "clip_map": 0.7867286762607083,
+  "clip_ap_per_class": {
+    "alarm_bell": 0.8722833933822778,
+    "applause_cheering": 0.9530875347606218,
+    "door_slam": 0.650970090704622,
+    "explosion": 0.6112802339991671,
+    "fireworks": 0.6962841766634239,
+    "glass_breaking": 0.8230351124793158,
+    "gunshot": 0.6419326956167863,
+    "laughter": 0.9081058552887098,
+    "object_drop_dishes": 0.5771323334101502,
+    "running_footsteps": 0.8577846441874716,
+    "scream": 0.8983309216285791,
+    "shout_yell": 0.8548912256829847,
+    "siren": 0.9016805325248952,
+    "speech_normal": 0.8933158179718952,
+    "vehicle_crash": 0.6608155756097206
+  },
+  "median_sizes": {
+    "alarm_bell": 51,
+    "applause_cheering": 51,
+    "door_slam": 51,
+    "explosion": 51,
+    "fireworks": 51,
+    "glass_breaking": 51,
+    "gunshot": 51,
+    "laughter": 51,
+    "object_drop_dishes": 47,
+    "running_footsteps": 51,
+    "scream": 51,
+    "shout_yell": 51,
+    "siren": 51,
+    "speech_normal": 51,
+    "vehicle_crash": 51
+  },
+  "results": {
+    "cố định (7)": {
+      "segment_f1": 0.37891596220785684,
+      "event_f1": 0.1362514398551917,
+      "event_f1_per_class": {
+        "alarm_bell": 0.13333333333333333,
+        "applause_cheering": 0.18960244648318042,
+        "door_slam": 0.1003344481605351,
+        "explosion": 0.10140845070422534,
+        "fireworks": 0.06369426751592357,
+        "glass_breaking": 0.17210682492581603,
+        "gunshot": 0.07594936708860758,
+        "laughter": 0.1858974358974359,
+        "object_drop_dishes": 0.08869179600886919,
+        "running_footsteps": 0.22626262626262628,
+        "scream": 0.22754491017964074,
+        "shout_yell": 0.13545816733067728,
+        "siren": 0.15827338129496404,
+        "speech_normal": 0.20657276995305163,
+        "vehicle_crash": 0.11583011583011583
+      }
+    },
+    "thích ứng": {
+      "segment_f1": 0.37891596220785684,
+      "event_f1": 0.1362514398551917,
+      "event_f1_per_class": {
+        "alarm_bell": 0.13333333333333333,
+        "applause_cheering": 0.18960244648318042,
+        "door_slam": 0.1003344481605351,
+        "explosion": 0.10140845070422534,
+        "fireworks": 0.06369426751592357,
+        "glass_breaking": 0.17210682492581603,
+        "gunshot": 0.07594936708860758,
+        "laughter": 0.1858974358974359,
+        "object_drop_dishes": 0.08869179600886919,
+        "running_footsteps": 0.22626262626262628,
+        "scream": 0.22754491017964074,
+        "shout_yell": 0.13545816733067728,
+        "siren": 0.15827338129496404,
+        "speech_normal": 0.20657276995305163,
+        "vehicle_crash": 0.11583011583011583
+      }
+    }
+  }
+}

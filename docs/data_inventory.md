@@ -1,6 +1,10 @@
 # data_inventory.md — Tổng kết dữ liệu (sinh tự động)
 
-> **KHÔNG sửa tay.** Chạy `python scripts/data_inventory.py` để sinh lại.
+> **KHÔNG sửa tay.** Chạy `.venv/Scripts/python.exe scripts/data_inventory.py` để sinh lại.
+> Snapshot UTC: 2026-09-17T17:29:44+00:00. Xem [STATUS.md](STATUS.md).
+> Bảng bank đọc manifest; synthetic đọc slice_index, không chứng nhận audio/slice đạt QA.
+> Real dev/gold đọc splits.csv + raw_manifest.csv; AudioSet 937 WAV/segments đã tải rồi dừng 17/09 nhưng chưa nhập manifest nên không được tính.
+> Taxonomy 16 lớp, SED 15 đầu ra; ambient_noise không cần foreground. Shout_yell giữ 56/80 theo ADR-0005.
 
 ## Foreground bank
 
@@ -44,8 +48,12 @@
 
 ## Train/dev tổng hợp (Scaper)
 
+Lát cắt dưới đây là kế hoạch, không phải số clip vượt kiểm định hợp đồng. Không có index thì chưa hiện trong bảng.
+
 | Tập | Clip | Giờ | Clip im lặng | Lát cắt |
 |---|---:|---:|---:|---|
+| train | 7920 | 22.0 | 788 | causal_chain=1161, long_event=791, low_snr=1928, overlap=2387, reverb=3136 |
+| dev | 1440 | 4.0 | 153 | causal_chain=203, long_event=144, low_snr=390, overlap=437, reverb=557 |
 
 ## dev / gold_test — audio thật
 

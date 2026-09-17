@@ -70,15 +70,16 @@ def test_mid_khong_khop_lop_nao_thi_bo_qua():
     assert segments == {}
 
 
-# ── Ghi segments.jsonl, không đè kết quả cũ ─────────────────────────────────
+# ── Ghi segments.jsonl NGAY từng dòng, không đè kết quả cũ ──────────────────
 
 
 def test_them_dong_moi_khong_xoa_dong_cu(tmp_path, monkeypatch):
     monkeypatch.setattr(fas, "RAW_ROOT", tmp_path)
     monkeypatch.setattr(fas, "SEGMENTS_PATH", tmp_path / "segments.jsonl")
 
-    fas.append_segments([{"file_id": "a", "events": []}])
-    fas.append_segments([{"file_id": "b", "events": []}])
+    seen = fas.load_existing_segment_ids()
+    fas.append_one_segment({"file_id": "a", "events": []}, seen)
+    fas.append_one_segment({"file_id": "b", "events": []}, seen)
 
     with fas.SEGMENTS_PATH.open(encoding="utf-8") as handle:
         ids = [json.loads(line)["file_id"] for line in handle]
@@ -89,9 +90,45 @@ def test_them_dong_da_co_khong_bi_nhan_doi(tmp_path, monkeypatch):
     monkeypatch.setattr(fas, "RAW_ROOT", tmp_path)
     monkeypatch.setattr(fas, "SEGMENTS_PATH", tmp_path / "segments.jsonl")
 
-    fas.append_segments([{"file_id": "a", "events": []}])
-    fas.append_segments([{"file_id": "a", "events": []}])
+    seen = fas.load_existing_segment_ids()
+    fas.append_one_segment({"file_id": "a", "events": []}, seen)
+    fas.append_one_segment({"file_id": "a", "events": []}, seen)
 
+    with fas.SEGMENTS_PATH.open(encoding="utf-8") as handle:
+        assert len(handle.readlines()) == 1
+
+
+def test_khong_nhan_doi_ke_ca_qua_lan_goi_load_lai(tmp_path, monkeypatch):
+    """Mô phỏng đúng kịch bản đã gây mất dữ liệu: tiến trình bị giết giữa `run()`, rồi
+    chạy lại — `load_existing_segment_ids()` đọc lại từ đĩa phải thấy dòng đã ghi trước đó."""
+    monkeypatch.setattr(fas, "RAW_ROOT", tmp_path)
+    monkeypatch.setattr(fas, "SEGMENTS_PATH", tmp_path / "segments.jsonl")
+
+    seen_1 = fas.load_existing_segment_ids()
+    fas.append_one_segment({"file_id": "a", "events": []}, seen_1)
+    # "Tiến trình mới" — nạp lại seen từ đĩa, không dùng chung biến seen_1 trong RAM.
+    seen_2 = fas.load_existing_segment_ids()
+    fas.append_one_segment({"file_id": "a", "events": []}, seen_2)
+
+    with fas.SEGMENTS_PATH.open(encoding="utf-8") as handle:
+        assert len(handle.readlines()) == 1
+
+
+def test_ghi_ngay_khong_doi_toi_cuoi(tmp_path, monkeypatch):
+    """Đây chính là bug đã xảy ra thật (17/09/2026): bản cũ dồn kết quả vào RAM (`new_rows`)
+    rồi chỉ ghi một lần ở cuối `run()`. Nếu tiến trình chết giữa đường (mất điện, crash,
+    bị kill), mọi file đã tải thành công KHÔNG có dòng nào trong segments.jsonl trỏ tới —
+    375 file .wav trên đĩa mà chỉ 3 dòng ghi lại. Test này khẳng định dòng ghi xong ngay
+    sau lệnh gọi, không phụ thuộc bước nào tiếp theo."""
+    monkeypatch.setattr(fas, "RAW_ROOT", tmp_path)
+    monkeypatch.setattr(fas, "SEGMENTS_PATH", tmp_path / "segments.jsonl")
+
+    seen = fas.load_existing_segment_ids()
+    fas.append_one_segment({"file_id": "a", "events": []}, seen)
+
+    # Đọc lại file NGAY, giả lập một tiến trình khác (hoặc lần chạy lại sau crash) mở
+    # file trong khi tiến trình ghi còn "sống" — nếu dữ liệu còn kẹt trong buffer chưa
+    # flush, dòng này sẽ không thấy được.
     with fas.SEGMENTS_PATH.open(encoding="utf-8") as handle:
         assert len(handle.readlines()) == 1
 
@@ -104,23 +141,20 @@ class _FakeInfo:
         self.duration = duration
 
 
-def _fake_run_writing_wav(cmd, **kwargs):
-    dest = Path(cmd[cmd.index("-o") + 1].replace(".%(ext)s", ".wav"))
-    dest.write_bytes(b"RIFF")
-
-    class Result:
-        returncode = 0
-    return Result()
+def _fake_download_ok(cmd, timeout):
+    """Giả lập yt-dlp chạy thành công: ghi file đích rồi trả mã 0."""
+    Path(cmd[cmd.index("-o") + 1].replace(".%(ext)s", ".wav")).write_bytes(b"RIFF")
+    return 0
 
 
 def test_tai_audio_goi_dung_khoang_thoi_gian(tmp_path, monkeypatch):
     captured = {}
 
-    def fake_run(cmd, **kwargs):
-        captured["cmd"] = cmd
-        return _fake_run_writing_wav(cmd, **kwargs)
+    def fake_run(cmd, timeout):
+        captured["cmd"], captured["timeout"] = cmd, timeout
+        return _fake_download_ok(cmd, timeout)
 
-    monkeypatch.setattr(fas.subprocess, "run", fake_run)
+    monkeypatch.setattr(fas, "run_with_hard_timeout", fake_run)
     monkeypatch.setattr(fas.soundfile, "info", lambda path: _FakeInfo(10.0))
     dest = tmp_path / "clip.wav"
     ok = fas.download_window("abc123", 5000, dest)
@@ -135,23 +169,114 @@ def test_ep_keyframe_de_cat_dung_vi_tri(tmp_path, monkeypatch):
     thật một clip ra 19.994s thay vì 10s, làm nhãn onset/offset lệch khỏi audio."""
     captured = {}
 
-    def fake_run(cmd, **kwargs):
+    def fake_run(cmd, timeout):
         captured["cmd"] = cmd
-        return _fake_run_writing_wav(cmd, **kwargs)
+        return _fake_download_ok(cmd, timeout)
 
-    monkeypatch.setattr(fas.subprocess, "run", fake_run)
+    monkeypatch.setattr(fas, "run_with_hard_timeout", fake_run)
     monkeypatch.setattr(fas.soundfile, "info", lambda path: _FakeInfo(10.0))
     fas.download_window("abc123", 0, tmp_path / "clip.wav")
     assert "--force-keyframes-at-cuts" in captured["cmd"]
 
 
-def test_tai_audio_that_bai_tra_ve_false(tmp_path, monkeypatch):
-    def fake_run(cmd, **kwargs):
-        class Result:
-            returncode = 1
-        return Result()
+def test_co_tran_thoi_gian_cho_moi_clip(tmp_path, monkeypatch):
+    """Thiếu trần thời gian thì một video treo khoá cả job vĩnh viễn — đã xảy ra thật
+    17/09/2026 (job đứng 56 phút). Đây là lỗi im lặng nên phải có test canh."""
+    captured = {}
 
-    monkeypatch.setattr(fas.subprocess, "run", fake_run)
+    def fake_run(cmd, timeout):
+        captured["timeout"] = timeout
+        return _fake_download_ok(cmd, timeout)
+
+    monkeypatch.setattr(fas, "run_with_hard_timeout", fake_run)
+    monkeypatch.setattr(fas.soundfile, "info", lambda path: _FakeInfo(10.0))
+    fas.download_window("abc123", 0, tmp_path / "clip.wav")
+
+    assert captured.get("timeout"), "phải truyền trần thời gian xuống"
+    assert captured["timeout"] <= 600, "trần quá lớn thì coi như không có trần"
+
+
+def test_qua_han_thi_bo_file_do_va_tra_ve_false(tmp_path, monkeypatch):
+    """File tải dở vẫn `exists()`, nên lần chạy sau sẽ bỏ qua nó và nhận một clip hỏng
+    vào manifest. Phải xoá hẳn."""
+    dest = tmp_path / "clip.wav"
+
+    def fake_run(cmd, timeout):
+        dest.write_bytes(b"RIFF....phan tai do")
+        return None      # None = quá hạn
+
+    monkeypatch.setattr(fas, "run_with_hard_timeout", fake_run)
+
+    assert not fas.download_window("abc123", 0, dest)
+    assert not dest.exists()
+
+
+# ── Trần thời gian phải THOÁT RA ĐƯỢC, không chỉ tồn tại ────────────────────
+
+
+def test_khong_mo_pipe_vi_pipe_khoa_duong_thoat_cua_timeout(monkeypatch):
+    """Bản vá TRƯỚC (subprocess.run + capture_output + timeout) KHÔNG đủ: job vẫn treo
+    34,7 phút với ffmpeg chỉ tốn 0,64 s CPU.
+
+    Cơ chế: yt-dlp sinh ffmpeg làm tiến trình CHÁU, cháu thừa hưởng hai đầu pipe. Hết giờ,
+    Python giết yt-dlp rồi communicate() chờ pipe ĐÓNG, mà pipe chỉ đóng khi ffmpeg chết —
+    chính đường thoát của timeout bị khoá. Điều kiện cần để thoát được: không mở pipe nào.
+    """
+    ghi_nhan = {}
+
+    class _FakePopen:
+        def __init__(self, cmd, **kwargs):
+            ghi_nhan.update(kwargs)
+            self.pid = 1
+
+        def wait(self, timeout=None):
+            return 0
+
+    monkeypatch.setattr(fas.subprocess, "Popen", _FakePopen)
+    fas.run_with_hard_timeout(["yt-dlp"], 10)
+
+    assert ghi_nhan.get("stdout") is fas.subprocess.DEVNULL
+    assert ghi_nhan.get("stderr") is fas.subprocess.DEVNULL
+
+
+def test_qua_han_thi_giet_ca_cay_roi_bao_none(monkeypatch):
+    """Hết giờ phải (a) giết cả cây tiến trình và (b) TRẢ VỀ ĐƯỢC, không treo ở bước dọn."""
+    da_giet = []
+
+    class _FakeHangingPopen:
+        def __init__(self, cmd, **kwargs):
+            self.pid = 4242
+            self.lan_goi = 0
+
+        def wait(self, timeout=None):
+            # Lần đầu: treo quá hạn. Lần sau (sau khi bị giết): trả về ngay.
+            self.lan_goi += 1
+            if self.lan_goi == 1:
+                raise fas.subprocess.TimeoutExpired("yt-dlp", timeout)
+            return -9
+
+    monkeypatch.setattr(fas.subprocess, "Popen", _FakeHangingPopen)
+    monkeypatch.setattr(fas, "kill_process_tree", da_giet.append)
+
+    assert fas.run_with_hard_timeout(["yt-dlp"], 1) is None
+    assert da_giet == [4242]
+
+
+def test_giet_ca_cay_tien_trinh_tren_windows(monkeypatch):
+    """Giết mỗi tiến trình cha để lại ffmpeg mồ côi, và nó vẫn giữ file đích."""
+    goi = {}
+    monkeypatch.setattr(fas.sys, "platform", "win32")
+    monkeypatch.setattr(fas.subprocess, "run", lambda cmd, **kw: goi.setdefault("cmd", cmd))
+
+    fas.kill_process_tree(4242)
+
+    assert goi["cmd"][:1] == ["taskkill"]
+    assert "/T" in goi["cmd"], "thiếu /T thì tiến trình cháu sống sót"
+    assert "4242" in goi["cmd"]
+
+
+def test_tai_audio_that_bai_tra_ve_false(tmp_path, monkeypatch):
+    monkeypatch.setattr(fas, "run_with_hard_timeout", lambda cmd, timeout: 1)
     ok = fas.download_window("abc123", 0, tmp_path / "clip.wav")
     assert not ok
 
@@ -159,7 +284,7 @@ def test_tai_audio_that_bai_tra_ve_false(tmp_path, monkeypatch):
 def test_do_dai_lech_qua_xa_10s_thi_loai(tmp_path, monkeypatch):
     """Exit code 0 không đảm bảo cắt đúng vị trí — chỉ đảm bảo ffmpeg không crash.
     Phải tự đo lại độ dài thật, không tin exit code."""
-    monkeypatch.setattr(fas.subprocess, "run", _fake_run_writing_wav)
+    monkeypatch.setattr(fas, "run_with_hard_timeout", _fake_download_ok)
     monkeypatch.setattr(fas.soundfile, "info", lambda path: _FakeInfo(19.994))
     dest = tmp_path / "clip.wav"
     ok = fas.download_window("abc123", 200000, dest)
@@ -169,7 +294,7 @@ def test_do_dai_lech_qua_xa_10s_thi_loai(tmp_path, monkeypatch):
 
 def test_do_dai_gan_dung_van_duoc_giu(tmp_path, monkeypatch):
     """Cho phép lệch nhỏ do làm tròn container, không đòi đúng tuyệt đối 10.000s."""
-    monkeypatch.setattr(fas.subprocess, "run", _fake_run_writing_wav)
+    monkeypatch.setattr(fas, "run_with_hard_timeout", _fake_download_ok)
     monkeypatch.setattr(fas.soundfile, "info", lambda path: _FakeInfo(10.008))
     dest = tmp_path / "clip.wav"
     assert fas.download_window("abc123", 0, dest)

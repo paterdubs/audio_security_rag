@@ -1,0 +1,32 @@
+# Dependency service `inference` — CHỈ cài trong Docker image.
+#
+# Image này nặng (~2 GB vì torch) và đó là lý do `api` được tách ra không dùng torch.
+#
+# ⚠️ KHÔNG ghim numpy 1.26 ở đây. Ràng buộc đó thuộc về scaper trong requirements-data.txt
+# (môi trường .venv), không liên quan gì tới service. Ghim nhầm sang đây sẽ cản
+# sentence-transformers bản mới mà chẳng được lợi gì.
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+python-multipart==0.0.20
+PyYAML==6.0.2
+
+# --- model ---
+# torch CPU: image nhỏ hơn bản CUDA khoảng 2 GB. W1 chỉ cần chạy thông, chưa cần nhanh;
+# chuyển sang GPU là việc của W7 khi đo latency P95 thật.
+#
+# ⚠️ KHÁC requirements-screen.txt (ghim torch==2.5.1) một cách CÓ CHỦ Ý. Bản ghim 2.5.1
+# ở đó là để giữ numpy 1.26 cho scaper — ràng buộc của .venv, không liên quan gì tới
+# container này. Ở đây torch phải ≥ 2.6: transformers/sentence-transformers từ chối
+# `torch.load` trên torch cũ hơn vì CVE-2025-32434, nên 2.5.1 làm service chết ngay lúc
+# nạp BGE-M3. Đã gặp thật khi dựng service lần đầu.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.8.0
+torchaudio==2.8.0
+
+panns-inference==0.1.1     # CNN14 pretrain trên AudioSet, 527 lớp
+torchlibrosa==0.1.0
+librosa==0.10.2.post1
+soundfile==0.12.1
+sentence-transformers==3.3.1   # BGE-M3 cho embedding RAG

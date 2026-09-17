@@ -19,7 +19,15 @@ splits:
 events:
   # 0 sự kiện ~10%: dạy model biết im lặng. Thiếu nhánh này model sẽ luôn tìm ra
   # một cái gì đó, và đó chính là nguồn báo động giả.
-  count_weights: {0: 0.10, 1: 0.30, 2: 0.30, 3: 0.20, 4: 0.10}
+  #
+  # Bộ "E" — chọn 17/09 sau khi quét 6 bộ (STATUS §7 B6, ADR-0008). Bộ cũ
+  # {0:.10, 1:.30, 2:.30, 3:.20, 4:.10} cho độ phủ sóng 37.7% trong khi miền đích
+  # là 53.0%; mà độ phủ sóng CHÍNH LÀ tỉ lệ frame dương, nên lệch đó làm ngưỡng
+  # quyết định chệch có hệ thống. Bộ E đưa về 50.0%.
+  #
+  # Không thể khớp đồng thời phủ sóng và mật độ chồng lấn — xem ADR-0008. Đã ưu
+  # tiên phủ sóng; phần chồng lấn dư làm train khó hơn test, là hướng lệch an toàn.
+  count_weights: {0: 0.10, 1: 0.10, 2: 0.14, 3: 0.20, 4: 0.20, 5: 0.14, 6: 0.08, 7: 0.04}
   snr_db: [-5, 25]
   pitch_shift_semitones: [-1, 1]
   time_stretch: [0.9, 1.1]
@@ -32,7 +40,13 @@ forced_slices:
   overlap:      {ratio: 0.30, min_events: 2, min_overlap_ratio: 0.30}
   low_snr:      {ratio: 0.25, max_snr_db: 5}
   reverb:       {ratio: 0.40}
-  long_event:   {ratio: 0.10, min_event_duration_sec: 8.0}
+  # Ngưỡng hạ 8.0 → 4.0 sau khi đo (STATUS §7 B5, ADR-0007). Ngưỡng 8 giây vừa bất
+  # khả thi vừa sai thực tế: bank chỉ có 4 lớp cấp nổi, và miền đích cũng chỉ 5.1%
+  # sự kiện vượt 8 giây. Lô 17/09 khai "long_event 10.0% · 791 clip" trong khi số
+  # sự kiện ≥ 8s THẬT SỰ sinh ra là 0 — lát cắt hỏng 100%, không triệu chứng.
+  # Ở 4.0 giây có 8/15 lớp đủ điều kiện; danh sách lớp KHÔNG ghi cứng ở đây mà tính
+  # từ bank lúc chạy, để nó không âm thầm lệch khi bank đổi.
+  long_event:   {ratio: 0.10, min_event_duration_sec: 4.0}
   causal_chain: {ratio: 0.15}
 
 # Kịch bản chuỗi nhân quả — chính là thứ Temporal Aggregator và captioning sinh ra

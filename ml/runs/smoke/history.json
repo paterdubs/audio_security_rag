@@ -1,0 +1,69 @@
+{
+  "args": {
+    "split": "train",
+    "epochs": 1,
+    "batch_size": 16,
+    "lr": 0.001,
+    "backbone_lr_scale": 0.05,
+    "workers": 0,
+    "val_ratio": 0.04,
+    "seed": 20260917,
+    "sample_rate": 32000,
+    "duration": 10.0,
+    "threshold": 0.5,
+    "clip_loss_weight": 0.5,
+    "full_eval_every": 1,
+    "freeze_backbone": false,
+    "zero_shot": false,
+    "name": "smoke"
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "loss": 1.6887584994287055,
+      "clip_map": 0.5981775694282759,
+      "segment_f1": 0.29341881953611165,
+      "event_f1": 0.10895795246800732,
+      "seconds": 157.96469116210938
+    }
+  ],
+  "final": {
+    "clip_map": 0.5981775694282759,
+    "clip_ap_per_class": {
+      "alarm_bell": 0.7767725371061929,
+      "applause_cheering": 0.8220472075099303,
+      "door_slam": 0.521263800651496,
+      "explosion": 0.31045994271542315,
+      "fireworks": 0.481123714192797,
+      "glass_breaking": 0.6596869047573246,
+      "gunshot": 0.5670578245942527,
+      "laughter": 0.6207700415719041,
+      "object_drop_dishes": 0.45696479294554615,
+      "running_footsteps": 0.5089330370204109,
+      "scream": 0.7908875165687093,
+      "shout_yell": 0.5638289846067892,
+      "siren": 0.8489289723238441,
+      "speech_normal": 0.8056780128035211,
+      "vehicle_crash": 0.23826025205599738
+    },
+    "segment_f1": 0.29341881953611165,
+    "event_f1": 0.10895795246800732,
+    "event_f1_per_class": {
+      "alarm_bell": 0.0903225806451613,
+      "applause_cheering": 0.1780821917808219,
+      "door_slam": 0.13903743315508021,
+      "explosion": 0.03389830508474576,
+      "fireworks": 0.11224489795918369,
+      "glass_breaking": 0.050955414012738856,
+      "gunshot": 0.08219178082191782,
+      "laughter": 0.14414414414414414,
+      "object_drop_dishes": 0.10169491525423728,
+      "running_footsteps": 0.16153846153846155,
+      "scream": 0.07608695652173914,
+      "shout_yell": 0.06037735849056604,
+      "siren": 0.18644067796610167,
+      "speech_normal": 0.1607142857142857,
+      "vehicle_crash": 0.07725321888412018
+    }
+  }
+}

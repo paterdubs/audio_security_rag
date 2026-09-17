@@ -34,6 +34,11 @@ WHERE embedding IS NOT NULL
   AND (CAST(:to_ts   AS timestamptz) IS NULL OR window_start <= CAST(:to_ts   AS timestamptz))
   AND (CAST(:location AS text) IS NULL OR location_id = CAST(:location AS text))
   AND (CAST(:severity AS text) IS NULL OR severity   = CAST(:severity AS text))
+  -- Ngưỡng bằng chứng. Viết theo KHOẢNG CÁCH (<=) chứ không theo similarity (>=) để
+  -- Postgres còn dùng được index HNSW; hai cách tương đương vì similarity = 1 - distance.
+  -- Thiếu dòng này thì mọi câu hỏi đều có citation, kể cả câu lạc đề hoàn toàn — nhánh
+  -- "không có sự kiện nào" của §4.4 trở thành code chết.
+  AND (embedding <=> CAST(:query_vec AS vector)) <= :max_distance
 ORDER BY embedding <=> CAST(:query_vec AS vector)
 LIMIT :top_k
 """
@@ -48,6 +53,7 @@ async def retrieve(
     to_ts: datetime | None = None,
     location: str | None = None,
     severity: str | None = None,
+    min_similarity: float = 0.0,
 ) -> list[RetrievedEvent]:
     rows = await session.execute(
         text(_SQL),
@@ -59,6 +65,7 @@ async def retrieve(
             "to_ts": to_ts,
             "location": location,
             "severity": severity,
+            "max_distance": 1.0 - min_similarity,
             "top_k": top_k,
         },
     )

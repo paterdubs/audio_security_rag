@@ -11,15 +11,18 @@
 
 ## Bảng trạng thái tổng
 
+Đối soát **18/09/2026**: chi tiết và kết quả chạy cuối ở [STATUS.md](STATUS.md).
+Các tuần là lịch dự kiến; làm sớm một phần không đồng nghĩa đã nghiệm thu cả tuần.
+
 | Tuần | Khoảng ngày | Chủ đề | Trạng thái | Nghiệm thu |
 |---|---|---|---|---|
-| **W1** | 15–21/09/2026 | Nền tảng + Walking Skeleton | 🔜 chưa bắt đầu | ☐ |
-| **W2** | 22–28/09/2026 | Dữ liệu + Scaper + Precompute | 🔜 | ☐ |
-| **W3** | 29/09–05/10 | 4 Gold set + SED baseline | 🔜 | ☐ |
+| **W1** | 15–21/09/2026 | Nền tảng + Walking Skeleton | 🔄 skeleton có; CI/DVC/protocol còn thiếu | ☐ |
+| **W2** | 22–28/09/2026 | Dữ liệu + Scaper + Precompute | 🔄 làm sớm; lô mới PASS QA + waveform PANNs, real dev/gold chưa có | ☐ |
+| **W3** | 29/09–05/10 | 4 Gold set + SED baseline | 🔄 PANNs v1/v2/v3 xong; gold chưa có, baseline BEATs–Conformer chưa làm | ☐ |
 | **W4** | 06–12/10 | AAC baseline B1 + hạ tầng metric | 🔜 | ☐ |
 | **W5** | 13–19/10 | **Grounded AAC (P)** — đóng góp chính | 🔜 | ☐ |
 | **W6** | 20–26/10 | Ablation + báo cáo theo slice | 🔜 | ☐ |
-| **W7** | 27/10–02/11 | Streaming + RAG + Dashboard | 🔜 | ☐ |
+| **W7** | 27/10–02/11 | Streaming + RAG + Dashboard | 🔄 dashboard/RAG template đã có; streaming còn kế hoạch | ☐ |
 | **W8** | 03–09/11 | MLOps + E2E eval + bản nháp báo cáo | 🔜 | ☐ |
 
 Ký hiệu: 🔜 chưa bắt đầu · 🔄 đang làm · ✅ xong · ⚠️ trễ · ⛔ bị chặn
@@ -51,25 +54,25 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 
 | ☐ | Task | Ai | Ghi chú |
 |---|---|---|---|
-| ☐ | **Nộp đơn xin MIVIA Audio Events + MIVIA Road** | 👤 | **NGÀY ĐẦU TIÊN.** Duyệt có thể mất 1–2 tuần |
-| ☐ | `git init`, `.gitignore`, `README.md`, cấu trúc thư mục | 🤖 | |
-| ☐ | Viết `docs/taxonomy.md` — 16 class, mỗi class có bao gồm/loại trừ + 3 ví dụ | 👥 | Trích từ SYSTEM.md §3.1 rồi mở rộng |
-| ☐ | Viết `docs/annotation_guideline.md` | 👥 | SYSTEM.md §3.6 |
+| ☑ | **Nộp đơn xin MIVIA Audio Events + MIVIA Road** | 👤 | Theo xác nhận trong nhật ký 14/09; chưa có kết quả duyệt. Road đã có nguồn thay thế |
+| ☑ | `git init`, `.gitignore`, `README.md`, cấu trúc thư mục | 🤖 | `master`; base lịch sử `70ab498`, snapshot đầy đủ chuẩn bị publish 18/09 |
+| ☑ | Viết `docs/taxonomy.md` — 16 class, mỗi class có bao gồm/loại trừ + 3 ví dụ | 👥 | Đã có, kiểm tra với ontology |
+| ☑ | Viết `docs/annotation_guideline.md` | 👥 | Đã có; pilot/đóng băng chưa xong |
 | ☐ | Viết `docs/evaluation_protocol.md` | 🤖 | SYSTEM.md §8 |
-| ☐ | `docker-compose.yml`: db(pgvector) + redis + mlflow + api + inference + frontend | 🤖 | Mirror `example_project/docker-compose.yml` |
+| ☑ | `docker-compose.yml`: db(pgvector) + redis + mlflow + api + inference + frontend | 🤖 | 6 service healthy trên máy hiện tại; chưa kiểm máy trắng |
 | ☐ | Khởi tạo DVC + remote local | 🤖 | |
-| ☐ | Schema DB + migration (Alembic) | 🤖 | SYSTEM.md §4.3 |
-| ☐ | `scripts/validate_taxonomy.py` | 🤖 | |
-| ☐ | **Walking skeleton**: upload wav → PANNs tag (tạm) → caption template (tạm) → ghi event → embed → pgvector → `/rag/query` trả lời → frontend hiện | 🤖 | Chấp nhận thô, miễn là **chạy thông** |
+| ☑ | Schema DB + migration (Alembic) | 🤖 | Có và đã chạy trong Docker |
+| ☑ | `scripts/verify_ontology.py` | 🤖 | Tên script thực tế; không có validate_taxonomy.py |
+| ☑ | **Walking skeleton**: upload wav → PANNs tag (tạm) → caption template (tạm) → ghi event → embed → pgvector → `/rag/query` trả lời → frontend hiện | 🤖 | B3–B6 theo bàn giao phiên trước; lượt đối soát này không tạo lại dữ liệu E2E |
 | ☐ | CI khung: lint + test + smoke | 🤖 | |
 | ☐ | ADR-0001 (FastAPI), ADR-0002 (pgvector), ADR-0003 (Redis Streams), ADR-0004 (kiến trúc Grounded AAC) | 🤖 | |
 
 ### Nghiệm thu W1
 - [ ] `docker compose up` từ máy trắng → tất cả service healthy
-- [ ] Upload 1 file wav → thấy event trên dashboard
-- [ ] Hỏi 1 câu tiếng Việt → nhận câu trả lời **có citation**
-- [ ] `validate_taxonomy.py` xanh, CI xanh
-- [ ] Đơn MIVIA đã gửi
+- [x] Upload 1 file wav → thấy event trên dashboard (nghiệm thu lịch sử B3–B6)
+- [x] Hỏi 1 câu tiếng Việt → nhận câu trả lời **có citation** (nghiệm thu lịch sử B3–B6)
+- [ ] `verify_ontology.py` xanh **và CI xanh** — CI chưa thiết lập
+- [x] Đơn MIVIA đã gửi (xác nhận lịch sử 14/09)
 
 ---
 
@@ -84,15 +87,15 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 | ☐ | Task | Ai | Ghi chú |
 |---|---|---|---|
 | ☐ | Tải + lọc AudioSet-strong, DESED, FSD50K, UrbanSound8K, ESC-50 theo bảng ánh xạ | 🤖 | Ghi license **từng file** |
-| ☐ | Xây **foreground bank** (event đơn, đã trim) và **background bank** | 👥 | Nghe kiểm tra chất lượng — 👤 |
+| ◐ | Xây **foreground bank** (event đơn, đã trim) và **background bank** | 👥 | FG 4.267/BG 2.461; 1.831 bulk-accept chưa nghe từng clip; onset nguồn cần kiểm tra |
 | ☐ | Thu RIR hành lang / nhà xe / xưởng tại IUH | 👤 | Cho slice S3 |
 | ☐ | Thu background thật + kịch bản `media_playback` (phát audio qua loa rồi thu lại) | 👤 | Cho slice S4 — **buổi thu số 1** |
-| ☐ | `scripts/data_inventory.py` → `docs/data_inventory.md` | 🤖 | Số giờ/class, cảnh báo class < 10 phút |
-| ☐ | **QUYẾT ĐỊNH:** class nào thiếu dữ liệu → gộp / loại khỏi macro-F1 / bù bằng tổng hợp | 👤 | Ghi thành ADR |
-| ☐ | Pipeline Scaper: sinh soundscape 10s, tham số hoá SNR/overlap/RIR/thứ tự | 🤖 | Xuất wav + TSV + metadata |
-| ☐ | Sinh train 15–25h + dev, đảm bảo tỉ lệ slice: overlap ~30%, low-SNR ~25%, reverb ~40%, chain ~15% | 🤖 | |
+| ☑ | `scripts/data_inventory.py` → `docs/data_inventory.md` | 🤖 | Đọc manifest/index; không thay thế kiểm tra chất lượng |
+| ☑ | **QUYẾT ĐỊNH:** class nào thiếu dữ liệu → gộp / loại khỏi macro-F1 / bù bằng tổng hợp | 👤 | ADR-0005 giữ shout_yell 56/80 và vẫn tính macro-F1 |
+| ☑ | Pipeline Scaper: sinh soundscape 10s, tham số hoá SNR/overlap/RIR/thứ tự | 🤖 | Lô B0–B9 có source theo clip, duration đích, overlap ép, long_event 4s có giới hạn lớp, mô phỏng nhãn + seed theo clip. TSV chuẩn DCASE chưa xuất. |
+| ☑ | Sinh train 15–25h + dev, đảm bảo tỉ lệ slice: overlap ~30%, low-SNR ~25%, reverb ~40%, chain ~15% | 🤖 | Lô mới 22h train + 4h dev PASS `verify_synthetic`; xem STATUS §7. Không thay thế real dev/gold. |
 | ☐ | `scripts/check_leakage.py` + đưa vào CI | 🤖 | Chia theo `source_id`, không theo clip |
-| ☐ | **Precompute đặc trưng BEATs → `.npy`** cho toàn bộ train/dev | 🤖 | Quyết định tiết kiệm then chốt |
+| ☐ | **Precompute đặc trưng BEATs → `.npy`** cho toàn bộ train/dev | 🤖 | Chưa làm. Hiện chỉ có waveform PANNs 32 kHz train/dev cho baseline; không gọi nhầm là feature BEATs. |
 | ☐ | Dựng Label Studio + import test set + **pilot 30 clip** | 👥 | |
 | ☐ | Pilot 30 clip, **nghỉ ≥3 ngày rồi gán lại mù** → tính tự-nhất-quán → **sửa guideline** → mới gán đại trà | 👤 | Bỏ bước này = sai lầm tốn kém nhất |
 | ☐ | 🔴 **Bắt đầu gán nhãn test set** (chạy song song suốt W2–W3) | 👤 | ~1 giờ audio; 20% sẽ gán lại lần hai sau ≥7 ngày |
@@ -128,7 +131,7 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 
 ### Nghiệm thu W3
 - [ ] 4 gold set hoàn chỉnh, validate xanh
-- [ ] **Kappa ≥ 0.70**; mỗi class ≥ 20 event trong test; mỗi slice ≥ 20 clip
+- [ ] **Test–retest event-F1 ≥ 0.75, onset lệch trung vị ≤ 100 ms**; mỗi event class ≥ 20 event trong test; mỗi slice ≥ 20 clip
 - [ ] SED baseline có Event-F1 + PSDS + bảng per-class + bảng theo slice
 - [ ] Toàn bộ số liệu log trên MLflow, tái lập được
 
@@ -159,7 +162,7 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 ### Nghiệm thu W4
 - [ ] B1 chạy được, có số SPIDEr trên G2
 - [ ] Bộ metric hallucination chạy được, **độ chính xác bộ trích đã đo và ghi lại**
-- [ ] B0 chạy được (EHR ≈ 0, SPIDEr thấp — xác nhận đúng kỳ vọng)
+- [ ] B0 chạy được; đo EHR/SPIDEr trên gold, không mặc định EHR ≈ 0 vì SED vẫn có thể sai
 - [ ] Bảng 8.2 và 8.3 có 2 dòng đầu (B0, B1)
 
 ---
@@ -305,10 +308,14 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 | ☐ | Kiểm định độ chính xác bộ trích `EVENT_LEXICON` | W4 | Điều kiện cần của C2 |
 | ☐ | Xác nhận `aac-metrics` / `psds_eval` cài được trên Windows | W1 | Có gói khó build trên Windows → cân nhắc WSL2 |
 | ☐ | Kiểm tra VRAM thực tế khi train Conformer + BART | W4 | Quyết định batch size |
-| ☐ | Cài `yt-dlp` + `ffmpeg`, chạy `fetch_audioset_strong.py` thật | W2 | Script đã viết + kiểm thử 15/09, chưa tải audio thật — `dev`/`gold_test` vẫn rỗng, cổng D7 chưa qua |
+| ☑ | Cài `yt-dlp` + `ffmpeg`, chạy `fetch_audioset_strong.py` thật | W2 | Đã tải thật; manifest/split chưa nhập đợt mới, real dev/gold chưa sẵn sàng |
 | ☐ | Đo lại tỉ lệ hụt video AudioSet-strong (dự kiến 15–30%, ghi `unavailable` vào `exclusions.csv`) | W2 | Phải báo cáo tỉ lệ hụt thật trong khoá luận, không dùng số dự kiến |
 | ☐ | Xác nhận ruling chuông quầy thức ăn nhanh trong `data/gold/decision_log.md` (đang ⚠️ CHỜ XÁC NHẬN) | W2 | Ảnh hưởng biên `alarm_bell` |
-| ☐ | Xử lý 1802-clip `review_queue.csv` (đang trì hoãn có chủ đích) | W2 | Chờ ổn định taxonomy trước khi nghe hàng loạt, tránh nghe lại 2 lần |
+| ☑ | Xử lý hàng đợi duyệt | W2 | Hoàn tất 16/09; 1.831 bulk-accept phải nêu là hạn chế, không xem như kiểm định mù |
+| ☑ | Sửa recipe synthetic + kiểm tra âm thanh thật; phiên bản dữ liệu mới riêng | Trước train v3 | B0–B9 xong; lô mới PASS hợp đồng, legacy giữ tách làm bằng chứng. Gold/real dev vẫn chưa có. |
+| ☐ | Hoàn thiện tracking, seed, checkpoint resume, lưu dự đoán và quét threshold | Trước train mới | Theo TRAINING_OPS_PLAN; Pha 1/3/4/5 chưa có. Thiếu prediction đang chặn kết luận v1/v2/v3. |
+| ☐ | Sửa eval_sed để load đúng time_pool_blocks/config checkpoint | Trước eval v2/v3 lại | Hiện mặc định pool=5, v2/v3 dùng pool=3; state_dict không phát hiện khác pooling. |
+| ◐ | Bảo vệ checkpoint/raw lớn khỏi Git và thiết lập DVC | W1–W2 | Weight/checkpoint/cache/secret đã ignore; JAMS legacy theo dõi có chủ đích. DVC pipeline/remote vẫn chưa có. |
 
 ---
 
@@ -323,4 +330,4 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 
 ---
 
-*Cập nhật lần cuối: 2026-09-15 · Tuần hiện tại: **W1 (dữ liệu đang chạy sớm, xem CLAUDE.md §3)***
+*Cập nhật lần cuối: 2026-09-18 · W1; số liệu/chứng cứ hiện hành: [STATUS.md](STATUS.md).*

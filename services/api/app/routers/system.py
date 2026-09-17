@@ -6,13 +6,49 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.captions import CLASS_VI, SEVERITY_VI, class_vi
 from app.config import get_settings
 from app.db import get_session
 from app.envelope import ok
-from app.models import EventDetection, EventFeedback, SecurityEvent
+from app.models import EventDetection, EventFeedback, Location, SecurityEvent
+from app.ontology import class_groups, class_tiers
 from app.schemas import FeedbackIn
 
 router = APIRouter(tags=["system"])
+
+
+@router.get("/taxonomy")
+async def taxonomy() -> dict:
+    """Taxonomy cho dashboard: id lớp, tên tiếng Việt, tier, nhóm.
+
+    Endpoint này tồn tại để frontend KHÔNG phải chép lại 16 lớp lần thứ ba. Danh sách lớp
+    đã có hai bản sao hợp lệ (ontology_map.yaml giữ tier/group, captions.py giữ tên tiếng
+    Việt); thêm một bản nữa trong JavaScript thì lần sau taxonomy đổi sẽ có một chỗ âm thầm
+    lệch đi — đã xảy ra thật khi tách `laughter_cheering`.
+    """
+    tiers, groups = class_tiers(), class_groups()
+    return ok(
+        {
+            "classes": [
+                {"id": class_id, "vi": class_vi(class_id), "tier": tiers[class_id],
+                 "group": groups.get(class_id)}
+                for class_id in sorted(tiers, key=lambda c: (groups.get(c) or "Z", c))
+            ],
+            "severities": SEVERITY_VI,
+            # Lớp có trong ontology nhưng chưa có tên tiếng Việt: hiện ra để người bảo trì
+            # thấy ngay, thay vì để dashboard lặng lẽ hiển thị class_id thô.
+            "missing_vi": sorted(set(tiers) - set(CLASS_VI)),
+        }
+    )
+
+
+@router.get("/locations")
+async def list_locations(session: AsyncSession = Depends(get_session)) -> dict:
+    """Danh sách vị trí — dashboard cần để đổ vào ô chọn lúc upload."""
+    rows = (await session.scalars(select(Location).order_by(Location.location_id))).all()
+    return ok(
+        [{"id": r.location_id, "name": r.name, "area_type": r.area_type} for r in rows]
+    )
 
 
 @router.post("/events/{event_id}/feedback")

@@ -1,0 +1,70 @@
+/* Design tokens.
+ *
+ * Hướng hình ảnh: PHÒNG ĐIỀU KHIỂN — nền graphite tối, chữ mảnh, số liệu bằng font đơn
+ * cách. Chọn tối không phải theo thói quen: đây là màn hình trực 24/7, và nền tối giúp
+ * các dải màu mức độ nguy hiểm nổi bật mà không phải tô kín cả hàng.
+ *
+ * Màu dùng theo NGHĨA (mức độ nguy hiểm), không dùng để trang trí. Không có font tải từ
+ * mạng: công cụ giám sát phải mở được kể cả khi máy không ra được internet.
+ */
+
+:root {
+  /* Bề mặt — bốn tầng độ sâu, không phải một nền phẳng */
+  --surface-void: #0b0d10;
+  --surface-base: #121519;
+  --surface-raised: #191d23;
+  --surface-overlay: #22272f;
+
+  --line-subtle: #262c34;
+  --line-strong: #39414c;
+
+  --text-primary: #e8ecf1;
+  --text-secondary: #a3adba;
+  --text-muted: #6b7785;
+
+  /* Mức độ nguy hiểm — thang nhiệt, đọc được thứ bậc chỉ bằng màu */
+  --sev-critical: #ff4d5e;
+  --sev-high: #ff9142;
+  --sev-medium: #f2c94c;
+  --sev-low: #5ac8a8;
+
+  --sev-critical-dim: rgba(255, 77, 94, 0.14);
+  --sev-high-dim: rgba(255, 145, 66, 0.14);
+  --sev-medium-dim: rgba(242, 201, 76, 0.13);
+  --sev-low-dim: rgba(90, 200, 168, 0.12);
+
+  --accent: #6ea8fe;
+  --accent-dim: rgba(110, 168, 254, 0.14);
+
+  /* Chữ: một cặp có chủ đích — sans cho văn xuôi, mono cho id/số đo/thời gian.
+     Mono không phải để trang trí: event_id và mốc thời gian phải thẳng cột thì mắt mới
+     quét nhanh được trên một bảng dài. */
+  --font-sans: ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-display: clamp(1.75rem, 1.2rem + 1.8vw, 2.75rem);
+
+  /* Nhịp không đều có chủ đích: khoảng cách trong một khối chặt, giữa các khối thoáng */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  --duration-fast: 120ms;
+  --duration-normal: 220ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.28);
+}

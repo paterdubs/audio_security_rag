@@ -254,6 +254,21 @@ def test_clip_im_lang_tich_chap_khong_no():
     assert len(sg.apply_rir(np.zeros(1000, dtype=np.float32), np.zeros(100, dtype=np.float32))) == 1000
 
 
+@pytest.mark.parametrize("dtype", [np.float32, np.float64])
+@pytest.mark.parametrize("scale", [0.01, 0.9])
+def test_fft_rir_khop_tich_chap_truc_tiep(dtype, scale):
+    rng = np.random.default_rng(17)
+    audio = rng.normal(0, scale, 4096).astype(dtype)
+    rir = rng.normal(0, 0.1, 511).astype(dtype)
+    expected = np.convolve(audio, rir)[:len(audio)]
+    peak = float(np.abs(expected).max())
+    if peak > 0.99:
+        expected *= 0.99 / peak
+    actual = sg.apply_rir(audio, rir)
+    assert actual.dtype == np.float32
+    np.testing.assert_allclose(actual, expected.astype(np.float32), atol=1e-6, rtol=1e-5)
+
+
 # ── Khu vực nền quyết định loại phòng ────────────────────────────────────────
 
 
@@ -279,3 +294,130 @@ def test_ke_hoach_gan_khu_vuc_cho_moi_clip():
 
 def test_khong_co_bank_nen_thi_de_trong_chu_khong_bia():
     assert all(p.area_type == "" for p in sg.plan_clips(CONFIG, 20, seed=5, areas=[]))
+
+
+# ── generate_split: tiếp tục được sau khi bị ngắt giữa đường ────────────────
+#
+# Bug đã xảy ra thật (17/09/2026, tắt máy giữa lúc chạy): generate_split không kiểm tra
+# file đã có, nên chạy lại luôn sinh từ clip 0 — không mất dữ liệu (seed cố định, ra
+# byte giống hệt) nhưng lãng phí hàng giờ cho phần đã xong. Test dưới đây không gọi
+# Scaper thật (quá chậm cho unit test) — nó giả (stub) đúng ba hàm chạm audio thật
+# (`build_scaper`, `populate`, `pick_rir`, và `generator.generate`), chỉ để đo ĐÚNG một
+# thứ: generate_split có bỏ qua tổng hợp audio cho clip đã tồn tại, và trật tự rút số từ
+# `rng` dùng chung có giữ NGUYÊN dù có bỏ qua hay không — thiếu điều này thì các clip
+# MỚI sinh sau khi resume sẽ khác hẳn so với chạy sạch từ đầu, phá lời hứa tái lập được
+# ở đầu scaper_train.yaml.
+
+
+class _FakeGenerator:
+    def __init__(self, calls, name):
+        self.calls = calls
+        self.name = name
+
+    def generate(self, audio_path, jams_path, **kwargs):
+        self.calls.append(("generate", self.name))
+        Path(audio_path).write_bytes(b"gia-lap-wav")
+        Path(jams_path).write_text("{}", encoding="utf-8")
+
+
+def _lam_gia_moi_truong(monkeypatch, tmp_path, calls):
+    monkeypatch.setattr(sg, "OUTPUT_DIR", tmp_path)
+
+    def fake_build_scaper(config, seed):
+        return _FakeGenerator(calls, seed)
+
+    def fake_populate(generator, plan, config, rng, chains, nguyen_lieu=None):
+        calls.append(("populate", plan.index, rng.random()))
+
+    def fake_pick_rir(rng, area_type):
+        calls.append(("pick_rir", rng.random()))
+        return None  # không cần RIR thật cho test này
+
+    monkeypatch.setattr(sg, "build_scaper", fake_build_scaper)
+    monkeypatch.setattr(sg, "populate", fake_populate)
+    monkeypatch.setattr(sg, "pick_rir", fake_pick_rir)
+    monkeypatch.setattr(sg, "class_dirs", lambda root: [])
+
+
+def _plans(n: int) -> list:
+    return [sg.ClipPlan(index=i) for i in range(n)]
+
+
+# `populate` đã bị stub ở các test này, nên nguyên liệu không được dùng tới. Truyền vào
+# để `generate_split` khỏi đọc bank/manifest thật — các test này đo cơ chế resume, không
+# đo nội dung clip.
+_NGUYEN_LIEU_GIA = object()
+
+
+def test_clip_da_co_khong_sinh_lai(tmp_path, monkeypatch):
+    calls: list = []
+    _lam_gia_moi_truong(monkeypatch, tmp_path, calls)
+    config = {"duration_sec": 10.0}
+
+    written_first = sg.generate_split(config, "train", _plans(3), seed=1, nguyen_lieu=_NGUYEN_LIEU_GIA)
+    assert written_first == 3
+    so_lan_generate_1 = sum(1 for c in calls if c[0] == "generate")
+    assert so_lan_generate_1 == 3
+
+    calls.clear()
+    written_second = sg.generate_split(config, "train", _plans(3), seed=1, nguyen_lieu=_NGUYEN_LIEU_GIA)
+    # written vẫn đếm đủ 3 (đã có, tính là xong) nhưng KHÔNG gọi generate lại lần nào.
+    assert written_second == 3
+    assert sum(1 for c in calls if c[0] == "generate") == 0
+
+
+def test_clip_loi_giua_chung_khong_cong_bo_cap_file(tmp_path, monkeypatch):
+    calls = []
+    _lam_gia_moi_truong(monkeypatch, tmp_path, calls)
+
+    def interrupted(self, audio_path, jams_path, **kwargs):
+        Path(audio_path).write_bytes(b"partial")
+        raise RuntimeError("interrupted")
+
+    monkeypatch.setattr(_FakeGenerator, "generate", interrupted)
+    with pytest.raises(RuntimeError, match="interrupted"):
+        sg.generate_split({"duration_sec": 10}, "train", _plans(1), seed=1, nguyen_lieu=_NGUYEN_LIEU_GIA)
+    assert not (tmp_path / "train/audio/train_000000.wav").exists()
+    assert not (tmp_path / "train/jams/train_000000.jams").exists()
+
+
+def test_resume_khong_khoi_tao_scaper_cho_clip_da_xong(tmp_path, monkeypatch):
+    calls = []
+    _lam_gia_moi_truong(monkeypatch, tmp_path, calls)
+    sg.generate_split({"duration_sec": 10}, "train", _plans(2), seed=1, nguyen_lieu=_NGUYEN_LIEU_GIA)
+
+    def unexpected(*args):
+        raise AssertionError("khong duoc khoi tao Scaper cho clip da co")
+
+    monkeypatch.setattr(sg, "build_scaper", unexpected)
+    assert sg.generate_split({"duration_sec": 10}, "train", _plans(2), seed=1, nguyen_lieu=_NGUYEN_LIEU_GIA) == 2
+
+
+def test_tiep_tuc_ra_dung_ket_qua_nhu_chay_sach(tmp_path, monkeypatch):
+    """(A) chạy sạch 5 clip, (B) chạy 2 clip rồi resume tới 5. Ba clip cuối phải rút
+    ĐÚNG NHỮNG SỐ NHƯ NHAU — điều kiện để dataset tái lập được dù bị ngắt giữa đường.
+
+    Từ B8 mỗi clip có seed RIÊNG, nên clip này không còn phụ thuộc clip nào trước nó.
+    `populate()` vẫn chạy cho clip đã xong, nhưng vì một lý do KHÁC hẳn trước: nó đẩy
+    RNG tới vị trí mà `pick_rir()` cần, và `rir_used` chỉ suy ra được từ đó. Bỏ qua
+    luôn thì `slice_index` khai "gắn nhãn reverb nhưng rir_used rỗng" cho toàn bộ
+    phần đã sinh — đo được 2.663/7.920 clip như vậy.
+
+    Phần ĐẮT (khởi tạo Scaper, tổng hợp audio) vẫn được bỏ hẳn — xem
+    `test_resume_khong_khoi_tao_scaper_cho_clip_da_xong`.
+    """
+    config = {"duration_sec": 10.0}
+
+    calls_sach: list = []
+    _lam_gia_moi_truong(monkeypatch, tmp_path / "sach", calls_sach)
+    sg.generate_split(config, "train", _plans(5), seed=7, nguyen_lieu=_NGUYEN_LIEU_GIA)
+    rut_so_sach = [c for c in calls_sach if c[0] in ("populate", "pick_rir")]
+
+    calls_resume: list = []
+    _lam_gia_moi_truong(monkeypatch, tmp_path / "resume", calls_resume)
+    sg.generate_split(config, "train", _plans(2), seed=7, nguyen_lieu=_NGUYEN_LIEU_GIA)
+    calls_resume.clear()
+    sg.generate_split(config, "train", _plans(5), seed=7, nguyen_lieu=_NGUYEN_LIEU_GIA)
+    rut_so_resume = [c for c in calls_resume if c[0] in ("populate", "pick_rir")]
+
+    assert rut_so_resume == rut_so_sach

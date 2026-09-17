@@ -35,6 +35,11 @@ def class_tiers() -> dict[str, str]:
     return {name: spec["tier"] for name, spec in _config()["classes"].items()}
 
 
+def class_groups() -> dict[str, str]:
+    """{class_id: group} — 'A' sự kiện an ninh, 'B' lớp gây nhầm lẫn & nền."""
+    return {name: spec["group"] for name, spec in _config()["classes"].items()}
+
+
 def class_ids() -> set[str]:
     return set(_config()["classes"])
 

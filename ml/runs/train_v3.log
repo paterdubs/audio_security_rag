@@ -1,0 +1,34 @@
+D:\IUH_K18\HK1N5\KLTN\audio-security-rag\.venv\Lib\site-packages\torch\optim\lr_scheduler.py:224: UserWarning: Detected call of `lr_scheduler.step()` before `optimizer.step()`. In PyTorch 1.1.0 and later, you should call them in the opposite order: `optimizer.step()` before `lr_scheduler.step()`.  Failure to do this will result in PyTorch skipping the first value of the learning rate schedule. See more details at https://pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate
+  warnings.warn(
+model: 80,784,350 tham số học được · 1001 khung/clip · cuda
+dữ liệu: 7128 train / 792 val (tách tạm từ synthetic train)
+cửa sổ lọc theo lớp: alarm_bell=29, applause_cheering=51, door_slam=25, explosion=51, fireworks=51, glass_breaking=47, gunshot=21, laughter=51, object_drop_dishes=21, running_footsteps=17, scream=51, shout_yell=51, siren=51, speech_normal=51, vehicle_crash=51
+epoch  1/25  loss=2.7406  mAP(clip)=0.3118  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (178s)
+epoch  2/25  loss=2.5642  mAP(clip)=0.5013  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (204s)
+epoch  3/25  loss=2.3481  mAP(clip)=0.6010  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (204s)
+epoch  4/25  loss=2.2639  mAP(clip)=0.6574  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (219s)
+D:\IUH_K18\HK1N5\KLTN\audio-security-rag\.venv\Lib\site-packages\dcase_util\utils\utils.py:12: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+epoch  5/25  loss=2.1949  mAP(clip)=0.6992  F1(đoạn 1s)=0.2488  F1(sự kiện)=0.0994  (243s)
+epoch  6/25  loss=2.1869  mAP(clip)=0.7222  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (189s)
+epoch  7/25  loss=2.1440  mAP(clip)=0.7401  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (201s)
+epoch  8/25  loss=2.1110  mAP(clip)=0.7593  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (203s)
+epoch  9/25  loss=2.1025  mAP(clip)=0.7670  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (199s)
+epoch 10/25  loss=2.0620  mAP(clip)=0.7755  F1(đoạn 1s)=0.2234  F1(sự kiện)=0.0825  (237s)
+epoch 11/25  loss=2.0603  mAP(clip)=0.7842  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (198s)
+epoch 12/25  loss=2.0392  mAP(clip)=0.7897  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (220s)
+epoch 13/25  loss=2.0195  mAP(clip)=0.7920  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (219s)
+epoch 14/25  loss=2.0282  mAP(clip)=0.7986  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (227s)
+epoch 15/25  loss=1.9967  mAP(clip)=0.8012  F1(đoạn 1s)=0.2969  F1(sự kiện)=0.1223  (251s)
+epoch 16/25  loss=1.9967  mAP(clip)=0.8042  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (215s)
+epoch 17/25  loss=2.0239  mAP(clip)=0.8065  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (228s)
+epoch 18/25  loss=1.9976  mAP(clip)=0.8100  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (228s)
+epoch 19/25  loss=2.0220  mAP(clip)=0.8094  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (225s)
+epoch 20/25  loss=2.0045  mAP(clip)=0.8112  F1(đoạn 1s)=0.2536  F1(sự kiện)=0.0968  (248s)
+epoch 21/25  loss=1.9640  mAP(clip)=0.8107  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (201s)
+epoch 22/25  loss=1.9596  mAP(clip)=0.8115  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (219s)
+epoch 23/25  loss=1.9831  mAP(clip)=0.8116  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (199s)
+epoch 24/25  loss=1.9298  mAP(clip)=0.8106  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (193s)
+epoch 25/25  loss=1.9721  mAP(clip)=0.8123  F1(đoạn 1s)=0.2748  F1(sự kiện)=0.1077  (210s)
+
+✓ ml\runs\panns_ft_v3 · mAP tốt nhất 0.8123

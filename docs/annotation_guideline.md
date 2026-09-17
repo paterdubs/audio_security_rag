@@ -1,5 +1,14 @@
 # annotation_guideline.md — Quy ước gán nhãn
 
+> Đối soát **18/09/2026**: lô synthetic mới đã PASS hợp đồng nhưng chưa có gold annotations/pilot được lưu trong repo;
+> chưa coi guideline đã nghiệm thu và đóng băng. Trạng thái ở [STATUS.md](STATUS.md).
+> JAMS Scaper ghi biên đặt nguồn, không mặc định trùng onset/offset nghe được.
+> Lô legacy còn cắt event quanh 1 s và bắt đầu nguồn tại 0; không lấy các biên đó làm gold.
+> Biên của lô mới tốt hơn theo hợp đồng Scaper, nhưng vẫn là biên tổng hợp — không thay thế onset/offset
+> do người nghe gán mù trên gold.
+> 1.831 lượt bulk-accept foreground không thay thế nghe duyệt hoặc gán gold mù.
+> Ruling chuông quầy phục vụ trong [decision_log](../data/gold/decision_log.md) vẫn chờ người xác nhận.
+
 > **Vai trò:** trả lời câu hỏi *"đặt onset/offset ở đâu"*. Câu hỏi *"clip này thuộc lớp nào"* tra ở [taxonomy.md](taxonomy.md).
 >
 > Liên quan: [DATA_PLAN §4](DATA_PLAN.md) (quy trình bank) · [DATA_PLAN §8](DATA_PLAN.md) (gold test set)

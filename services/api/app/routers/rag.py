@@ -42,6 +42,7 @@ async def rag_query(payload: RagQuery, session: AsyncSession = Depends(get_sessi
         to_ts=payload.to,
         location=payload.location,
         severity=payload.severity,
+        min_similarity=settings.rag_min_similarity,
     )
 
     provider = get_provider(settings.rag_answer_provider)

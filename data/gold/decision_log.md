@@ -1,5 +1,9 @@
 # decision_log.md — Nhật ký quyết định gán nhãn
 
+> Đối soát **18/09/2026**: chưa có gold annotation artifact ngoài nhật ký này.
+> Mục chuông quầy phục vụ bên dưới vẫn **CHỜ XÁC NHẬN**; chưa có quyết định mới của người
+> gán nhãn nên không tự đổi taxonomy hay verdict. Tình trạng dự án: [STATUS](../../docs/STATUS.md).
+
 > Mọi ca không có sẵn trong `taxonomy.md` / `annotation_guideline.md` đều ghi vào đây,
 > kèm quyết định và lý do. Vừa là công cụ chống trôi tiêu chí giữa các phiên, vừa là
 > vật liệu trực tiếp cho chương phân tích lỗi của khoá luận.

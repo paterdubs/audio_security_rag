@@ -31,7 +31,10 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 | `docs/DATA_PLAN.md` | *Chuẩn bị dữ liệu thế nào?* (10 ngày, quy trình gán nhãn có máy hỗ trợ) | **Suốt W2–W3** |
 | `docs/taxonomy.md` | 16 class, định nghĩa bao gồm/loại trừ | Khi làm việc với nhãn |
 | `docs/annotation_guideline.md` | Quy ước gán nhãn | Khi gán nhãn |
-| `docs/evaluation_protocol.md` | Metric và cách đo | Khi làm evaluation |
+| `docs/evaluation_protocol.md` (chưa có) | Metric và cách đo dự kiến | Tạm xem SYSTEM.md §8 |
+| `docs/STATUS.md` | Snapshot đã đối soát, bằng chứng, giới hạn | Khi cần số liệu hiện hành |
+| `docs/TRAINING_OPS_PLAN.md` | Tracking, kiểm tra dữ liệu, phân tích lỗi | Trước lần train mới |
+| `docs/RELATED_WORK_2026.md` | Đối chiếu văn liệu và mức xác minh | Khi viết chương 2 |
 | `docs/data_inventory.md` | Số giờ/class (sinh tự động) | Khi lo về dữ liệu |
 | `docs/decisions/ADR-*.md` | Vì sao chọn thế này | Khi định thay đổi kiến trúc |
 
@@ -39,55 +42,75 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 
 ## 3. Trạng thái hiện tại
 
-**Tuần:** W1 (15–21/09/2026) · **Trạng thái:** 🟢 đang thu thập dữ liệu (D1)
-**Cập nhật lần cuối:** 2026-09-15
+**Tuần:** W1 (15–21/09/2026). Walking skeleton và baseline SED được làm sớm song song.
+**Đối soát workspace:** 18/09/2026, sau khi lô dữ liệu B0–B9, train v3 và dọn artifact đã hoàn tất.
+Số đo, phạm vi và bằng chứng ở [docs/STATUS.md](docs/STATUS.md); nhật ký §10 là lịch sử,
+không phải trạng thái hiện hành.
 
-### ✅ Đã xong
-- Chốt taxonomy **16 class** (10 an ninh + **6** nhầm lẫn, xem thay đổi 15/09 dưới) và 8 test slice
-- Chốt strong label + schema DCASE TSV
-- Chốt kiến trúc Grounded AAC (BEATs❄️ + Conformer trunk chia sẻ, 3 head, grounded decoding)
-- Chốt stack: FastAPI toàn bộ · PostgreSQL+pgvector · Redis Streams · MLflow · DVC · Docker Compose
-- Viết 4 tài liệu nền: `SYSTEM.md`, `PLAN.md`, `DATA_PLAN.md`, `CLAUDE.md`
-- Tạo cấu trúc thư mục
-- Chốt quy trình dữ liệu: máy hỗ trợ gán nhãn cho foreground bank, **gán mù cho gold test set**
-- **D1 — xác minh ontology xong**: `ml/configs/ontology_map.yaml` (16 lớp, mọi ID đối chiếu file gốc AudioSet) + `scripts/verify_ontology.py` + test → 0 lỗi
-- **D1 — đăng ký nguồn xong**: `ml/configs/sources.yaml` (11 nguồn, dung lượng & license lấy từ API Zenodo) + `scripts/download_sources.py`
-- Dựng môi trường: `.venv`, `requirements-data.txt`, `requirements-screen.txt` (torch + panns-inference), `.gitignore`
-- **Chuẩn hoá kỹ thuật xong cho ESC-50 + FSD50K**: `normalize_audio.py` + `preprocessing.yaml`
-- **Viết xong `taxonomy.md` + `annotation_guideline.md`** — hai tài liệu chặn đường găng pilot gán nhãn
-- **Adapter DESED, FSD50K, ESC-50, UrbanSound8K xong** — phát hiện và ghi lại 8 nhóm trùng **bắc cầu** giữa hai id Freesound (DESED)
-- **§4.2–4.4 DATA_PLAN xong**: `auto_screen.py` (PANNs CNN14) + `validate_screen.py` (phiếu kiểm định mù) → **kiểm định 245 clip, tỉ lệ lỗi auto-accept 0.4% (Wilson CI 0.1%–2.3%)**
-- **§5 xong**: `build_background_bank.py` → background bank đã sàng lọc bằng ngưỡng 0.15
-- **§6 xong**: `make_splits.py` + `check_leakage.py` (gộp nhóm bắc cầu trước khi chia, ràng buộc theo nguồn cho `gold_test`)
-- **§7 xong**: `scaper_generate.py` — sinh soundscape, 5 lát cắt (overlap/low_snr/reverb/long_event/causal_chain), tích chập RIR thật (không dùng SoX reverb)
-- **Bank RIR xong**: 505 RIR từ OpenSLR SLR28 (`build_rir_bank.py`), xếp nhóm theo RT60 đo được: small_room 151 · medium_room 198 · large_room 156
-- **`scripts/fetch_audioset_strong.py` viết + kiểm thử xong** (yt-dlp) — nguồn duy nhất cho `dev`/`gold_test` không phụ thuộc MIVIA/thu thực địa. **Chưa chạy tải audio thật** — xem §Nợ kỹ thuật ở PLAN.md
-- **15/09 — tách `laughter_cheering` → `laughter` + `applause_cheering`** (16 lớp), chạy lại toàn bộ pipeline thật, giữ nguyên 245 verdict kiểm định đã có (xem log §10)
-- **16/09 — `vehicle_crash_cc` (HF, CC-BY) thay MIVIA Road**: 46 clip, `video_id` làm source_group_id, đưa vào bank qua adapter riêng
-- **16/09 — duyệt hết hàng đợi người (2077 clip)**: 246 nghe thật + **1831 duyệt hàng loạt `ok`** theo quyết định người dùng (KHÔNG nghe từng clip — ghi rõ trong `note` cột của `screen_audit.csv`, coi là hạn chế phải nêu, xem ADR-0005)
-- Foreground bank hiện tại: **4268 clip / ~138 phút**, **15/16 lớp đạt mức tối thiểu**. Duy nhất `shout_yell` (56/80) dưới mức — **ADR-0005: chốt giữ nguyên, không bổ sung thêm**, đã có người dùng xác nhận
-- 304 test, tất cả đạt (`pytest tests/ -q` — **chạy trong `tests/`, không chạy ở gốc repo vì ESC-50 tự mang theo `tests/test_dataset.py` gây lỗi collection**)
+### Đã có
 
-### 🔄 Đang làm
-- Tải nền: `urbansound8k` · `fsd50k_dev_audio` (18.4 GB) · `tau2019_partial` — kiểm tra tiến trình cũ trước khi chạy lại (xem cảnh báo khoá `.part.lock` ở lịch sử §10 14/09)
-- 1802-clip `review_queue.csv` — **trì hoãn có chủ đích**, chờ ổn định taxonomy (đợt tách lớp 15/09) rồi mới nghe hàng loạt, tránh nghe lại hai lần
+- Git trên nhánh `master`; base trước lượt đồng bộ đầy đủ là `70ab498`. Snapshot dự án ngày
+  18/09 được chuẩn bị để publish lên GitHub; xem `git log` thay vì ghi cứng HEAD hiện hành.
+- Docker gồm 6 service. Upload offline → PANNs pretrained → caption template EN/VI → risk rules →
+  PostgreSQL/pgvector → BGE-M3 → RAG template + citation; dashboard 3 màn, WebSocket và feedback.
+  Docker Compose hiện đã được dừng chủ động để giải phóng tài nguyên; named volume được giữ nguyên.
+- Taxonomy 16 lớp = 10 an ninh + 6 nhầm lẫn/nền. SED huấn luyện **15 đầu ra**,
+  không có head riêng cho `ambient_noise`.
+- Foreground **4.267 clip / 15 lớp sự kiện**, background **2.461**, RIR **505**.
+  `shout_yell` 56/80: giữ nguyên theo ADR-0005. 1.831 lượt bulk-accept không phải nghe duyệt từng clip.
+- Lô **mới** sau B0–B9 có **7.920 train + 1.440 dev**, 10 s/clip; `verify_synthetic.py`
+  đã PASS ở hai split, không vi phạm hợp đồng. Lô **legacy** được giữ riêng chỉ với
+  9.360 JAMS, `slice_index` và hai log stdout làm bằng chứng trước-sửa; audio legacy đã xoá.
+- `scaper_generate.py` đã dùng lựa chọn source theo clip, nền 10 s, duration lấy từ
+  `train_strong`, overlap ép thật, `long_event` 4 s giới hạn lớp cấp được, mô phỏng nhãn và
+  seed riêng từng clip / chạy song song. Index vẫn chỉ được ghi ở cuối lượt sinh, nên đây vẫn là
+  nợ kỹ thuật nếu job sau này bị ngắt.
+- Precompute waveform PANNs 32 kHz hiện có đủ **train 7.920** (5,07 GB) và **dev 1.440**
+  (0,92 GB). Đây là cache waveform cho baseline PANNs, **không phải** feature BEATs.
+- **Cả ba run PANNs đã hoàn tất 25 epoch**:
 
-> ⚠️ **Phải gọi `.venv/Scripts/python.exe`, không phải `python` trần.** Trong Git Bash,
-> `python` trỏ vào Python hệ thống — script chết ngay ở `import yaml` và trông hệt như
-> lệnh tải "tự dừng".
+  | epoch cuối | v1 · legacy/pool 5 | v2 · legacy/pool 3 + mixup + adaptive | v3 · dữ liệu mới, tham số v2 |
+  |---|---:|---:|---:|
+  | clip mAP | 0.8372 | 0.8176 | 0.8123 |
+  | segment-F1 | 0.4120 | 0.2980 | 0.2748 |
+  | event-F1 | 0.1282 | 0.1897 | 0.1077 |
 
-### ⏭️ 3 việc tiếp theo
-1. 👤 **Cài `yt-dlp` + `ffmpeg`, chạy `fetch_audioset_strong.py` thật** — gỡ chặn `dev`/`gold_test` đang rỗng, cổng D7 chưa qua được. Dự kiến hụt 15–30% video, phải ghi tỉ lệ thật vào exclusions.csv và báo cáo
-2. 👤 **Pilot gán nhãn 30 clip lần 1** (trên `gold_test` sau khi có audio) — nghỉ ≥3 ngày rồi gán lại mù mới tính tự-nhất-quán
-3. Tải xong `urbansound8k`/`tau2019_partial`/`fsd50k_dev_audio` → chạy `build_manifest.py`/`normalize_audio.py` cho các nguồn còn lại → bù các lớp yếu (`shout_yell`, `door_slam`, `object_drop_dishes`, `explosion`, `running_footsteps`)
+  v1/v2 dùng snapshot legacy 6.568 clip; v3 dùng dữ liệu mới. Đây là baseline nội bộ,
+  không phải kết quả gold độc lập. Chưa quét threshold nên không được kết luận nguyên nhân
+  của các chênh lệch F1; chi tiết ở STATUS §3 và TRAINING_OPS_PLAN Pha 3.
+- Có `verify_synthetic.py`; chưa hoàn tất toàn bộ kế hoạch tracking/analysis ở
+  [TRAINING_OPS_PLAN](docs/TRAINING_OPS_PLAN.md) — Pha 1/3/4/5 chưa có module.
+- Mốc test gần nhất ghi trong B9 là **550 test đạt**. Lượt cập nhật tài liệu không tự nhận
+  là đã chạy lại test code; phải chạy lại trước một thay đổi mã tiếp theo.
 
-Song song: thu thực địa tại IUH (buổi 1: RIR hành lang/nhà xe/xưởng cho S3 + `gold_test`; buổi 2: `media_playback` cho S4 và kiểm tra phổ pháo hoa VN).
+### Đang làm / chưa nghiệm thu
 
-### ⛔ Đang bị chặn
-- `dev`/`gold_test` — rỗng, chặn ở việc 👤 cài yt-dlp/ffmpeg (không phải việc AI làm được), xem việc tiếp theo #1.
+- 🔴 **`long_event` là điều khoản BẤT KHẢ THI với bank hiện có** — phát hiện 17/09 15:00.
+  Chỉ **90/4.267** clip bank còn ≥8 s sau khi cắt im lặng; 9/15 lớp có **0** clip;
+  `siren` chỉ **2/311** (p90 4,01 s, do UrbanSound8K cắt sẵn ở 4 s). Vì thế lô mới dùng
+  ngưỡng 4 s và chỉ các lớp cấp được; bảng đo và giới hạn ở STATUS §6–§7.
+- AudioSet-strong: **937 WAV / 937 dòng segments** — khớp tuyệt đối. Process tải **đã dừng**,
+  chưa hết hàng đợi. Raw mới chưa vào manifest/split → **real dev/gold chưa sẵn sàng**.
+- F1 bằng 0 tại epoch không full-eval là **chưa đo**, không phải F1 thực. Tất cả số trong
+  bảng trên lấy từ epoch 25 có full-eval.
+- CI, DVC pipeline, BEATs–Conformer–BART, grounded decoding, streaming Redis Streams,
+  temporal aggregator, gold G1–G4 và tracking đầy đủ vẫn chưa xong.
+- Inference đang dùng PANNs pretrained; **chưa deploy v1/v2/v3**. MLflow healthy không có nghĩa
+  training đã log lên MLflow. `AUDIO_RETENTION_DAYS` chưa có tác vụ tự xoá audio hết hạn.
+- Checkpoint/model weight `.pt/.pth/.ckpt/.onnx` đã được Git-ignore và giữ tại máy.
+  `data/synthetic_legacy/` được đưa lên có chủ đích làm bằng chứng trước-sửa; JAMS legacy chứa
+  đường dẫn tuyệt đối lịch sử của máy sinh dữ liệu nên dùng để audit, không replay portable nguyên trạng.
 
-`vehicle_crash` KHÔNG còn bị chặn — 16/09 đã có nguồn thay thế (`vehicle_crash_cc`, 33
-clip qua sàng lọc, vượt mức tối thiểu 30). Đơn MIVIA Road vẫn giữ như nguồn dự phòng.
+### Ba việc tiếp theo
+
+1. Hoàn thiện Pha 1 và Pha 3 của Training Ops trước lần train mới: run manifest,
+   config/seed/fingerprint, prediction mức đoạn và quét threshold; sửa loader đánh giá để
+   lấy `time_pool_blocks` từ checkpoint.
+2. Đưa 937 AudioSet-strong WAV vào manifest/split không rò rỉ, chuẩn bị real dev và gold;
+   sau đó thực hiện pilot gán mù theo DATA_PLAN §8. Không dùng test để chọn threshold.
+3. Snapshot GitHub giữ code, tài liệu, manifest, metric và JAMS legacy; loại weight/cache/secret.
+   Sau khi clone, cộng tác viên phải tự tái tạo dữ liệu/cache theo README thay vì trông chờ đường dẫn
+   tuyệt đối trong JAMS legacy.
 
 ---
 
@@ -95,11 +118,15 @@ clip qua sàng lọc, vượt mức tối thiểu 30). Đơn MIVIA Road vẫn gi
 
 Không thảo luận lại trừ khi có lý do mới. Mỗi thay đổi phải kèm một ADR.
 
+Đây là quyết định **thiết kế đích**. Hiện serving dùng PANNs + template; RAG chưa có
+provider LLM thực, embedding đã dùng rich document VI/EN + metadata. Xem STATUS để
+phân biệt implementation với kiến trúc BEATs/Grounded AAC/Redis Streams dự kiến.
+
 | Quyết định | Chọn | Ngày | Lý do ngắn |
 |---|---|---|---|
 | Số class | **16** (10 an ninh + 6 nhầm lẫn) | 14/09, sửa 15/09 | 6 lớp nhầm lẫn kiểm soát False Alarm Rate. **15/09:** tách `laughter_cheering` → `laughter` + `applause_cheering` — tiếng cười một giọng khác hẳn phổ/nhịp vỗ tay-đám đông |
 | Loại nhãn | **Strong label** (onset/offset) | 14/09 | Điều kiện cần cho event-based F1 **và** cho grounding |
-| Trường hợp đặc biệt | 5 lớp nhầm lẫn **trong** taxonomy + **8 test slice** | 14/09 | Slice là lát cắt đánh giá, không phải class |
+| Trường hợp đặc biệt | 6 lớp nhầm lẫn/nền **trong** taxonomy + **8 test slice** | 15/09 | 5 lớp có event head + ambient_noise nền; slice không phải class |
 | Bối cảnh | **Tổng quát cho cả 4 khu vực** (trường học, bãi xe, dân cư, nhà máy) | 14/09 | `location` là metadata, không phải tham số model |
 | Backend | **FastAPI toàn bộ** (không Django) | 14/09 | Async-native cho streaming; một framework cho 3 service |
 | Vector DB | **pgvector** (không Qdrant) | 14/09 | Lọc metadata + vector search trong **một** câu SQL |
@@ -109,7 +136,7 @@ Không thảo luận lại trừ khi có lý do mới. Mỗi thay đổi phải 
 | GPU | **Có** | 14/09 | Cho phép train Conformer + BART |
 | LLM cho RAG | Interface pluggable, mặc định API, fallback Ollama | 14/09 | Không khoá cứng nhà cung cấp |
 | Caption song ngữ | Sinh EN (benchmark) + dịch VI (RAG), embed bản **VI** | 14/09 | Truy vấn tiếng Việt, tránh sụt retrieval |
-| Strong label cho train | **Scaper sinh tự động** từ foreground bank | 14/09 | Strong label miễn phí, chính xác tuyệt đối, điều khiển được slice |
+| Strong label cho train | **Scaper sinh tự động** từ foreground bank | 14/09 | Biên đặt nguồn, cần kiểm chứng phần âm thanh thực sự nghe được và hợp đồng slice |
 | Gán nhãn có máy hỗ trợ | ✅ Cho foreground bank · ❌ **Cấm cho gold test set** | 14/09 | Máy đề xuất + người bấm duyệt ⇒ confirmation bias ⇒ gold nghiêng về model |
 | Số người gán nhãn | **Một người** | 14/09 | Hệ quả: không tính được kappa liên-người → dùng test–retest, ngưỡng **0.75**, và **phải nêu ở phần Hạn chế** (DATA_PLAN §8) |
 
@@ -163,9 +190,9 @@ Không thảo luận lại trừ khi có lý do mới. Mỗi thay đổi phải 
 | `class_id` | snake_case tiếng Anh, đúng 16 giá trị trong `docs/taxonomy.md` |
 | Model version | `{component}-v{major}.{minor}`, ví dụ `aac-v2.0` |
 | Commit | `<type>: <mô tả>` — feat, fix, refactor, docs, test, chore, exp |
-| Nhánh | `main` + nhánh tính năng; không commit thẳng lên `main` |
+| Nhánh | Hiện tại `master`; quy ước đích là nhánh tính năng, không tự đổi tên nhánh |
 | Config | YAML trong `ml/configs/`, **không hardcode** hyperparameter trong code |
-| Seed | Mặc định 42; kết quả cuối chạy 3 seed, báo cáo mean ± std |
+| Seed | Scaper train 20260914, dev 21260914; split baseline 20260917. Training chưa seed toàn bộ RNG; 3 seed kết quả cuối còn là kế hoạch |
 | Secret | Chỉ qua `.env`, không bao giờ vào git. `.env.example` phải luôn cập nhật |
 | API response | Envelope `{success, data, error, meta}` |
 
@@ -177,28 +204,29 @@ Không thảo luận lại trừ khi có lý do mới. Mỗi thay đổi phải 
 # Hạ tầng
 docker compose up -d                  # khởi động toàn bộ
 docker compose logs -f inference      # xem log service
-docker compose down -v                # dọn sạch (mất volume!)
+docker compose down                   # dừng, giữ named volumes; không dùng -v nếu cần giữ dữ liệu
 
 # Dữ liệu
-python scripts/data_inventory.py           # → docs/data_inventory.md
-python scripts/validate_taxonomy.py
-python scripts/validate_annotations.py --split test
-python scripts/check_leakage.py
-python scripts/agreement.py --split test   # tự-nhất-quán test-retest + onset MAE
-python scripts/slice_coverage.py --split test
-python scripts/scaper_generate.py --config ml/configs/scaper_train.yaml
+.venv/Scripts/python.exe scripts/data_inventory.py
+.venv/Scripts/python.exe scripts/verify_ontology.py
+.venv/Scripts/python.exe scripts/check_leakage.py
+.venv/Scripts/python.exe scripts/scaper_generate.py --split train
+.venv/Scripts/python.exe scripts/scaper_generate.py --split dev
+.venv/Scripts/python.exe scripts/verify_synthetic.py --split train
+# validate_annotations.py, agreement.py, slice_coverage.py: chưa triển khai
 
 # Huấn luyện & đánh giá
-python -m ml.training.train --config ml/configs/sed_baseline.yaml
-python -m ml.training.train --config ml/configs/aac_proposed.yaml
-python -m ml.evaluation.run_all --model <run_id> --split test
+.venv/Scripts/python.exe -m ml.training.train_sed --help
+.venv/Scripts/python.exe -m ml.evaluation.eval_sed --run panns_ft_v1
+# eval_sed hiện mặc định pool=5: KHÔNG dùng cho v2 (pool=3) khi chưa sửa loader.
+# Grounded AAC và evaluation tổng hợp: chưa triển khai.
 
 # Chất lượng
-pytest -q --cov=. --cov-report=term-missing
+.venv/Scripts/python.exe -m pytest tests/ -q
 ruff check . && black --check . && mypy .
 
 # DVC / MLflow
-dvc repro && dvc push
+# Chưa có dvc.yaml/remote: dvc repro chưa phải lệnh tái lập hoạt động.
 # MLflow UI: http://localhost:5000
 ```
 
@@ -304,3 +332,43 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
 ---
 
 *Nếu bạn là một phiên AI mới: đọc xong file này, mở `docs/PLAN.md` tới tuần ghi ở §3, rồi bắt đầu từ "3 việc tiếp theo".*
+
+### 2026-09-17 — Đối soát hiện trạng, tăng tốc Scaper, đồng bộ tài liệu
+
+- Đọc lại mã nguồn, process/log/artifact; sửa các mô tả lỗi thời về Git, AudioSet, bank,
+  walking skeleton và v1/v2. Số chốt và bằng chứng ở `docs/STATUS.md`.
+- RIR trực tiếp → FFT; replay RNG khi resume, ghi WAV/JAMS qua file pending.
+  Giữ nguyên recipe legacy, không tự đánh dấu dữ liệu đạt; giữ nguyên phiên train v2.
+- Sao lưu hai cặp clip cuối trước khi resume; giữ các quyết định đã chốt và nhật ký cũ.
+
+### 2026-09-17 (15:05–15:30) — Đối soát lại, phát hiện `long_event` bất khả thi
+
+- **Đối soát lại snapshot 12:33 và sửa bốn chỗ lệch:** v2 đã xong (không phải đang chạy),
+  AudioSet 937 (không phải 527), 394 test (không phải 76), và `long_event` sai vì lý do
+  sâu hơn recipe. Mọi tiến trình Python/yt-dlp/ffmpeg đã dừng; Docker vẫn 6/6 healthy.
+- **v2 hoàn tất:** event-F1 0.1282 → **0.1897** (+48 % tương đối), nhưng segment-F1
+  0.4120 → 0.2980 và mAP 0.8372 → 0.8176. Ba yếu tố đổi cùng lúc nên chưa quy được nguyên
+  nhân; không quét được ngưỡng vì predictions chưa lưu.
+- 🔴 **Đo toàn bộ 4.267 clip bank:** chỉ **90** clip còn ≥8 s sau cắt im lặng, 9/15 lớp
+  có **0** clip, `siren` 2/311. `long_event: min_event_duration_sec: 8.0` là điều khoản
+  dữ liệu không bao giờ thoả được — **bác bỏ chẩn đoán trước đó** rằng chỉ cần bỏ
+  `event_duration=("const", 1.0)`.
+- Kiểm chứng `slice_index.jsonl` vẫn khớp code sau khi Codex sửa `scaper_generate.py`:
+  **0/7.920 khác biệt**; tỉ lệ 5 lát cắt khớp config ±3 %.
+- Người dùng duyệt kế hoạch **bốn bản sửa ①②③④** và quy trình sinh lại theo mốc
+  **500 → 1.000 → 1.500**. Ghi ở `docs/STATUS.md` §6–§7.
+
+### 2026-09-17 (tối) — B0–B9, lô dữ liệu mới và baseline v3
+
+- Đo lại phân bố rồi thay kế hoạch bốn sửa bằng B0–B9: chọn source theo clip, nền 10 s,
+  duration theo `train_strong`, overlap ép, `long_event` 4 s có giới hạn lớp, mật độ/đặt vào
+  khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
+- Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
+  segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-18 — Dọn artifact và đồng bộ tài liệu
+
+- Xoá log/cache tạm, recovery trùng và stderr legacy; giữ JAMS legacy, stdout chứng minh lỗi,
+  feature cache hiện hành và checkpoint cục bộ. Docker Compose được dừng không xoá volume.
+- Đối chiếu lại artifact thật, sinh lại `docs/data_inventory.md`, rồi cập nhật trạng thái/docs
+  theo lô B0–B9 và v3. Chưa chỉnh `.gitignore` hay push trong block tài liệu này.

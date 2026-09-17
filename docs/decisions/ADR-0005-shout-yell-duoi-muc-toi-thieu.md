@@ -3,6 +3,11 @@
 **Trạng thái:** Đã chốt · 2026-09-16
 **Cổng:** D7 — phân tích thiếu hụt (DATA_PLAN §11)
 
+> Đối soát 17/09/2026: **quyết định không đổi**. Bank thực tế 4.267 clip / 15 lớp
+> sự kiện; 14/15 lớp có foreground đạt tối thiểu, shout_yell 56/80 không đạt.
+> Ambient_noise không có chỉ tiêu foreground. Con số 4.268 và 15/16 trong bối cảnh
+> phía dưới là số đã ghi ở phiên 16/09, không phải số hiện tại. Xem [STATUS](../STATUS.md).
+
 ## Bối cảnh
 
 Sau khi duyệt toàn bộ hàng đợi người (2077 clip trong `screen_audit.csv`), foreground
@@ -12,8 +17,8 @@ bank đạt 4268 clip, 15/16 lớp vượt mức tối thiểu. Riêng `shout_ye
 |---|---:|---:|---:|
 | `shout_yell` | 56 | 200 | 80 |
 
-Nguyên nhân: PANNs CNN14 không có nhãn AudioSet riêng cho "quát tháo có lời" — tagger
-nhận nhầm sang Speech/Groan/Gasp (đã ghi nhận ở `guard_low_resolution_classes()`,
+Nguyên nhân vận hành ghi nhận: tagger PANNs sàng lọc kém với định nghĩa `shout_yell`
+của dự án, thường nhận sang Speech/Groan/Gasp (đã ghi nhận ở `guard_low_resolution_classes()`,
 `auto_screen.py`). Vì vậy cả sàng lọc tự động lẫn nguồn tự nhiên đều ít cho lớp này,
 không phải do bank thiếu clip khai thác được — mà do đặc trưng âm học của lớp trùng
 lấp nhiều với `speech_normal`/`scream`.

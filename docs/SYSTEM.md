@@ -1,10 +1,40 @@
 # SYSTEM.md — Đặc tả hệ thống
 
+> Đối soát **18/09/2026**: đây là **kiến trúc đích**, không phải xác nhận đã triển khai hết.
+> Số liệu và bằng chứng chạy cuối ở [STATUS.md](STATUS.md).
+
+## Phạm vi đã triển khai
+
+| Thành phần | Hiện có | Chưa có / giới hạn |
+|---|---|---|
+| Ingest | Upload file offline | Redis Streams, buffer streaming, signal-health gate |
+| SED serving | PANNs pretrained 527 nhãn ánh xạ taxonomy, CPU | Chưa deploy checkpoint v1/v2/v3 |
+| SED research | PANNs 15 head, waveform 32 kHz train/dev; v1/v2 legacy và v3 lô mới | BEATs–Conformer chưa triển khai; chưa có real dev/gold hay threshold sweep |
+| Caption | Template EN/VI từ dự đoán sự kiện | BART, InfoNCE, multi-task, grounded decoder |
+| RAG | BGE-M3 1024 chiều; rich document VI/EN + metadata; SQL filter/vector; template + citation | Chưa có provider LLM thực; min similarity 0.52 mới hiệu chỉnh mẫu nhỏ |
+| Event/dashboard | Risk rules, PostgreSQL, feedback, 3 màn React, WebSocket trong API | Temporal aggregator; pub/sub đa worker; đánh giá streaming |
+| MLOps | Docker, Git, MLflow server, best.pt và history.json | DVC pipeline, CI workflows, run lineage, predictions, full-state resume |
+| Dữ liệu | Bank; synthetic mới PASS hợp đồng; legacy JAMS làm bằng chứng; AudioSet tải raw | Real dev/gold chưa sẵn sàng; còn domain gap và giới hạn duration/overlap đã đo |
+| Retention | Có AUDIO_RETENTION_DAYS; lưu audio khi >0 | Chưa có tác vụ tự xoá audio hết hạn |
+
+Taxonomy **16 lớp = 10 A + 6 B**; head SED **15 lớp sự kiện**, không có đầu ra riêng
+cho `ambient_noise`. Synthetic dev khác seed nhưng **cùng foreground bank** với train,
+không thay thế source-disjoint real dev/gold.
+
+Lô synthetic mới đã PASS hợp đồng và được dùng cho baseline v3, nhưng không biến synthetic
+dev thành dev độc lập. Các chỉ số v1/v2/v3 chỉ là baseline nội bộ; gold do người gán mù vẫn là
+điều kiện để báo cáo kết quả nghiên cứu. Chi tiết phân bố, contract và giới hạn ở [STATUS.md](STATUS.md).
+
+Template bám dự đoán SED, không phải sự thật: SED sai thì caption vẫn sai, **không mặc định
+EHR = 0**. Các đóng góp C1/C2 phía dưới còn là giả thuyết cần triển khai và thực nghiệm.
+
+---
+
 > **Đề tài:** Xây dựng hệ thống giám sát an ninh và truy xuất cảnh báo (RAG) thông qua sinh mô tả âm thanh tự động
 >
 > **English title:** *Grounded Automated Audio Captioning for Security Surveillance and RAG-based Alert Retrieval — an MLOps Approach*
 >
-> **Loại tài liệu:** Đặc tả kỹ thuật đầy đủ (single source of truth về *hệ thống LÀ GÌ*).
+> **Loại tài liệu:** Đặc tả kỹ thuật kiến trúc đích; implementation thực tế theo bảng phía trên.
 > **Không** chứa tiến độ (xem [PLAN.md](PLAN.md)) và **không** chứa trạng thái phiên làm việc (xem [../CLAUDE.md](../CLAUDE.md)).
 >
 > **Quy ước:** Mục lục của file này ánh xạ 1:1 với chương báo cáo khoá luận. Viết file này = viết báo cáo.
@@ -12,6 +42,7 @@
 > | Phiên bản | Ngày | Ghi chú |
 > |---|---|---|
 > | 0.1 | 2026-09-14 | Bản khởi tạo, chốt taxonomy 15 class + 8 slice + kiến trúc Grounded AAC |
+> | 0.2 | 2026-09-18 | Đồng bộ phạm vi triển khai sau B0–B9 và baseline PANNs v3; kiến trúc đích không đổi |
 
 ---
 
@@ -77,7 +108,7 @@ Cho một luồng âm thanh liên tục $x(t)$ thu từ một hoặc nhiều đi
 
 | # | Mục tiêu | Tiêu chí đo |
 |---|---|---|
-| M1 | Xây dựng taxonomy 16 lớp âm thanh an ninh có định nghĩa vận hành rõ ràng | Kappa liên người gán ≥ 0.70 |
+| M1 | Xây dựng taxonomy 16 lớp âm thanh an ninh có định nghĩa vận hành rõ ràng | Một người gán: test–retest event-F1 ≥ 0.75, onset lệch trung vị ≤ 100 ms |
 | M2 | Xây dựng bộ dữ liệu strong-label + 4 gold set cho 4 tầng đánh giá | Đủ 8 test slice, mỗi slice ≥ 20 clip |
 | M3 | Huấn luyện SED đa nhãn có định vị thời gian | Event-based F1, PSDS, báo cáo theo từng slice |
 | M4 | **Đề xuất kiến trúc Grounded AAC chống hallucination** | Giảm Event Hallucination Rate so với baseline ở cùng mức CIDEr |
@@ -207,9 +238,9 @@ Bốn trụ cột áp dụng: **data versioning** (DVC), **experiment tracking +
 
 | Khoảng trống | Hệ quả | Đề tài xử lý |
 |---|---|---|
-| AAC được đánh giá bằng metric tương đồng văn bản, không có metric đo **tính có bằng chứng** | Không phân biệt được model trung thực với model nói hay | **C2** — bộ metric EHR/EOR/GS/TOA |
+| Metric tương đồng văn bản chưa đủ đánh giá grounding theo strong label miền an ninh | Cần đối chiếu sự kiện, biên và thứ tự, bổ sung metric/benchmark đã có | **C2 dự kiến** — EHR/EOR/GS/TOA; đối chiếu BRACE/CAF-Score/AAD trong RELATED_WORK_2026.md |
 | AAC hiếm khi tận dụng **strong label** làm giám sát grounding | Bỏ phí tín hiệu mạnh nhất đang có | **C1** — head SED mức frame trên trunk chia sẻ |
-| Dataset SED an ninh thường chỉ gồm lớp "nguy hiểm", thiếu lớp gây nhầm | Báo cáo F1 đẹp, deploy thì báo động giả liên tục | **C3** — 5 lớp nhầm lẫn trong taxonomy |
+| Cần kiểm chứng vai trò lớp gây nhầm trong miền an ninh | Đo FAR trên gold và ablation, không suy diễn từ synthetic F1 | **C3 dự kiến** — 5 lớp nhầm lẫn có event head + ambient_noise nền |
 | Chưa có benchmark nào phủ chuỗi *audio → caption → security event → RAG* | Không đánh giá được hệ thống như một tổng thể | **C4** — gold set 4 tầng |
 | Kịch bản **media playback** (TV/loa phát tiếng súng, tiếng hét) gần như không được xử lý | Nguồn báo động giả nghiêm trọng trong thực tế | Slice **S4** |
 
@@ -219,7 +250,7 @@ Bốn trụ cột áp dụng: **data versioning** (DVC), **experiment tracking +
 
 ## 3.1 Taxonomy 16 lớp
 
-Nguyên tắc thiết kế: **10 lớp sự kiện an ninh + 5 lớp gây nhầm lẫn/nền**. Năm lớp Nhóm B không phải "rác" — chúng là lớp có nhãn đầy đủ và chính chúng quyết định False Alarm Rate.
+Nguyên tắc thiết kế: **10 lớp sự kiện an ninh + 6 lớp gây nhầm lẫn/nền**. Nhóm B gồm 5 lớp có event head và `ambient_noise` nền; vai trò kiểm soát False Alarm Rate cần kiểm chứng bằng đánh giá.
 
 ### Nhóm A — Sự kiện an ninh (10 lớp)
 
@@ -234,9 +265,9 @@ Nguyên tắc thiết kế: **10 lớp sự kiện an ninh + 5 lớp gây nhầm
 | 7 | `door_slam` | Đóng sập cửa / phá cửa | High | Sập cửa mạnh, đạp cửa, cạy cửa | Đóng cửa nhẹ (→15) | Cần hard negative "gió sập cửa" |
 | 8 | `running_footsteps` | Bước chân chạy | Medium | Chạy, bước gấp, nhiều người di chuyển nhanh | Đi bộ thong thả (→15) | Lớp **bổ trợ ngữ cảnh**, hiếm khi tự nó là cảnh báo |
 | 9 | `siren` | Còi hú | Medium | Còi cứu hoả, cứu thương, cảnh sát | Chuông báo động cố định (→10), còi xe (→15) | Thường là *hệ quả*, không phải *nguyên nhân* |
-| 10 | `alarm_bell` | Chuông báo động | Medium | Báo cháy, báo trộm, chuông cảnh báo thiết bị | Chuông cửa, chuông điện thoại (→15) | Kéo dài rất lâu → kích hoạt slice S6 |
+| 10 | `alarm_bell` | Chuông báo động | Medium | Báo cháy, báo trộm, chuông cửa, chuông nhà thờ theo taxonomy A10 | Chuông điện thoại; chuông quầy phục vụ còn chờ ruling | Nguồn định nghĩa chuẩn: taxonomy.md |
 
-### Nhóm B — Lớp gây nhầm lẫn & nền (5 lớp)
+### Nhóm B — Lớp gây nhầm lẫn & nền (6 lớp)
 
 | # | `class_id` | Tên tiếng Việt | Nhầm với | Lý do phải là lớp riêng |
 |---|---|---|---|---|
@@ -276,7 +307,7 @@ Slice **không phải class**. Mỗi clip trong test set được gắn thêm c�
 |---|---|---|---|
 | **AudioSet (temporally-strong)** | Strong | 1,2,3,6,7,8,9,10,11,13,14,15 | Nhãn CC-BY của Google; audio là link YouTube → **chỉ phát hành script tái tạo, không phát hành audio** |
 | **MIVIA Audio Events** | Strong + thang SNR | 1,3,4 | Cần đăng ký với đơn vị phát hành — **nộp đơn ngày đầu W1** |
-| **MIVIA Road Audio Events** | Strong | 5 | Như trên |
+| **vehicle_crash_cc** | Clip cắt quanh sự kiện; biên nghe được cần kiểm chứng | 5 | Nguồn đang dùng; provenance/license theo manifest. MIVIA Road là dự phòng |
 | **DESED** | Strong (synthetic + validation) | 10,12,14,15 | Lớp `Dishes`, `Alarm_bell_ringing`, `Speech` dùng trực tiếp |
 | **FSD50K** | Weak (clip-level) | 4,7,8,11,12 | CC; dùng làm **foreground bank** cho Scaper (clip đã trim = strong ngầm định) |
 | **UrbanSound8K** | Weak + salience | 9,15 | Dùng cho `siren`, nền giao thông |
@@ -292,9 +323,14 @@ Mâu thuẫn trung tâm: strong label là bắt buộc, nhưng gán tay tốn 5�
 
 | Tập | Cơ chế nhãn | Quy mô mục tiêu | Vai trò |
 |---|---|---|---|
-| **Train** | **Scaper sinh tự động** — mix foreground lên background với SNR/overlap/thời điểm do ta điều khiển ⇒ strong label chính xác tuyệt đối, miễn phí | 15–25 giờ | Huấn luyện chính |
+| **Train** | **Scaper sinh tự động** — nhãn thời điểm đặt nguồn; phải QA biên nghe được và slice, không mặc định ground truth hoàn hảo | 15–25 giờ | Huấn luyện chính |
 | **Dev** | Strong label công khai có sẵn (AudioSet-strong, DESED, MIVIA) | 3–5 giờ | Tuning, early stopping |
 | **Test (Gold)** | **Người gán mù**, gán lại 20% sau ≥7 ngày để đo tự-nhất-quán | ~1 giờ | **Con số duy nhất được báo cáo** |
+
+**Trạng thái hiện hành:** Train và synthetic dev của lô B0–B9 đã có, nhưng dev đang dùng cho
+baseline vẫn là synthetic và chung foreground bank với train. AudioSet-strong đã tải một phần
+nhưng chưa vào manifest/split; test gold còn rỗng. Do đó bảng này là thiết kế đích, không được
+diễn giải rằng dev/test real đã sẵn sàng.
 
 Scaper chính là công cụ mà DESED dùng để sinh soundscape có strong label. Nó giải quyết đồng thời hai việc: chi phí nhãn, **và** khả năng tạo có chủ đích các slice S1, S2, S3, S6, S7 (ta điều khiển được overlap, SNR, RIR, thời lượng, thứ tự sự kiện). Đó là lý do nó nằm ở trung tâm chiến lược chứ không phải một mẹo tiết kiệm.
 
@@ -710,7 +746,7 @@ EVENT_LEXICON = {
 
 | Ký hiệu | Model | Vai trò |
 |---|---|---|
-| **B0** | Structured captioner: timeline SED → template → (tuỳ chọn) LLM viết lại | Cận trên về grounding (EHR ≈ 0), cận dưới về tự nhiên |
+| **B0** | Structured captioner: timeline SED → template → (tuỳ chọn) LLM viết lại | Baseline ràng buộc từ vựng; EHR còn phụ thuộc lỗi SED và bước viết lại, phải đo trên gold |
 | **B1** | BEATs → Conv1D → Conformer → BART, **chỉ NLL** | Baseline AAC thuần, tái hiện kiến trúc gốc |
 | **B2** | B1 + InfoNCE | Kiểm chứng đóng góp của nhánh contrastive |
 | **B3** | B1 + SED head (đa nhiệm) | Kiểm chứng đóng góp của grounding supervision |
@@ -1011,7 +1047,7 @@ Bảng 8.7 — Hệ thống: latency P50/P95/P99 theo chặng | throughput | VRA
 |---|---|
 | `lint` | ruff + black --check + mypy |
 | `test` | pytest, ngưỡng coverage 80% |
-| `data-validate` | `validate_taxonomy.py`, `validate_annotations.py`, `check_leakage.py` |
+| `data-validate` (CI dự kiến) | `verify_ontology.py`, `check_leakage.py`; `validate_annotations.py` chưa có |
 | `build` | Build image các service |
 | `smoke` | `docker compose up` + gọi `/health` + một truy vấn RAG mẫu |
 
@@ -1178,4 +1214,4 @@ audio-security-rag/
 
 ---
 
-*Cập nhật lần cuối: 2026-09-14 · Phiên bản 0.1*
+*Cập nhật lần cuối: 2026-09-18 · Phiên bản 0.2 — tách kiến trúc đích và implementation thực tế.*

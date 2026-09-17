@@ -15,6 +15,7 @@ from __future__ import annotations
 from typing import Protocol
 
 from app.captions import SEVERITY_VI
+from app.rag.document import LOCAL_TZ
 from app.rag.retrieval import RetrievedEvent
 
 NO_EVIDENCE_VI = (
@@ -40,7 +41,11 @@ class TemplateProvider:
 
         lines = [f"Tìm thấy {len(events)} sự kiện liên quan:"]
         for event in events:
-            moment = event.window_start.strftime("%H:%M ngày %d/%m/%Y")
+            # Đổi sang giờ Việt Nam trước khi hiển thị. DB lưu UTC (đúng chuẩn), nhưng
+            # in thẳng UTC ra cho người dùng thì một sự kiện lúc 00:56 sáng 17/09 hiện
+            # thành "17:56 ngày 16/09" — sai cả giờ lẫn NGÀY, và người đọc không có cách
+            # nào biết là đang xem múi giờ khác.
+            moment = event.window_start.astimezone(LOCAL_TZ).strftime("%H:%M ngày %d/%m/%Y")
             muc = SEVERITY_VI.get(event.severity, event.severity)
             lines.append(f"- {moment}: {event.caption_vi} (mức {muc}, {event.event_id})")
         return "\n".join(lines)

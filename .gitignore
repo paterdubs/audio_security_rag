@@ -28,3 +28,10 @@ __pycache__/
 # Frontend
 services/frontend/node_modules/
 services/frontend/dist/
+
+# Model weights/checkpoints are local artifacts (GitHub rejects files >100 MB).
+# Keep lightweight history/config/metrics in ml/runs/, but never commit the binaries.
+*.pt
+*.pth
+*.ckpt
+*.onnx

@@ -1,5 +1,11 @@
 # taxonomy.md — Định nghĩa 16 lớp âm thanh
 
+> Đối soát 17/09/2026: giữ nguyên định nghĩa 16 lớp = 10 A + 6 B. Head SED hiện có
+> 15 đầu ra, không có lớp ambient_noise tường minh. Bank có 4.267 clip / 15 lớp sự kiện;
+> xem [inventory](data_inventory.md) và [STATUS](STATUS.md).
+> Shout_yell 56/80 giữ theo ADR-0005. Ruling chuông quầy phục vụ vẫn **chờ xác nhận**,
+> không tự áp dụng đề xuất trong decision_log vào taxonomy.
+
 > **Vai trò:** định nghĩa chuẩn của 16 lớp. Mọi tranh cãi "clip này thuộc lớp nào" đều tra ở đây.
 >
 > Liên quan: [ontology_map.yaml](../ml/configs/ontology_map.yaml) (ánh xạ sang nhãn dataset — **file máy đọc**) · [annotation_guideline.md](annotation_guideline.md) (cách gán biên thời gian) · [DATA_PLAN.md](DATA_PLAN.md)
@@ -91,7 +97,8 @@ Tiếng va chạm giữa phương tiện với phương tiện hoặc vật cả
 | 🔍 **Dấu hiệu phân biệt** | **so với `glass_breaking` và `door_slam`:** va chạm xe là **sự kiện phức hợp** — hiếm khi chỉ có một tiếng. Nếu chỉ nghe thấy đúng một tiếng "rầm" đơn lẻ không có bối cảnh giao thông thì **không** gán lớp này. |
 | 📌 **Ví dụ** | (1) Phanh rít 0.8 s rồi va chạm rồi kính vỡ (2) Xe máy đổ, kim loại trượt trên đường (3) Va chạm nhẹ ở bãi đỗ, chỉ một tiếng "cộp" kim loại **và có tiếng động cơ nền** |
 
-> 🔴 **Lớp rủi ro cao nhất.** Đã xác minh: AudioSet **không có** lớp nào nghĩa là va chạm xe, nên lớp này phụ thuộc hoàn toàn vào MIVIA Road. Nếu đơn không được duyệt, lớp này ra [cổng quyết định D7](DATA_PLAN.md#11-cổng-quyết-định-d7--phân-tích-thiếu-hụt).
+> **Nguồn hiện tại:** `vehicle_crash_cc`, 33 clip qua sàng lọc, đạt mức tối thiểu 30.
+> MIVIA Road là dự phòng, không còn chặn lớp này. Cỡ mẫu vẫn nhỏ, cần nêu trong báo cáo.
 
 ---
 
@@ -278,21 +285,24 @@ Dán bảng này cạnh màn hình khi gán nhãn.
 
 | Lớp | Nhóm | Mục tiêu | Tối thiểu | Trạng thái |
 |---|---|---:|---:|---|
-| `gunshot` | A | 200 | 80 | ⏳ chờ MIVIA |
-| `explosion` | A | 120 | 50 | 🔴 khan hiếm |
-| `scream` | A | 200 | 80 | ⏳ chờ MIVIA |
-| `glass_breaking` | A | 250 | 100 | 🟢 |
-| `vehicle_crash` | A | 80 | 30 | 🔴 chờ MIVIA Road |
-| `shout_yell` | A | 200 | 80 | 🟢 |
-| `door_slam` | A | 250 | 100 | 🟢 |
-| `running_footsteps` | A | 250 | 100 | 🟡 tỉ lệ loại cao |
-| `siren` | A | 300 | 120 | 🟢 |
-| `alarm_bell` | A | 250 | 100 | 🟢 |
-| `fireworks` | B | 200 | 80 | 🟡 |
-| `object_drop_dishes` | B | 250 | 100 | 🟢 |
-| `laughter` | B | 150 | 60 | 🟢 |
-| `applause_cheering` | B | 250 | 100 | 🟢 |
-| `speech_normal` | B | 300 | 120 | 🟢 |
+| `gunshot` | A | 200 | 80 | 398 clip, đã đủ; không chờ MIVIA |
+| `explosion` | A | 120 | 50 | 64 clip, trên tối thiểu |
+| `scream` | A | 200 | 80 | 131 clip, trên tối thiểu |
+| `glass_breaking` | A | 250 | 100 | 322 clip, đủ mục tiêu |
+| `vehicle_crash` | A | 80 | 30 | 33 clip vehicle_crash_cc, trên tối thiểu |
+| `shout_yell` | A | 200 | 80 | 56 clip, dưới tối thiểu; giữ theo ADR-0005 |
+| `door_slam` | A | 250 | 100 | 151 clip, trên tối thiểu |
+| `running_footsteps` | A | 250 | 100 | 163 clip, trên tối thiểu |
+| `siren` | A | 300 | 120 | 311 clip, đủ mục tiêu |
+| `alarm_bell` | A | 250 | 100 | 487 clip, đủ mục tiêu |
+| `fireworks` | B | 200 | 80 | 199 clip, trên tối thiểu |
+| `object_drop_dishes` | B | 250 | 100 | 418 clip, đủ mục tiêu |
+| `laughter` | B | 150 | 60 | 390 clip, đủ mục tiêu |
+| `applause_cheering` | B | 250 | 100 | 162 clip, trên tối thiểu |
+| `speech_normal` | B | 300 | 120 | 982 clip, đủ mục tiêu |
 | `ambient_noise` | B | — | — | dùng background bank |
 
-Con số cập nhật tự động: `python scripts/coverage_report.py`. Lớp nào dưới mức tối thiểu ở mốc D7 sẽ ra [cổng quyết định](DATA_PLAN.md#11-cổng-quyết-định-d7--phân-tích-thiếu-hụt).
+Snapshot bank 17/09/2026, cập nhật bằng `.venv/Scripts/python.exe scripts/data_inventory.py`.
+`coverage_report.py` đo nguồn ở normalized, không phải số đã vào bank.
+Lớp dưới tối thiểu theo [cổng quyết định](DATA_PLAN.md#11-cổng-quyết-định-d7--phân-tích-thiếu-hụt);
+shout_yell đã có ADR-0005, không mở lại quyết định chỉ vì còn dưới ngưỡng.

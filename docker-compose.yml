@@ -64,6 +64,26 @@ services:
       start_period: 20s
     restart: unless-stopped
 
+  inference:
+    build:
+      context: .
+      dockerfile: services/inference/Dockerfile
+    environment:
+      EMBED_MODEL: ${EMBED_MODEL:-BAAI/bge-m3}
+      EMBED_DIM: ${EMBED_DIM:-1024}
+      ONTOLOGY_PATH: /config/ontology_map.yaml
+      AUDIOSET_ONTOLOGY: /config/audioset_ontology.json
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./ml/configs/ontology_map.yaml:/config/ontology_map.yaml:ro
+      - ./data/reference/audioset_ontology.json:/config/audioset_ontology.json:ro
+      # Cache model: BGE-M3 ~2.2 GB + checkpoint PANNs ~300 MB. Không có volume này thì
+      # mỗi lần dựng lại container là tải lại từ đầu.
+      - model_cache:/models
+    restart: unless-stopped
+
   api:
     build:
       context: .
@@ -91,6 +111,25 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      # CỐ Ý chỉ `service_started`, KHÔNG phải `service_healthy`: lần chạy đầu inference
+      # mất vài phút tải model. Chờ nó healthy nghĩa là dashboard và /events cũng chết
+      # theo suốt thời gian đó, dù chúng không cần model. /health của api báo trạng thái
+      # inference riêng, và upload sẽ lỗi rõ ràng nếu gọi sớm.
+      inference:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: services/frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      # Chỉ `service_started`: nginx proxy tới api lúc có request, không phải lúc khởi
+      # động. Bắt chờ api healthy chỉ làm dashboard lên chậm mà không được gì.
+      api:
+        condition: service_started
     restart: unless-stopped
 
 volumes:
@@ -98,3 +137,4 @@ volumes:
   redisdata:
   mlflow_data:
   event_audio:
+  model_cache:

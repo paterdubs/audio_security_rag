@@ -1,0 +1,21 @@
+▶ train: 7920 clip × 10.0s = 22.0 h · seed 20260914
+
+lát cắt             đích   thực tế    clip
+──────────────────────────────────────────
+overlap             30%     30.1%    2387
+low_snr             25%     24.3%    1928
+reverb              40%     39.6%    3136
+long_event          10%     10.0%     791
+causal_chain        15%     14.7%    1161
+
+788 clip không có sự kiện (9.9%) — nhánh dạy model biết im lặng
+
+✓ 4267 clip bank đều thuộc foreground_bank_train
+  7400/7920…
+  7500/7920…
+  7600/7920…
+  7700/7920…
+  7800/7920…
+  7900/7920…
+
+✓ đã sinh 7920 clip → data\synthetic\train

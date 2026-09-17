@@ -42,7 +42,36 @@ Sai lầm hay gặp là coi "gán nhãn" là một việc duy nhất. Thực t�
 | **B — Background bank** | Đoạn nền **không chứa** sự kiện Nhóm A | ~0.5× realtime | Nền cho Scaper + lớp `ambient_noise` | ✅ Sàng lọc tự động |
 | **C — Gold test set** | Strong label onset/offset trên audio thật | **5–10× realtime** | Con số duy nhất được báo cáo | ❌ **Cấm** (xem N1) |
 
-**Chìa khoá của cả kế hoạch:** strong label cho *train* không cần gán tay chút nào — Scaper biết chính xác nó đặt foreground ở đâu, nên nó **sinh ra strong label miễn phí và chính xác tuyệt đối**. Việc của người chỉ là làm sạch nguyên liệu (loại A, rẻ) và gán gold (loại C, đắt nhưng ít).
+**Chìa khoá của kế hoạch:** Scaper tự sinh nhãn thời điểm đặt foreground. Biên này
+không luôn trùng sự kiện nghe được: nguồn có khoảng lặng, event bị cắt và hiệu ứng có
+thể làm đổi biên. Phải kiểm tra nguyên liệu và hợp đồng slice; gold vẫn gán mù.
+
+### Hiện trạng đã đối soát — 18/09/2026
+
+- FG **4.267 clip / 15 lớp sự kiện**, BG **2.461**, RIR **505**. Chi tiết ở
+  [data_inventory.md](data_inventory.md); bằng chứng chạy cuối ở [STATUS.md](STATUS.md).
+- Lô **mới** Scaper đã sinh đủ **7.920 train + 1.440 dev**, 10 s/clip, WAV/JAMS/index;
+  `verify_synthetic.py` PASS ở cả hai split. Precompute waveform PANNs hiện có đủ train/dev.
+  Đây vẫn là synthetic dev cùng foreground bank với train, không phải real dev/gold độc lập.
+- Lô **legacy** cùng quy mô được giữ tách riêng bằng JAMS/index/log để làm bằng chứng trước-sửa;
+  WAV legacy đã xoá. Legacy thất bại hợp đồng vì `source_time=0`, `event_duration=1.0`, overlap
+  không ép và long_event nhãn rỗng. Không dùng lô này cho lượt train sau.
+- ⚠️ **`long_event ≥ 8 s` là điều khoản BẤT KHẢ THI với bank hiện có** (đo 17/09/2026 trên
+  toàn bộ 4.267 clip): chỉ **90 clip** còn ≥8 s sau cắt im lặng đầu/cuối, **9/15 lớp có 0
+  clip**, và `siren` — lớp kéo dài mẫu mực nhất — chỉ có **2/311** (p90 4,01 s, vì nguồn
+  UrbanSound8K cắt sẵn ở 4 giây). Lô mới đã hạ xuống **4 s** và giới hạn `long_event` vào
+  các lớp có đủ nguyên liệu (ADR-0007). Bảng số đo đầy đủ ở [STATUS §6](STATUS.md); đây là
+  nới điều khoản có ghi nhận, không được diễn giải thành đã khớp hoàn toàn đích ≥8 s.
+- Recipe mới dùng source cụ thể theo clip, duration rút từ `train_strong`, nền liên tục 10 s,
+  overlap ép thật, kiểm nhãn mô phỏng và seed theo clip. `verify_synthetic.py` đọc lại sản phẩm
+  thật; fallback dựng plan khi thiếu index vẫn không chứng minh RIR đã áp dụng, nên index phải
+  luôn được giữ và data-v1.0 vẫn chưa thể đóng băng khi gold còn trống.
+- Real dev/gold theo §6/§8 chưa sẵn sàng: 937 WAV AudioSet-strong đã tải nhưng chưa nhập
+  manifest/splits. Gold test do người gán mù là nút thắt còn lại.
+- Hàng đợi đã xử lý 16/09, trong đó **1.831 bulk-accept** không nghe từng clip.
+  Không dùng lỗi 0,4% trên mẫu auto-accept để suy ra chất lượng nhóm này.
+- `vehicle_crash_cc` 33 clip đã thay phụ thuộc MIVIA Road; giữ `shout_yell` 56/80 theo
+  ADR-0005, vẫn tính macro-F1; không tự gộp/bỏ lớp hoặc bổ sung trái quyết định.
 
 ```
 Loại A (rẻ, máy hỗ trợ)  ─┐
@@ -120,7 +149,7 @@ gunshot:
 
 **Bốn phát hiện làm thay đổi kế hoạch:**
 
-1. 🔴 **AudioSet không có lớp nào nghĩa là "va chạm xe".** Gần nhất là `/m/07pjjrj Smash, crash` — tiếng vỡ/đập nói chung, không đặc thù xe cộ. `vehicle_crash` vì thế phụ thuộc MIVIA Road **tuyệt đối**, chứ không phải "chủ yếu" như đánh giá ban đầu. Nộp đơn ngay.
+1. **AudioSet không có nhãn riêng tương đương `vehicle_crash` trong ánh xạ đang dùng.** `/m/07pjjrj Smash, crash` là tiếng vỡ/đập nói chung. Từ 16/09 đã có `vehicle_crash_cc` (33 clip bank); MIVIA Road chỉ là dự phòng, không còn chặn lớp này.
 
 2. ❌ **ESC-50 không dùng được cho `door_slam`.** Hai lớp cửa của ESC-50 là `door_wood_knock` (gõ cửa) và `door_wood_creaks` (cọt kẹt) — không lớp nào là đóng sầm. Bảng trên đã sửa.
 
@@ -179,7 +208,7 @@ Foreground bank cần đúng clip **PP**. Lấy điều kiện *một lớp duy 
 | `explosion` | 425 | 111 | 50 | ✅ |
 | `shout_yell` | 197 | 77 | 80 | 🟡 sát ngưỡng |
 | `siren` | 120 | 27 | 120 | 🔴 trông vào UrbanSound8K |
-| `vehicle_crash` | 0 | 0 | 30 | ⛔ MIVIA Road |
+| `vehicle_crash` | 0 | 0 | 30 | Số riêng FSD50K lúc khảo sát; bank hiện có 33 từ vehicle_crash_cc |
 
 **Ý nghĩa:** FSD50K mở khoá 11/13 lớp còn thiếu, và ta biết điều đó **trước khi tải**. Đây là lý do phải tải `FSD50K.metadata` (~34 MB) ngay từ đầu, tách khỏi audio (18.4 GB) — metadata rẻ nhưng quyết định toàn bộ chiến lược.
 
@@ -426,7 +455,7 @@ Sau khi có bank sạch, đây là bước **sinh strong label miễn phí**.
 
 | Tham số | Phân phối |
 |---|---|
-| Số sự kiện/clip | 0–4 (0 sự kiện ~10% → dạy model biết im lặng) |
+| Số sự kiện/clip | 0–7 (0 sự kiện 10% → dạy model biết im lặng; `count_weights` bộ E ưu tiên khớp độ phủ sóng) |
 | SNR foreground/background | Uniform(−5, 25) dB |
 | Pitch shift | Uniform(−1, 1) semitone |
 | Time stretch | Uniform(0.9, 1.1) |
@@ -440,7 +469,7 @@ Sau khi có bank sạch, đây là bước **sinh strong label miễn phí**.
 | S1 `overlap` | 30% | Ép ≥2 sự kiện chồng ≥30% |
 | S2 `low_snr` | 25% | Ép SNR ≤ 5 dB |
 | S3 `reverb` | 40% | Tích chập RIR |
-| S6 `long_event` | 10% | Foreground kéo dài > 8 s |
+| S6 `long_event` | 10% | Ép event ≥4 s, chỉ từ lớp/nguồn cấp được; ngưỡng 8 s đã bị loại theo ADR-0007 |
 | S7 `causal_chain` | 15% | Kịch bản có thứ tự (xem dưới) |
 
 **Kịch bản chuỗi nhân quả (S7)** — định nghĩa tường minh trong config, vì đây chính là thứ Temporal Aggregator và captioning sinh ra để xử lý:
@@ -462,7 +491,10 @@ causal_chains:
 
 Hai chuỗi âm tính cuối dạy model rằng *một chuỗi sự kiện liên tiếp không mặc nhiên là sự cố an ninh*. Thiếu chúng, model sẽ học "cứ có chuỗi là nguy hiểm".
 
-**Đầu ra:** mỗi clip có `.wav` + `.jams` (Scaper ghi đầy đủ công thức) + dòng trong `.tsv`. File `.jams` cho phép **tái tạo chính xác** toàn bộ train set từ bank — đó là lý do có thể công bố "dataset" mà không cần công bố audio.
+**Đầu ra hiện có:** mỗi clip có `.wav` + `.jams` (Scaper ghi đầy đủ công thức) + dòng trong
+`slice_index.jsonl`; TSV chuẩn DCASE chưa xuất. File `.jams` cho phép **tái tạo chính xác** toàn
+bộ train set từ bank — đó là lý do có thể công bố công thức dataset mà không cần công bố audio.
+Xuất TSV phải là bước tường minh, có kiểm tra schema, trước khi dùng bộ dữ liệu với công cụ đánh giá ngoài.
 
 ---
 
@@ -560,7 +592,7 @@ Bỏ pilot ở bước 1–3 là sai lầm tốn kém nhất trong toàn bộ k�
 
 | Ngày | Việc | Ai | Có chặn gì không |
 |---|---|---|---|
-| **D0** | Nộp đơn MIVIA · viết `ontology_map.yaml` · **xác minh ID ontology từ file gốc** · khung script | 👥 | MIVIA chặn lớp 5 |
+| **D0** | Nộp đơn MIVIA · viết `ontology_map.yaml` · **xác minh ID ontology từ file gốc** · khung script | 👥 | Đã làm; lớp 5 hiện dùng vehicle_crash_cc |
 | **D1–D2** | Tải AudioSet-strong / FSD50K / ESC-50 / UrbanSound8K / DESED · ghi `raw_manifest.csv` đủ cột (đặc biệt `source_group_id`, `license`) | 🤖 | |
 | **D2** | Chuẩn hoá + kiểm tra chất lượng (§4.1) · khử trùng lặp (§6) | 🤖 | |
 | **D3** | Sàng lọc tự động (§4.2) · sinh đề xuất biên (§4.3) · dựng Label Studio | 🤖 | |
@@ -624,7 +656,9 @@ Với mỗi lớp 🔴, chọn **một** trong bốn phương án và **ghi thà
 
 Nguyên tắc: **quyết ở D7, không kéo dài**. Một lớp còn 🔴 vào D8 mà chưa quyết sẽ làm hỏng cả lịch W3.
 
-Khuyến nghị mặc định cho `vehicle_crash` nếu MIVIA Road không về kịp: chọn **C** — giữ lớp, loại khỏi macro-F1, nêu rõ. Đó là cách trung thực nhất và không phá taxonomy.
+`vehicle_crash` hiện đạt tối thiểu 33/30, không cần kích hoạt phương án chờ MIVIA Road.
+Với `shout_yell`, ADR-0005 chốt giữ 56/80, **không loại khỏi macro-F1**, ghi rõ hạn chế.
+Quyết định cụ thể này ưu tiên hơn khuyến nghị thiếu dữ liệu chung ở bảng trên.
 
 ---
 
@@ -643,8 +677,8 @@ Chỉ tag DVC khi **toàn bộ** mục dưới đây đạt. Đây là ý nghĩa
 ### Tính đúng đắn
 - [ ] `check_leakage.py` xanh (3 kiểm tra ở §6)
 - [ ] `validate_annotations.py` xanh (offset > onset, không vượt duration, nhãn ∈ taxonomy)
-- [ ] `validate_taxonomy.py` xanh
-- [ ] Kappa ≥ 0.70, **đã ghi số**
+- [ ] `verify_ontology.py` xanh
+- [ ] Test–retest event-F1 ≥ 0.75 và onset lệch trung vị ≤ 100 ms, **đã ghi số**; không gọi là kappa liên-người
 - [ ] Tỉ lệ lỗi auto-accept ≤ 10%, **đã ghi số**
 - [ ] Gold set **không** có clip synthetic nào
 - [ ] Gold set gán mù, **không** dùng đề xuất của máy
@@ -682,10 +716,10 @@ Chỉ tag DVC khi **toàn bộ** mục dưới đây đạt. Đây là ý nghĩa
 | `scripts/check_leakage.py` | 3 kiểm tra rò rỉ (CI) | D7 + CI |
 | `scripts/scaper_generate.py` | Sinh soundscape + slice + chuỗi nhân quả | D7 |
 | `scripts/validate_annotations.py` | Kiểm tra tính hợp lệ nhãn (CI) | D10 + CI |
-| `scripts/agreement.py` | Kappa + onset MAE | D10 |
+| `scripts/agreement.py` (chưa có) | Test–retest event-F1 + thống kê sai lệch onset | D10 |
 | `scripts/slice_coverage.py` | Đếm clip theo slice | D10 |
 | `scripts/data_inventory.py` | Sinh `docs/data_inventory.md` | D10 |
 
 ---
 
-*Cập nhật lần cuối: 2026-09-14 · Phiên bản 0.1*
+*Cập nhật lần cuối: 2026-09-18 · Phiên bản 0.2. Lịch D0–D10 là kế hoạch, không phải checklist đã hoàn thành.*

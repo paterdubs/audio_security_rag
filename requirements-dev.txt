@@ -23,6 +23,11 @@ httpx==0.28.1            # HTTP client + FastAPI TestClient
 python-multipart==0.0.20 # FastAPI cần để nhận multipart/form-data (upload file)
 PyYAML==6.0.2
 
+# numpy ở ĐÂY cố ý KHÔNG ghim 1.26: services/ không dùng scaper nên không dính ràng buộc
+# np.Inf. Đây chính là lý do phải tách venv — .venv-services đang chạy numpy 2.x trong khi
+# .venv giữ 1.26.4; dùng chung một môi trường thì bước sinh train set chết ngay.
+numpy>=2.0
+
 # --- kiểm thử & chất lượng ---
 pytest==8.3.4
 pytest-asyncio==0.25.0
