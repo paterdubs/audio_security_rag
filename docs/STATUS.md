@@ -1,7 +1,7 @@
 # Trạng thái dự án đã đối soát
 
-> **Snapshot hiện hành: 19/09/2026, sau Pha 1 + Pha 3 + Pha 4 của Training Ops, lượt quét
-> ngưỡng và lượt phân tích lỗi.**
+> **Snapshot hiện hành: 19/09/2026, sau Pha 1–5 của Training Ops, lượt quét ngưỡng,
+> lượt phân tích lỗi và ablation hậu xử lý.**
 > Trước đó: 18/09 sau B0–B9, train `panns_ft_v3` và dọn artifact.
 > Các phép đo dữ liệu/training được thực hiện ngày 17/09; kiểm kê file và cache trong workspace
 > được đối chiếu lại ngày 18/09. Phân biệt rõ **lô legacy** (bằng chứng trước-sửa) với **lô mới**
@@ -40,9 +40,22 @@
   200 ms dù model đoán hoàn hảo (v2/v3 lưới 79,9 ms → trần 0%). **So event-F1 của v1 với
   v2/v3 là so một phần độ phân giải bộ giải mã.** Phép đo ở
   [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md).
-- Pha 1, Pha 3 và Pha 4 của [TRAINING_OPS_PLAN](TRAINING_OPS_PLAN.md) đã có module và đã
-  chạy: `ml/runs/{v1,v2,v3}/manifest.json` + `predictions/dev_all.npz` +
-  `analysis.{json,md}`. `train_sed.py` nay gieo toàn bộ RNG và ghi manifest trước epoch đầu.
+- 🔴 **19/09 — Pha 5 kết luận: KHÔNG có phép so sánh sạch nào giữa v1/v2/v3.**
+  `compare_runs.py` khai `KHONG_RO` cho cả dữ liệu lẫn mã nguồn: vân tay của v1/v2 là
+  `null` vĩnh viễn, còn `code.tree_sha256` của cả ba **trùng nhau** vì manifest lập hồi
+  cứu trong cùng một phút — đó là mã lúc lập manifest, không phải lúc train. Thêm một bẫy
+  đã bị chặn bằng test: `manifest.ket_qua_cuoi` chấm trên val split **riêng** của từng run
+  (0,1282 / 0,1897 / 0,1077), xếp **v2 > v1 > v3**, ngược hẳn dev chung.
+- 🔴 **19/09 — `long_event` hỏng vì phân mảnh, không phải bỏ sót.** Phân mảnh gấp **1,9
+  lần** mốc clip sạch, Insertion gấp 1,8 lần (hệ quả cơ học của phân mảnh), còn Deletion
+  thì thấp hơn cả `low_snr`. Ablation **bác bỏ một phần** giả thuyết "cửa sổ lọc 7 khung
+  quá hẹp": cửa sổ theo lớp nâng mọi lát cắt gần như cùng một lượng nên khoảng cách tới
+  mốc không đổi (0,180 → 0,178). Nguyên nhân riêng của lát cắt này **vẫn chưa tìm ra**.
+  Phép đo ở [measurements/long_event_postproc_20260919.md](measurements/long_event_postproc_20260919.md).
+- Pha 1–5 của [TRAINING_OPS_PLAN](TRAINING_OPS_PLAN.md) đã có module và đã chạy:
+  `ml/runs/{v1,v2,v3}/manifest.json` + `predictions/dev_all.npz` +
+  `analysis{,_adaptive}.{json,md}`. `train_sed.py` nay gieo toàn bộ RNG và ghi manifest
+  trước epoch đầu.
 - Lô legacy đã được chuyển sang `data/synthetic_legacy/`: giữ **9.360 JAMS**, hai
   `slice_index.jsonl` và hai stdout log; WAV legacy, cache tạm, recovery trùng và stderr log đã xoá.
   Đây là bằng chứng trước-sửa, không phải dữ liệu để train lại.
@@ -215,11 +228,12 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **601 test đạt** (19/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho Pha 1,
-  Pha 3, phép gom sự kiện và lỗi pickle memmap, rồi 21 test nữa cho Pha 4 (phép ghép cặp,
-  lát cắt, ghi bền, đối chiếu `sed_eval`). Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
+- **616 test đạt** (19/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho Pha 1,
+  Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép ghép cặp,
+  lát cắt, ghi bền, đối chiếu `sed_eval`), rồi 15 test cho Pha 5 và phân loại lỗi theo lát
+  cắt. Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
 - Lượt 19/09 **có** chạy lại suite trước và sau thay đổi mã: 573 đạt trước khi thêm test mới,
-  580 sau Pha 1 + Pha 3, **601** sau Pha 4. `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết. Không tuyên bố đã chạy lại test API/frontend.
+  580 sau Pha 1 + Pha 3, 601 sau Pha 4, **616** sau Pha 5. `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết. Không tuyên bố đã chạy lại test API/frontend.
 - **`slice_index.jsonl` vẫn khớp code hiện tại.** `scaper_generate.py` được sửa lúc
   12:35:54, sau khi clip cuối sinh lúc 12:20:22 — tức dữ liệu sinh bằng code cũ. Đã chạy
   lại `plan_clips` với code mới và so từng clip: **0/7.920 khác biệt**. Tỉ lệ 5 lát cắt
@@ -439,8 +453,10 @@ lại sản phẩm thật và bắt được cả thứ chưa ai nghĩ tới, nh
 |---|---|
 | Ops Pha 1 + 3 | ✅ **xong 19/09** — manifest/vân tay/seed đầy đủ, prediction mức đoạn + quét ngưỡng cho cả ba run |
 | A/B | ✅ **đã chạy cùng giao thức** (§3). Kết luận có điều kiện: v3 tốt nhất trên dev, nhưng dev cùng recipe với train của v3 — confound còn nguyên |
-| Ops Pha 4 | **xong 19/09** — 6 loại lỗi, ma trận nhầm 16×16, bảng theo lát cắt, θ theo từng lớp; chạy trên CPU ~3 phút/run. Số đo: [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md) |
-| Ops Pha 5 | **việc tiếp theo** — `compare_runs.py`; manifest đã đủ để chỉ rõ confound dữ liệu |
+| Ops Pha 4 | ✅ **xong 19/09** — 6 loại lỗi (cả mức toàn tập lẫn **theo từng lát cắt**), ma trận nhầm 16×16, θ theo từng lớp; CPU ~100–170 s/run. Số đo: [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md) |
+| Ops Pha 5 | ✅ **xong 19/09** — `ml/tracking/compare_runs.py`; chạy trên ba run thì dữ liệu và mã nguồn đều `KHONG_RO`, tức chưa so sạch được run nào với run nào |
+| `long_event` | **chưa xong** — biết hỏng vì phân mảnh, đã loại ứng viên "cửa sổ lọc quá hẹp", chưa tìm ra nguyên nhân riêng |
+| `confusable_with` | ✅ **19/09** — 8 cặp đo được đã khai (đối xứng) + bảng tra §3 `taxonomy.md`; tỉ lệ lượt nhầm đã khai của v3 lên 54,1% |
 | Cổng hợp đồng | `train_sed.py` mới **cảnh báo** khi hợp đồng khác PASSED, chưa **chặn**. Một lô FAILED vẫn train được |
 | Hiệu chuẩn | Cả ba run đỉnh ở θ≈0,9 — chưa đo reliability diagram, chưa ablation `pos_weight` |
 | gold_test | vẫn RỖNG; DATA_PLAN D8–D10 là nút thắt, cần người gán mù |

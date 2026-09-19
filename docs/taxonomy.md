@@ -269,6 +269,30 @@ Dán bảng này cạnh màn hình khi gán nhãn.
 | `object_drop_dishes` ↔ `running_footsteps` | Một-hai xung rời rạc, hay **chuỗi đều nhịp**? | Chuỗi đều → `running_footsteps` · Rời rạc → `object_drop_dishes` |
 | `shout_yell` ↔ `applause_cheering` | Nhiều giọng chồng nhau, có nhịp lặp, sắc thái vui? | Có → `applause_cheering` · Không → `shout_yell` |
 
+Tám cặp dưới đây **không** đến từ bất đồng giữa hai người gán nhãn như các cặp trên, mà từ
+**ma trận nhầm lẫn đo được** của `panns_ft_v3` trên dev tổng hợp @θ = 0,90 (19/09/2026,
+xem [error_analysis_20260919.md](measurements/error_analysis_20260919.md) §4). Chúng vào
+đây vì `confusable_with` là nguồn chân lý cho luật định tuyến, và luật đó phải khớp thứ
+thật sự bị nhầm. Số trong ngoặc là số lượt nhầm hai chiều cộng lại.
+
+| Cặp | Câu hỏi quyết định | Trả lời → lớp |
+|---|---|---|
+| `running_footsteps` ↔ `fireworks` (39) | Nhịp có **đều** và cường độ các xung xấp xỉ nhau không? | Đều → `running_footsteps` · Rải rác, có đuôi vọng → `fireworks` |
+| `running_footsteps` ↔ `gunshot` (34) | Đếm số xung: **trên 4 xung đều nhịp**, hay 1–3 xung dốc đứng? | Trên 4, đều → `running_footsteps` · 1–3, dốc → `gunshot` |
+| `running_footsteps` ↔ `door_slam` (32) | Chỉ **một** xung kèm đuôi cộng hưởng khung cửa? | Có → `door_slam` · Chuỗi xung lặp → `running_footsteps` |
+| `running_footsteps` ↔ `applause_cheering` (14) | Nhiều nguồn chồng nhau, nhịp **không khoá** với nhau? | Có → `applause_cheering` · Một nguồn, nhịp đều → `running_footsteps` |
+| `running_footsteps` ↔ `explosion` (13) | Một xung đơn năng lượng lớn dồn ở tần số thấp? | Có → `explosion` · Chuỗi xung nhỏ lặp lại → `running_footsteps` |
+| `door_slam` ↔ `explosion` (14) | Đuôi > 1 s và năng lượng dồn ở tần số thấp? | Có → `explosion` · Đuôi ngắn, nghe ra chốt/khung cửa → `door_slam` |
+| `door_slam` ↔ `fireworks` (13) | Có tiếng rít bay lên, hoặc nhiều tiếng rải rác không đều? | Có → `fireworks` · Một xung + đuôi khung cửa → `door_slam` |
+| `siren` ↔ `vehicle_crash` (11) | Có cao độ **trượt liên tục** kéo dài không? | Có → `siren` · Va chạm phức hợp, có phanh/vỡ → `vehicle_crash` |
+
+> ⚠️ Bảy cặp khác cũng chạm ngưỡng 10 lượt ở `panns_ft_v3` nhưng **chưa** khai vào
+> `confusable_with` vì chỉ xuất hiện ở đúng một run (`door_slam`↔`vehicle_crash`,
+> `door_slam`↔`glass_breaking`, `gunshot`↔`object_drop_dishes`,
+> `alarm_bell`↔`object_drop_dishes`, `alarm_bell`↔`applause_cheering`,
+> `applause_cheering`↔`laughter`, `glass_breaking`↔`running_footsteps`). Đó là nhầm lẫn
+> của model, chưa đủ bằng chứng để bắt người gán nhãn đổi quy trình.
+
 ---
 
 ## 4. Quy ước xuyên suốt

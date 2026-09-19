@@ -62,6 +62,17 @@ Chấm ở θ = 0,90. **Lát cắt chồng nhau** — một clip vừa `overlap`
 | causal_chain | 203 | 845 | 0.4417 | 0.6968 |
 | sach | 357 | 967 | 0.4487 | 0.7460 |
 
+Phân loại lỗi **đếm lại trên từng tập con clip**, không chia tỉ lệ từ tổng — lát cắt chồng nhau nên cộng cột sẽ lớn hơn tổng toàn tập. Cột *phân mảnh/thật* là số sự kiện thật bị cắt thành nhiều mảnh, chia cho số sự kiện thật của chính lát cắt đó, nên so ngang giữa các hàng được.
+
+| lát cắt | thật | Đúng | Boundary | Substitution | Deletion | Insertion | phân mảnh | phân mảnh/thật | gộp |
+|---|---|---|---|---|---|---|---|---|---|
+| overlap | 1723 | 779 | 352 | 260 | 332 | 987 | 330 | 0,192 | 77 |
+| low_snr | 1449 | 592 | 331 | 234 | 292 | 908 | 294 | 0,203 | 46 |
+| reverb | 1888 | 842 | 373 | 288 | 385 | 1114 | 359 | 0,190 | 68 |
+| long_event | 559 | 218 | 156 | 91 | 94 | 600 | 178 | 0,318 | 20 |
+| causal_chain | 845 | 422 | 149 | 109 | 165 | 386 | 127 | 0,150 | 17 |
+| sach | 967 | 538 | 175 | 144 | 110 | 574 | 162 | 0,168 | 19 |
+
 ## 3. Ma trận nhầm lẫn
 
 Hàng = lớp thật, cột = lớp đoán, `∅` = không có đối tác (Deletion ở cột, Insertion ở hàng). **Đường chéo gồm cả Đúng lẫn Boundary** — cả hai đều đúng lớp, chỉ khác thời điểm; đọc đường chéo như 'số đúng' là đọc sai.
@@ -92,13 +103,13 @@ Các cặp nhầm nhiều nhất, đối chiếu `confusable_with` khai trong `o
 |---|---|---|---|
 | object_drop_dishes | door_slam | 29 | có |
 | object_drop_dishes | glass_breaking | 27 | có |
-| fireworks | running_footsteps | 26 | **chưa** |
-| door_slam | running_footsteps | 22 | **chưa** |
-| gunshot | running_footsteps | 19 | **chưa** |
+| fireworks | running_footsteps | 26 | có |
+| door_slam | running_footsteps | 22 | có |
+| gunshot | running_footsteps | 19 | có |
 | object_drop_dishes | running_footsteps | 19 | có |
 | speech_normal | shout_yell | 17 | có |
-| running_footsteps | gunshot | 15 | **chưa** |
-| running_footsteps | fireworks | 13 | **chưa** |
+| running_footsteps | gunshot | 15 | có |
+| running_footsteps | fireworks | 13 | có |
 | gunshot | door_slam | 12 | có |
 | vehicle_crash | door_slam | 12 | **chưa** |
 | door_slam | gunshot | 11 | có |
@@ -106,7 +117,7 @@ Các cặp nhầm nhiều nhất, đối chiếu `confusable_with` khai trong `o
 | laughter | applause_cheering | 10 | **chưa** |
 | object_drop_dishes | gunshot | 10 | **chưa** |
 
-222/725 (31%) lượt nhầm rơi vào cặp đã khai. Phần còn lại là nhầm lẫn mà ontology **chưa dự đoán** — nếu tỉ lệ này cao thì thứ cần sửa là `confusable_with`, không phải model.
+392/725 (54%) lượt nhầm rơi vào cặp đã khai. Phần còn lại là nhầm lẫn mà ontology **chưa dự đoán** — nếu tỉ lệ này cao thì thứ cần sửa là `confusable_with`, không phải model.
 
 ## 4. Ngưỡng theo từng lớp
 

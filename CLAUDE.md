@@ -43,8 +43,8 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 ## 3. Trạng thái hiện tại
 
 **Tuần:** W1 (15–21/09/2026). Walking skeleton và baseline SED được làm sớm song song.
-**Đối soát workspace:** 19/09/2026, sau khi Pha 1 + Pha 3 + Pha 4 của Training Ops,
-lượt quét ngưỡng và lượt phân tích lỗi đã hoàn tất.
+**Đối soát workspace:** 19/09/2026, sau khi Pha 1–5 của Training Ops, lượt quét ngưỡng,
+lượt phân tích lỗi và ablation hậu xử lý đã hoàn tất.
 Số đo, phạm vi và bằng chứng ở [docs/STATUS.md](docs/STATUS.md); nhật ký §10 là lịch sử,
 không phải trạng thái hiện hành.
 
@@ -82,16 +82,26 @@ không phải trạng thái hiện hành.
   đúng. Bảng cũ chấm ở 0,5 (mAP 0,8372/0,8176/0,8123 · event-F1 0,1282/0,1897/0,1077) đo
   trên ba tập val khác nhau và **không dùng để xếp hạng ba run được nữa**; nó vẫn còn ở
   STATUS §3 làm bản ghi lịch sử. Confound chưa gỡ: dev sinh cùng recipe với train của v3.
-- **Pha 1 + Pha 3 + Pha 4 của [TRAINING_OPS_PLAN](docs/TRAINING_OPS_PLAN.md) đã xong (19/09):**
-  `ml/tracking/{fingerprint,run_manifest}.py`,
+- **Pha 1–5 của [TRAINING_OPS_PLAN](docs/TRAINING_OPS_PLAN.md) đã xong (19/09):**
+  `ml/tracking/{fingerprint,run_manifest,compare_runs}.py`,
   `ml/evaluation/{predictions,threshold_sweep,error_taxonomy,error_analysis}.py`.
-  `train_sed.py` gieo toàn bộ RNG và ghi `manifest.json` trước epoch đầu. Pha 5 chưa có.
+  `train_sed.py` gieo toàn bộ RNG và ghi `manifest.json` trước epoch đầu.
 - **Phân tích lỗi đã chạy trên cả ba run** (`ml/runs/{run}/analysis.{json,md}`). Ở θ = 0,5
   v3 chỉ bỏ sót **9/4.873** sự kiện nhưng chèn thêm **61.020** — hỏng ở ngưỡng, không phải
   ở năng lực phát hiện. **37,4%** lỗi biên của v1 là trần cứng do bước lưới onset 319,7 ms
   (v2/v3: 79,9 ms → trần 0%), nên **so event-F1 của v1 với v2/v3 là so một phần độ phân
   giải bộ giải mã**. Số đo: `docs/measurements/error_analysis_20260919.md`.
-- **601 test đạt** (19/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 580.
+- **Pha 5 kết luận: KHÔNG có phép so sánh sạch nào giữa v1/v2/v3.** `compare_runs.py`
+  khai `KHONG_RO` cho cả dữ liệu (vân tay v1/v2 là `null`) lẫn mã nguồn (cả ba manifest
+  lập hồi cứu cùng lúc nên `tree_sha256` **trùng nhau** — đó là mã lúc lập manifest, không
+  phải lúc train). Cũng đừng đọc `manifest.ket_qua_cuoi`: nó chấm trên val split **riêng**
+  của từng run, xếp v2 > v1 > v3, **ngược hẳn** dev chung.
+- **`long_event` hỏng vì phân mảnh, không phải vì bỏ sót** — phân mảnh gấp 1,9 lần mốc
+  clip sạch, Insertion gấp 1,8 lần (hệ quả cơ học của phân mảnh), còn Deletion thì bình
+  thường. Ablation **bác bỏ một phần** giả thuyết "cửa sổ lọc 7 khung quá hẹp": cửa sổ
+  theo lớp nâng *mọi* lát cắt lên xấp xỉ cùng một lượng nên khoảng cách tới mốc gần như
+  không đổi (0,180 → 0,178). Số đo: `docs/measurements/long_event_postproc_20260919.md`.
+- **616 test đạt** (19/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 601.
 
 ### Đang làm / chưa nghiệm thu
 
@@ -113,11 +123,12 @@ không phải trạng thái hiện hành.
 
 ### Ba việc tiếp theo
 
-1. **Việc do chính Pha 4 sinh ra.** (a) Bổ sung cặp nhầm thật vào `confusable_with` —
-   chỉ **31%** lượt nhầm lớp rơi vào cặp đã khai, và `running_footsteps` là trung tâm
-   nhầm lẫn hút bốn lớp xung lực. Đây là sửa tài liệu cho khớp số đo, không phải sửa
-   model. (b) Tìm nguyên nhân `long_event` — lát cắt tệ nhất ở cả v2 lẫn v3, thấp hơn mốc
-   clip sạch ~0,15 F1; cửa sổ lọc cố định 7 khung là ứng viên nhưng **chưa ablation**.
+1. **Nguyên nhân `long_event` vẫn chưa tìm ra.** Đã loại được ứng viên "cửa sổ lọc quá
+   hẹp" (xem trên). Ứng viên còn lại chưa kiểm: cửa sổ tối đa bị chặn ở 51 khung (~0,5 s)
+   trong khi sự kiện của lát cắt này dài nhiều giây; và Scaper có thể đang sinh khe hở
+   năng lượng thật bên trong sự kiện dài. Kèm theo: cửa sổ lọc **theo lớp** nâng v3 từ
+   0,3979 lên 0,4347, nhưng nó suy từ nhãn của chính tập đang chấm nên **chưa báo cáo
+   được** — phải suy từ tập train rồi đo lại trên tập độc lập.
 2. **Đưa 937 AudioSet-strong WAV vào manifest/split không rò rỉ**, chuẩn bị real dev và
    gold; sau đó pilot gán mù theo DATA_PLAN §8. Đây là thứ DUY NHẤT gỡ được confound
    "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
@@ -233,12 +244,14 @@ docker compose down                   # dừng, giữ named volumes; không dùn
 .venv/Scripts/python.exe -m ml.evaluation.eval_sed --run panns_ft_v1
 # eval_sed đọc time_pool_blocks từ checkpoint → history → mặc định kèm CẢNH BÁO.
 
-# Training Ops (TRAINING_OPS_PLAN Pha 1 + Pha 3 + Pha 4)
+# Training Ops (TRAINING_OPS_PLAN Pha 1–5)
 .venv/Scripts/python.exe -m ml.tracking.run_manifest --run panns_ft_v3 --du-lieu hien-tai
 .venv/Scripts/python.exe -m ml.evaluation.predictions --run panns_ft_v3 --split dev
 .venv/Scripts/python.exe -m ml.evaluation.threshold_sweep --run panns_ft_v3 --split dev
 .venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 --split dev
-# Grounded AAC và Pha 5 (so run): chưa triển khai.
+.venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 --adaptive-postproc
+.venv/Scripts/python.exe -m ml.tracking.compare_runs --runs panns_ft_v1 panns_ft_v2 panns_ft_v3
+# Grounded AAC: chưa triển khai.
 
 # Chất lượng
 .venv/Scripts/python.exe -m pytest tests/ -q
@@ -384,6 +397,27 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-19 (tối) — Pha 5, ablation hậu xử lý, và ontology khớp số đo
+
+- **Pha 5 xong:** `ml/tracking/compare_runs.py` + 11 test. Chạy trên v1/v2/v3 thì cả dữ
+  liệu lẫn mã nguồn đều ra `KHONG_RO` → **không có phép so sánh sạch nào giữa ba run hiện
+  có**. Ba cái bẫy được cài test riêng: vân tay `null` không phải "giống nhau"; manifest
+  hồi cứu thì băm mã trùng nhau là vô nghĩa; `ket_qua_cuoi` chấm trên val riêng từng run
+  nên xếp hạng theo nó ra **ngược** dev chung (v2 > v1 > v3).
+- **`bang_lat_cat()` xuất đủ 6 loại lỗi cho từng lát cắt**, đếm lại trên tập con chứ không
+  chia tỉ lệ từ tổng. `--adaptive-postproc` giờ ghi ra `analysis_adaptive.{json,md}`, không
+  đè báo cáo mặc định nữa.
+- **`long_event` hỏng vì phân mảnh (1,9× mốc), không phải bỏ sót** — Deletion của nó còn
+  thấp hơn `low_snr`. Ablation cửa sổ lọc **bác bỏ một phần** giả thuyết cũ: cửa sổ theo
+  lớp nâng v3 0,3979 → 0,4347 nhưng nâng *mọi* lát cắt gần như cùng một lượng, khoảng cách
+  tới mốc sạch không đổi (0,180 → 0,178). v1 **không đổi một con số nào** ở cả hai cấu
+  hình vì xác suất của nó hằng số trên mảng ~32 khung — hệ quả thứ hai của lưới 319,7 ms.
+- **8 cặp nhầm đo được vào `confusable_with`** (đối xứng) + 8 hàng câu hỏi quyết định vào
+  bảng tra §3 của `taxonomy.md`. Tỉ lệ lượt nhầm đã khai của v3: 31% → **54,1%**. 7 cặp chỉ
+  chạm ngưỡng ở đúng một run thì **không** khai — trường này điều khiển luật định tuyến
+  sang người gán nhãn, nhầm-của-model không đồng nghĩa nhầm-của-người.
+- 601 → **616 test đạt**. Số đo: `docs/measurements/long_event_postproc_20260919.md`.
 
 ### 2026-09-19 (chiều) — Training Ops Pha 4: phân tích lỗi
 

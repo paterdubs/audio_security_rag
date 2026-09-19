@@ -23,8 +23,24 @@
     "vehicle_crash"
   ],
   "collar_sec": 0.2,
-  "adaptive_postproc": false,
-  "median_size": 7,
+  "adaptive_postproc": true,
+  "median_size": [
+    29,
+    51,
+    23,
+    51,
+    51,
+    47,
+    23,
+    51,
+    21,
+    17,
+    51,
+    51,
+    51,
+    51,
+    51
+  ],
   "theta_sao": 0.95,
   "f1_05": 0.11470916658207289,
   "seg_05": 0.46565829734597775,
@@ -1496,6 +1512,6 @@
     "speech_normal": 0.95,
     "vehicle_crash": 0.95
   },
-  "giay": 101.5,
+  "giay": 297.1,
   "ghi_chu": "dev tổng hợp sinh cùng recipe B0–B9 với train của v3 → thiên vị v3 theo thiết kế; θ* và θ theo lớp chọn trên chính tập đang chấm → rò rỉ"
 }

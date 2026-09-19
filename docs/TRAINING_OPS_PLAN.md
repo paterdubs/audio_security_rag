@@ -9,7 +9,7 @@
 > (quy trình dữ liệu) · [SYSTEM.md](SYSTEM.md) (kiến trúc) ·
 > [RELATED_WORK_2026.md](RELATED_WORK_2026.md) (đối chiếu văn liệu)
 
-> **Đối soát 19/09/2026: Pha 1–4 đã có module và đã chạy thật.** Pha 5 vẫn là kế hoạch.
+> **Đối soát 19/09/2026: Pha 1–5 đã có module và đã chạy thật.**
 > Bằng chứng ở [STATUS.md](STATUS.md),
 > [measurements/threshold_sweep_20260919.md](measurements/threshold_sweep_20260919.md) và
 > [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md).
@@ -232,15 +232,31 @@ tích theo lát cắt · so hai run.
 **(d) Đường cong ngưỡng** — F1 theo ngưỡng cho **từng lớp**. Ngưỡng 0.5 gần như chắc chắn
 không tối ưu cho lớp hiếm.
 
-### ☐ Pha 5 — So sánh lần chạy *(tuỳ chọn)*
+### ✅ Pha 5 — So sánh lần chạy *(xong 19/09)*
 
-**File:** `ml/tracking/compare_runs.py`
+**File:** `ml/tracking/compare_runs.py` · test: `tests/test_ml_compare_runs.py` (11)
 
 Bảng đối chiếu n run: metric + **diff của config** + diff của vân tay dữ liệu.
 
 > Điểm mấu chốt: khi v2 hơn v1, công cụ chỉ ra **đúng những gì đã đổi**. Nếu dữ liệu cũng
 > đổi thì nó cảnh báo rằng so sánh không sạch — thay vì để ta quy công cho thay đổi kiến
 > trúc trong khi thực ra chỉ là dữ liệu nhiều hơn.
+
+Chạy trên v1/v2/v3, công cụ từ chối khai ba thứ mà bảng so sánh thủ công sẽ khai bừa:
+
+> - **dữ liệu: `KHONG_RO`** — vân tay của v1/v2 là `null` (audio legacy xoá 18/09).
+>   `None == None` không phải bằng chứng cùng dữ liệu.
+> - **mã nguồn: `KHONG_RO`** — cả ba manifest lập hồi cứu trong cùng một phút nên
+>   `code.tree_sha256` của chúng **trùng nhau**; băm đó là mã lúc lập manifest, không
+>   phải lúc train.
+> - **metric**: ưu tiên `analysis.json` (cùng `data/synthetic/dev`) và in kèm θ. Đọc
+>   `manifest.ket_qua_cuoi` là sai: nó chấm trên val split **riêng** của từng run
+>   (0,1282 / 0,1897 / 0,1077 → xếp v2 > v1 > v3, **ngược hẳn** dev chung).
+>
+> Diff cấu hình phân biệt `<không có>` với "giá trị khác": v1 không có `mixup_alpha`,
+> `time_pool_blocks`, `adaptive_postproc` vì các cờ đó ra đời sau v1 — nghĩa là v1 chạy
+> bằng một phiên bản code khác, không phải ai đó chỉnh tham số. v2 và v3 khác nhau
+> **đúng mỗi `name`**, nên thứ phân biệt chúng nằm ở dữ liệu — mà dữ liệu thì `KHONG_RO`.
 
 **MLflow.** Container đã chạy sẵn ở cổng 5000. Nhưng **JSON/CSV là nguồn chân lý**, MLflow
 chỉ là màn hình xem. Cài `mlflow` vào `.venv` có rủi ro kéo numpy 2.x → dùng constraints
@@ -257,7 +273,7 @@ file như đã làm với `dcase_util`; nếu không an toàn thì đẩy qua RE
 | Git có nhưng worktree dirty, commit không mô tả đủ run | Cao | Lưu SHA + dirty diff/tree hash; đưa code vào version control trước run mới |
 | Lưu dự đoán phình đĩa | Trung bình | Lưu mức **đoạn**, float16 → ~8 MB/run; đo lại dung lượng trống trước mỗi run vì cache waveform hiện hành đã ~5,6 GiB |
 | Index mất khi job mới bị ngắt trước cuối main | Cao | Hai index legacy hiện đã có; vẫn cần ghi tăng dần. Dựng lại plan không chứng minh audio/RIR đã hoàn tất |
-| Làm quá tay, thành hạ tầng thay vì khoá luận | Trung bình | Pha 1–4 là tối thiểu; Pha 5 và MLflow tuỳ chọn |
+| Làm quá tay, thành hạ tầng thay vì khoá luận | Trung bình | Pha 1–5 xong, tổng ~1.500 dòng; MLflow vẫn tuỳ chọn và vẫn chưa cài |
 
 ---
 
@@ -276,11 +292,13 @@ file như đã làm với `dcase_util`; nếu không an toàn thì đẩy qua RE
 .venv/Scripts/python.exe -m ml.evaluation.predictions --run panns_ft_v3 --split dev
 .venv/Scripts/python.exe -m ml.evaluation.threshold_sweep --run panns_ft_v3 --split dev
 
-# Pha 4 — phân tích lỗi (CPU, ~3 phút/run)
+# Pha 4 — phân tích lỗi (CPU, ~100 s/run)
 .venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 --split dev
+# ablation hậu xử lý — ghi ra analysis_adaptive.{json,md}, KHÔNG đè báo cáo mặc định
+.venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 --adaptive-postproc
 
-# LỆNH DỰ KIẾN — Pha 5 CHƯA CÓ module, không phải runbook đang chạy được
-.venv/Scripts/python.exe -m ml.tracking.compare_runs panns_ft_v1 panns_ft_v2
+# Pha 5 — đối chiếu nhiều run (tức thì; --out để ghi .md thay vì in ra màn hình)
+.venv/Scripts/python.exe -m ml.tracking.compare_runs --runs panns_ft_v1 panns_ft_v2 panns_ft_v3
 
 .venv/Scripts/python.exe -m pytest tests/ -q          # test cũ vẫn xanh
 ```
@@ -318,7 +336,11 @@ chứng minh verifier từng bắt được lỗi thật.
    Việc theo sau mà chính Pha 4 sinh ra: bổ sung các cặp nhầm thật vào `confusable_with`
    (69% lượt nhầm chưa được khai), và tìm nguyên nhân `long_event` — lát cắt tệ nhất ở
    cả v2 lẫn v3.
-4. **Pha 5 — việc tiếp theo.** Manifest đã đủ để chỉ rõ confound dữ liệu.
+4. ✅ **Pha 5** — xong 19/09. Chạy trên v1/v2/v3 thì cả dữ liệu lẫn mã nguồn đều ra
+   `KHONG_RO`, tức **không có phép so sánh sạch nào giữa ba run hiện có**. Đó là kết
+   luận, không phải lỗi công cụ.
+5. **Việc tiếp theo:** `gold_test` vẫn rỗng. Mọi số trên trang này đo trên tập tổng hợp
+   dùng chung foreground bank với train.
 
 ---
 

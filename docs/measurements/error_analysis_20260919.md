@@ -109,8 +109,12 @@ lần chạy. `long_event` là lát cắt tệ nhất ở v2 và v3 — dưới 
 `causal_chain` thì **không khó hơn** clip sạch bao nhiêu, ngược với giả định lúc thiết kế
 lát cắt.
 
-Chưa xác định nguyên nhân của `long_event`: cửa sổ lọc trung vị cố định 7 khung, phân bố
-lớp trong lát cắt, và cách chấm offset đều là ứng viên. Cần ablation trước khi kết luận.
+Nguyên nhân `long_event` đã được đo tiếp ở
+[long_event_postproc_20260919.md](long_event_postproc_20260919.md): chữ ký của nó là **phân
+mảnh gấp 1,9 lần** mốc sạch, không phải bỏ sót. Ứng viên "cửa sổ lọc 7 khung quá hẹp" bị
+ablation **bác bỏ một phần** — cửa sổ rộng hơn nâng mọi lát cắt lên xấp xỉ cùng một lượng,
+nên khoảng cách `long_event` ↔ `sach` gần như không đổi (0,180 → 0,178). Thủ phạm riêng của
+lát cắt này vẫn chưa tìm ra.
 
 ---
 
@@ -135,8 +139,13 @@ thuyết chưa kiểm: chuỗi bước chân là một dãy xung ngắn lặp l�
 gian với loạt bắn và với tiếng vật rơi. Giả thuyết này **chưa** kiểm được bằng dữ liệu
 hiện có.
 
-Việc cần làm theo sau: bổ sung các cặp trên vào `confusable_with` là sửa **tài liệu cho
-khớp thực tế đo được**, không phải sửa model.
+> ✅ **Đã làm (19/09, cùng ngày).** Tám cặp qua được tiêu chí "≥ 10 lượt ở v3 **và** ≥ 10 ở
+> ít nhất một run khác" đã vào `confusable_with` (đối xứng hai chiều) và bảng tra §3 của
+> [taxonomy.md](../taxonomy.md). Tỉ lệ lượt nhầm đã khai của v3 lên **392/725 (54,1%)**.
+> Bảy cặp chỉ chạm ngưỡng ở đúng một run thì **không** khai — `confusable_with` điều khiển
+> luật định tuyến sang người gán nhãn, mà nhầm-của-model không đồng nghĩa nhầm-của-người;
+> chúng được liệt kê trong `taxonomy.md` §3 như nhầm lẫn của model chưa đủ bằng chứng.
+> Đây là sửa **tài liệu cho khớp thực tế đo được**, không phải sửa model.
 
 ---
 
@@ -168,5 +177,6 @@ Khoảng cách θ\* giữa các lớp (v3): `siren` tối ưu ở 0,60 còn `exp
 - **Không có tập độc lập.** `gold_test` rỗng, chưa có real dev. Mọi con số trên trang này
   đo trên tập tổng hợp dùng chung foreground bank với train.
 - **Confound v3 chưa gỡ.** dev cùng recipe B0–B9 với train của v3.
-- **Nguyên nhân `long_event`** chưa xác định.
+- **Nguyên nhân `long_event`** vẫn chưa xác định — đã loại được một ứng viên, xem
+  [long_event_postproc_20260919.md](long_event_postproc_20260919.md).
 - **`running_footsteps` là hub nhầm lẫn** — đã đo, chưa giải thích.
