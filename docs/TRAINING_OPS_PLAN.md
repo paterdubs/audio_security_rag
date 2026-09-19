@@ -296,6 +296,15 @@ file như đã làm với `dcase_util`; nếu không an toàn thì đẩy qua RE
 .venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 --split dev
 # ablation hậu xử lý — ghi ra analysis_adaptive.{json,md}, KHÔNG đè báo cáo mặc định
 .venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 --adaptive-postproc
+# quét trần cửa sổ — mỗi mức ra file riêng (analysis_adaptive_max<N>.{json,md}), ~300-420s/lượt
+.venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 \
+    --adaptive-postproc --max-median-frames 401
+# cửa sổ suy từ TRAIN thay vì từ chính tập đang chấm — không rò rỉ (analysis_adaptive_train.{json,md})
+.venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 \
+    --adaptive-postproc --adaptive-source train
+
+# Hiệu chuẩn xác suất — ECE + reliability diagram, không train lại, ~5-6s/run
+.venv/Scripts/python.exe -m ml.evaluation.calibration --run panns_ft_v3 --split dev
 
 # Pha 5 — đối chiếu nhiều run (tức thì; --out để ghi .md thay vì in ra màn hình)
 .venv/Scripts/python.exe -m ml.tracking.compare_runs --runs panns_ft_v1 panns_ft_v2 panns_ft_v3
@@ -323,7 +332,7 @@ chứng minh verifier từng bắt được lỗi thật.
 | 2 · Kiểm tra hợp đồng dữ liệu | 2–2.5 h | ✅ ⭐ | **xong** (cổng mới CẢNH BÁO, chưa chặn) |
 | 3 · Lưu dự đoán + quét ngưỡng | 1 h | ✅ | **xong 19/09** |
 | 4 · Phân tích lỗi | 2–3 h | ✅ | **xong 19/09** |
-| 5 · So run + MLflow | 1 h | tuỳ chọn | chưa bắt đầu |
+| 5 · So run + MLflow | 1 h | tuỳ chọn | **xong 19/09** (MLflow vẫn chưa cài) |
 
 ---
 
@@ -339,8 +348,23 @@ chứng minh verifier từng bắt được lỗi thật.
 4. ✅ **Pha 5** — xong 19/09. Chạy trên v1/v2/v3 thì cả dữ liệu lẫn mã nguồn đều ra
    `KHONG_RO`, tức **không có phép so sánh sạch nào giữa ba run hiện có**. Đó là kết
    luận, không phải lỗi công cụ.
-5. **Việc tiếp theo:** `gold_test` vẫn rỗng. Mọi số trên trang này đo trên tập tổng hợp
-   dùng chung foreground bank với train.
+5. ✅ **Ba việc theo sau Pha 4/5** — xong 19/09 (tối). (a) Quét `--max-median-frames`
+   ∈ {51,101,201,401}: trần 51 khung **không phải** nguyên nhân chính của `long_event`
+   — `v2` gap rộng ra, `v3` chỉ hẹp 6,4%; cột "gộp" đứng yên qua cả 4 mức, cảnh báo
+   "nới trần sẽ gộp nhầm" ở `sed_metrics.py:37` vẫn chưa có số đỡ. (b)
+   `cua_so_loc_tu_train()` — cửa sổ thích ứng suy từ `data/features/train_meta.json`
+   thay vì từ chính tập đang chấm: độ lớn rò rỉ đo được **= 0**, nhưng vì 9/15 lớp đã
+   kẹp trần 51 ở cả hai nguồn, không phải vì train/dev giống nhau. (c)
+   `ml/evaluation/calibration.py` — ECE + reliability diagram lần đầu: vùng dự báo
+   0,4–0,6 chiếm hơn nửa triệu khung mà tỉ lệ dương thật chỉ 1,7–3%, giải thích hợp lý
+   cho θ* luôn rơi 0,85–0,95 (chưa kết luận nguyên nhân, `pos_weight` cần train lại để
+   xác nhận). Phép đo:
+   [measurements/max_median_ceiling_20260919.md](measurements/max_median_ceiling_20260919.md) ·
+   [measurements/adaptive_window_leak_20260919.md](measurements/adaptive_window_leak_20260919.md) ·
+   [measurements/calibration_20260919.md](measurements/calibration_20260919.md).
+6. **Việc tiếp theo:** `gold_test` vẫn rỗng. Mọi số trên trang này đo trên tập tổng hợp
+   dùng chung foreground bank với train. Ứng viên còn lại cho `long_event`: khe hở năng
+   lượng thật do Scaper sinh bên trong sự kiện dài, chưa kiểm.
 
 ---
 

@@ -101,7 +101,13 @@ không phải trạng thái hiện hành.
   thường. Ablation **bác bỏ một phần** giả thuyết "cửa sổ lọc 7 khung quá hẹp": cửa sổ
   theo lớp nâng *mọi* lát cắt lên xấp xỉ cùng một lượng nên khoảng cách tới mốc gần như
   không đổi (0,180 → 0,178). Số đo: `docs/measurements/long_event_postproc_20260919.md`.
-- **616 test đạt** (19/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 601.
+- **Trần `MAX_MEDIAN_FRAMES=51` cũng bị bác bỏ phần lớn** — quét tới 401 khung: `v2` gap
+  rộng ra, `v3` chỉ hẹp 6,4%. **Cửa sổ suy từ train** (`cua_so_loc_tu_train()`, không rò
+  rỉ) khớp cửa sổ suy từ dev tới 6 chữ số — vì 9/15 lớp đã kẹp trần ở cả hai nguồn, không
+  phải vì train/dev giống nhau. **ECE đo lần đầu**: vùng dự báo 0,4–0,6 mang hơn nửa
+  triệu khung mà tỉ lệ dương thật chỉ 1,7–3% — giải thích triệu chứng θ*≈0,9, chưa kết
+  luận nguyên nhân. Số đo: `docs/measurements/{max_median_ceiling,adaptive_window_leak,calibration}_20260919.md`.
+- **631 test đạt** (19/09 tối, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 616.
 
 ### Đang làm / chưa nghiệm thu
 
@@ -121,20 +127,19 @@ không phải trạng thái hiện hành.
   `data/synthetic_legacy/` được đưa lên có chủ đích làm bằng chứng trước-sửa; JAMS legacy chứa
   đường dẫn tuyệt đối lịch sử của máy sinh dữ liệu nên dùng để audit, không replay portable nguyên trạng.
 
-### Ba việc tiếp theo
+### Việc tiếp theo
 
-1. **Nguyên nhân `long_event` vẫn chưa tìm ra.** Đã loại được ứng viên "cửa sổ lọc quá
-   hẹp" (xem trên). Ứng viên còn lại chưa kiểm: cửa sổ tối đa bị chặn ở 51 khung (~0,5 s)
-   trong khi sự kiện của lát cắt này dài nhiều giây; và Scaper có thể đang sinh khe hở
-   năng lượng thật bên trong sự kiện dài. Kèm theo: cửa sổ lọc **theo lớp** nâng v3 từ
-   0,3979 lên 0,4347, nhưng nó suy từ nhãn của chính tập đang chấm nên **chưa báo cáo
-   được** — phải suy từ tập train rồi đo lại trên tập độc lập.
+1. **Nguyên nhân riêng của `long_event` vẫn chưa tìm ra.** Đã loại hai ứng viên: "cửa sổ
+   lọc 7 khung quá hẹp" và "trần 51 khung chặn cửa sổ theo lớp" (cả hai xem trên). Ứng
+   viên còn lại, chưa kiểm: Scaper có thể đang sinh khe hở năng lượng thật bên trong sự
+   kiện dài — cần nghe trực tiếp một mẫu clip `long_event` bị phân mảnh để xác nhận.
 2. **Đưa 937 AudioSet-strong WAV vào manifest/split không rò rỉ**, chuẩn bị real dev và
    gold; sau đó pilot gán mù theo DATA_PLAN §8. Đây là thứ DUY NHẤT gỡ được confound
    "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
-3. **Nâng cổng hợp đồng dữ liệu từ cảnh báo lên chặn** trong `train_sed.py`, và đo hiệu
-   chuẩn xác suất (reliability diagram + ablation `pos_weight`) — cả ba run đạt đỉnh ở
-   θ≈0,9 là triệu chứng chưa được giải thích bằng số đo.
+3. **Nâng cổng hợp đồng dữ liệu từ cảnh báo lên chặn** trong `train_sed.py` — một lô
+   FAILED vẫn train được hiện tại.
+4. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã
+   đo (xem trên); cần train lại nên chi phí khác hẳn phép đo ECE đã có.
 
 ---
 
@@ -397,6 +402,27 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-19 (tối, tiếp) — trần cửa sổ bị bác bỏ, rò rỉ đo bằng 0, hiệu chuẩn xác suất
+
+- **Trần `MAX_MEDIAN_FRAMES=51` không phải nguyên nhân chính của `long_event`.** Quét
+  `--max-median-frames` ∈ {51,101,201,401}: `v2` gap **rộng ra** (0,1322→0,1463), `v3`
+  chỉ hẹp **6,4%** dù trần nới gần gấp 8 lần. Insertion giảm thật (v3: 504→442) nhưng
+  Đúng cũng giảm và Deletion tăng — đánh đổi, không phải thắng thuần. Cột "gộp" đứng yên
+  tuyệt đối qua cả 4 mức trần → cảnh báo "nới trần sẽ gộp nhầm" ở `sed_metrics.py:37`
+  vẫn chưa có số đỡ.
+- **`cua_so_loc_tu_train()` mới** — cửa sổ thích ứng suy từ `data/features/train_meta.json`
+  trực tiếp (không nhận `du_doan` nào), thay cho `cua_so_loc()` vốn suy từ chính tập đang
+  chấm. Độ lớn rò rỉ đo được **= 0,000000** ở cả v2/v3 — nhưng vì 9/15 lớp đã kẹp trần 51
+  ở cả hai nguồn, không phải vì train/dev giống hệt nhau; chỉ đúng khi trần còn hiệu lực.
+- **`ml/evaluation/calibration.py` mới** — ECE + reliability diagram, đo lần đầu vì sao
+  θ* luôn rơi 0,85–0,95. Vùng dự báo 0,4–0,6 mang **hơn nửa triệu khung** (vehicle_crash,
+  v3) mà tỉ lệ dương thật chỉ 1,7–3%. Không so ECE giữa các run như so chất lượng model:
+  v1 (0,1041) thấp hơn v3 (0,3332) vì xác suất gần hằng số của nó hiếm khi đẩy ra thái
+  cực, không phải vì hiệu chuẩn tốt hơn.
+- 616 → **631 test đạt**. Số đo: `docs/measurements/max_median_ceiling_20260919.md`,
+  `docs/measurements/adaptive_window_leak_20260919.md`,
+  `docs/measurements/calibration_20260919.md`.
 
 ### 2026-09-19 (tối) — Pha 5, ablation hậu xử lý, và ontology khớp số đo
 

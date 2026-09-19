@@ -317,7 +317,7 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 | ☑ | Sửa eval_sed để load đúng time_pool_blocks/config checkpoint | Trước eval v2/v3 lại | `doc_time_pool_blocks` đọc checkpoint → history → mặc định kèm CẢNH BÁO; có 3 test. v1 không ghi ở đâu cả nên vẫn rơi về mặc định 5 — đo gián tiếp ủng hộ nhưng không chứng minh. |
 | ☐ | Nâng cổng hợp đồng dữ liệu từ CẢNH BÁO lên CHẶN trong `train_sed.py` | Trước train mới | Hiện chỉ in cảnh báo khi hợp đồng khác PASSED; một lô FAILED vẫn train được. |
 | ☑ | Sửa `PrecomputedSedDataset` pickle nguyên memmap sang worker DataLoader | Trước train mới | Đo: pickle dev **921,8 MB → 0,159 MB**. v1/v2/v3 đều train ở `--workers 2` nên đều đã trả giá này; triệu chứng là crash không đều. |
-| ☐ | Đo hiệu chuẩn xác suất + ablation `pos_weight` | W3 | Cả ba run đạt đỉnh F1 ở θ≈0,90–0,96, tức xác suất bị thổi lên có hệ thống. `pos_weight` trần 30 là giả thuyết, **chưa đo**. |
+| ◐ | Đo hiệu chuẩn xác suất + ablation `pos_weight` | W3 | **19/09 tối: ECE + reliability diagram xong** (`ml/evaluation/calibration.py`) — vùng dự báo 0,4–0,6 mang hơn nửa triệu khung mà tỉ lệ dương thật chỉ 1,7–3%, giải thích triệu chứng θ*≈0,90–0,96. `pos_weight` là ứng viên nguyên nhân nhưng ablation nó cần train lại — **chưa làm**. |
 | ◐ | Bảo vệ checkpoint/raw lớn khỏi Git và thiết lập DVC | W1–W2 | Weight/checkpoint/cache/secret đã ignore; JAMS legacy theo dõi có chủ đích. DVC pipeline/remote vẫn chưa có. |
 
 ---

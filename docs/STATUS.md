@@ -52,6 +52,19 @@
   quá hẹp": cửa sổ theo lớp nâng mọi lát cắt gần như cùng một lượng nên khoảng cách tới
   mốc không đổi (0,180 → 0,178). Nguyên nhân riêng của lát cắt này **vẫn chưa tìm ra**.
   Phép đo ở [measurements/long_event_postproc_20260919.md](measurements/long_event_postproc_20260919.md).
+- 🔴 **19/09 (tối) — trần cửa sổ lọc cũng bị bác bỏ phần lớn, rò rỉ cửa sổ đo được bằng 0,
+  hiệu chuẩn xác suất lệch nặng ở vùng giữa.** (1) Nới `MAX_MEDIAN_FRAMES` 51→401 khung
+  không đóng được khoảng cách `sach`−`long_event`: `v2` còn **rộng ra** (0,1322→0,1463),
+  `v3` chỉ hẹp **6,4%**; cột 'gộp' đứng yên tuyệt đối qua cả 4 mức trần, cảnh báo "nới
+  trần sẽ gộp nhầm" trong code vẫn chưa có số đỡ. (2) Cửa sổ suy từ TRAIN (không rò rỉ,
+  `cua_so_loc_tu_train`) cho F1 khớp cửa sổ suy từ dev đến 6 chữ số — nhưng vì **9/15 lớp
+  đã kẹp ở trần 51 tại cả hai nguồn**, không phải vì train/dev giống nhau; kết luận "rò rỉ
+  = 0" chỉ đúng khi trần còn hiệu lực. (3) ECE đo lần đầu: vùng dự báo 0,4–0,6 mang **hơn
+  nửa triệu khung** mà tỉ lệ dương thật chỉ 1,7–3% — giải thích hợp lý cho θ* luôn rơi
+  0,85–0,95, **chưa kết luận nguyên nhân** (`pos_weight` cần train lại để xác nhận). Phép
+  đo ở [measurements/max_median_ceiling_20260919.md](measurements/max_median_ceiling_20260919.md),
+  [measurements/adaptive_window_leak_20260919.md](measurements/adaptive_window_leak_20260919.md),
+  [measurements/calibration_20260919.md](measurements/calibration_20260919.md).
 - Pha 1–5 của [TRAINING_OPS_PLAN](TRAINING_OPS_PLAN.md) đã có module và đã chạy:
   `ml/runs/{v1,v2,v3}/manifest.json` + `predictions/dev_all.npz` +
   `analysis{,_adaptive}.{json,md}`. `train_sed.py` nay gieo toàn bộ RNG và ghi manifest
@@ -228,12 +241,15 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **616 test đạt** (19/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho Pha 1,
-  Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép ghép cặp,
-  lát cắt, ghi bền, đối chiếu `sed_eval`), rồi 15 test cho Pha 5 và phân loại lỗi theo lát
-  cắt. Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
+- **631 test đạt** (19/09 tối), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho
+  Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép ghép
+  cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo
+  lát cắt, rồi 15 test nữa cho ablation trần cửa sổ + cửa sổ suy từ train + hiệu chuẩn
+  xác suất. Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
 - Lượt 19/09 **có** chạy lại suite trước và sau thay đổi mã: 573 đạt trước khi thêm test mới,
-  580 sau Pha 1 + Pha 3, 601 sau Pha 4, **616** sau Pha 5. `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết. Không tuyên bố đã chạy lại test API/frontend.
+  580 sau Pha 1 + Pha 3, 601 sau Pha 4, 616 sau Pha 5, **631** sau ablation trần/hiệu
+  chuẩn. `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết.
+  Không tuyên bố đã chạy lại test API/frontend.
 - **`slice_index.jsonl` vẫn khớp code hiện tại.** `scaper_generate.py` được sửa lúc
   12:35:54, sau khi clip cuối sinh lúc 12:20:22 — tức dữ liệu sinh bằng code cũ. Đã chạy
   lại `plan_clips` với code mới và so từng clip: **0/7.920 khác biệt**. Tỉ lệ 5 lát cắt
@@ -455,9 +471,10 @@ lại sản phẩm thật và bắt được cả thứ chưa ai nghĩ tới, nh
 | A/B | ✅ **đã chạy cùng giao thức** (§3). Kết luận có điều kiện: v3 tốt nhất trên dev, nhưng dev cùng recipe với train của v3 — confound còn nguyên |
 | Ops Pha 4 | ✅ **xong 19/09** — 6 loại lỗi (cả mức toàn tập lẫn **theo từng lát cắt**), ma trận nhầm 16×16, θ theo từng lớp; CPU ~100–170 s/run. Số đo: [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md) |
 | Ops Pha 5 | ✅ **xong 19/09** — `ml/tracking/compare_runs.py`; chạy trên ba run thì dữ liệu và mã nguồn đều `KHONG_RO`, tức chưa so sạch được run nào với run nào |
-| `long_event` | **chưa xong** — biết hỏng vì phân mảnh, đã loại ứng viên "cửa sổ lọc quá hẹp", chưa tìm ra nguyên nhân riêng |
+| `long_event` | **chưa xong** — biết hỏng vì phân mảnh; đã loại "cửa sổ lọc quá hẹp" VÀ "trần 51 khung" (`v2` gap rộng ra, `v3` chỉ hẹp 6,4%); nguyên nhân riêng vẫn chưa tìm ra, ứng viên còn lại là khe hở năng lượng thật do Scaper sinh ra |
+| Cửa sổ suy từ train | ✅ **19/09** — `cua_so_loc_tu_train()`; độ lớn rò rỉ đo được = 0 nhưng vì 9/15 lớp đã kẹp trần 51 ở cả hai nguồn, không phải vì train/dev giống nhau |
 | `confusable_with` | ✅ **19/09** — 8 cặp đo được đã khai (đối xứng) + bảng tra §3 `taxonomy.md`; tỉ lệ lượt nhầm đã khai của v3 lên 54,1% |
 | Cổng hợp đồng | `train_sed.py` mới **cảnh báo** khi hợp đồng khác PASSED, chưa **chặn**. Một lô FAILED vẫn train được |
-| Hiệu chuẩn | Cả ba run đỉnh ở θ≈0,9 — chưa đo reliability diagram, chưa ablation `pos_weight` |
+| Hiệu chuẩn | ✅ **19/09** — ECE + reliability diagram đo xong (`ml/evaluation/calibration.py`); vùng dự báo 0,4–0,6 chiếm hơn nửa triệu khung mà tỉ lệ dương thật chỉ 1,7–3%, giải thích triệu chứng θ*≈0,9. Chưa ablation `pos_weight` — cần train lại để xác nhận nguyên nhân |
 | gold_test | vẫn RỖNG; DATA_PLAN D8–D10 là nút thắt, cần người gán mù |
 | Publish prep | ✅ Weight/cache/secret đã ignore; JAMS legacy theo dõi có chủ đích; snapshot được audit trước khi push GitHub |
