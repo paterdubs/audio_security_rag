@@ -49,12 +49,18 @@ from ml.evaluation.error_taxonomy import (  # noqa: E402
 )
 from ml.evaluation.predictions import doc  # noqa: E402
 from ml.evaluation.sed_metrics import (  # noqa: E402
+    MAX_MEDIAN_FRAMES,
     ONSET_COLLAR_SEC,
     event_and_segment_f1,
     frames_to_events,
     thong_ke_su_kien,
 )
-from ml.evaluation.threshold_sweep import cua_so_loc, luoi_nguong, quet  # noqa: E402
+from ml.evaluation.threshold_sweep import (  # noqa: E402
+    cua_so_loc,
+    cua_so_loc_tu_train,
+    luoi_nguong,
+    quet,
+)
 
 RUNS_DIR = REPO_ROOT / "ml" / "runs"
 DATA_DIR = REPO_ROOT / "data" / "synthetic"
@@ -203,10 +209,23 @@ def bang_loi(tham_chieu, du_bao, class_ids) -> dict:
 DEM_RONG = dict.fromkeys(MOI_LOAI, 0)
 
 
-def ten_bao_cao(thich_ung: bool) -> str:
-    """Tên file báo cáo. Hai cấu hình hậu xử lý phải ra hai file — ghi đè lên nhau thì
-    lượt ablation sau xoá mất lượt trước mà không báo gì."""
-    return "analysis_adaptive" if thich_ung else "analysis"
+def ten_bao_cao(thich_ung: bool, max_frames: int = MAX_MEDIAN_FRAMES,
+                nguon_cua_so: str = "dev") -> str:
+    """Tên file báo cáo. Mỗi cấu hình hậu xử lý phải ra một file riêng — ghi đè lên nhau
+    thì lượt ablation sau xoá mất lượt trước mà không báo gì.
+
+    `max_frames` khác mặc định (51) là ablation quét trần ∈ {101, 201, 401} tìm nguyên
+    nhân `long_event`. `nguon_cua_so="train"` là cấu hình không rò rỉ (xem
+    `cua_so_loc_tu_train`) — khác cấu hình mặc định `"dev"` (rò rỉ, chỉ để chẩn đoán) nên
+    cũng phải ra tên riêng."""
+    if not thich_ung:
+        return "analysis"
+    phan = ["analysis_adaptive"]
+    if nguon_cua_so != "dev":
+        phan.append(nguon_cua_so)
+    if max_frames != MAX_MEDIAN_FRAMES:
+        phan.append(f"max{max_frames}")
+    return "_".join(phan)
 
 
 def bang_lat_cat(tham_chieu, du_bao, class_ids, duration, nhom) -> list[dict]:
@@ -406,7 +425,11 @@ def run(args: argparse.Namespace) -> int:
     bat_dau = time.time()
     du_doan = doc(nguon)
     class_ids = du_doan.class_ids
-    median_size = cua_so_loc(du_doan, args.adaptive_postproc)
+    if args.adaptive_postproc and args.adaptive_source == "train":
+        median_size = cua_so_loc_tu_train(class_ids, du_doan.n_frames / du_doan.duration,
+                                          max_frames=args.max_median_frames)
+    else:
+        median_size = cua_so_loc(du_doan, args.adaptive_postproc, args.max_median_frames)
     tham_chieu = du_doan.tham_chieu()
     khung = [du_doan.khung(i) for i in range(len(du_doan.clip_ids))]
 
@@ -464,6 +487,8 @@ def run(args: argparse.Namespace) -> int:
         "n_clip": len(du_doan.clip_ids), "n_ref": kq_sao.n_ref,
         "class_ids": class_ids, "collar_sec": ONSET_COLLAR_SEC,
         "adaptive_postproc": bool(args.adaptive_postproc),
+        "max_median_frames": args.max_median_frames,
+        "adaptive_source": args.adaptive_source,
         "median_size": (int(median_size) if np.isscalar(median_size)
                         else [int(x) for x in median_size]),
         "theta_sao": theta_sao,
@@ -480,7 +505,7 @@ def run(args: argparse.Namespace) -> int:
                     "theo thiết kế; θ* và θ theo lớp chọn trên chính tập đang chấm → rò rỉ"),
     }
 
-    ten = ten_bao_cao(args.adaptive_postproc)
+    ten = ten_bao_cao(args.adaptive_postproc, args.max_median_frames, args.adaptive_source)
     out_json = RUNS_DIR / args.run / f"{ten}.json"
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     out_md = viet_dan(RUNS_DIR / args.run / f"{ten}.md", dong_bao_cao(payload))
@@ -499,6 +524,12 @@ def main() -> int:
     parser.add_argument("--thresholds", default="0.05:0.95:0.05", help="dau:cuoi:buoc")
     parser.add_argument("--adaptive-postproc", action="store_true",
                         help="cửa sổ lọc riêng từng lớp; xem cảnh báo rò rỉ ở cua_so_loc()")
+    parser.add_argument("--max-median-frames", type=int, default=MAX_MEDIAN_FRAMES,
+                        help="trần cửa sổ thích ứng; chỉ có nghĩa cùng --adaptive-postproc")
+    parser.add_argument("--adaptive-source", choices=("dev", "train"), default="dev",
+                        help="'dev' rò rỉ (suy từ chính tập đang chấm), 'train' không rò "
+                             "rỉ (suy từ data/features/train_meta.json); chỉ có nghĩa "
+                             "cùng --adaptive-postproc")
     return run(parser.parse_args())
 
 

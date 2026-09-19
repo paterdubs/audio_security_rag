@@ -31,9 +31,10 @@ from common import enable_utf8_output  # noqa: E402
 
 enable_utf8_output()
 
-from ml.evaluation.predictions import doc  # noqa: E402
+from ml.evaluation.predictions import FEATURES_DIR, doc  # noqa: E402
 from ml.evaluation.sed_metrics import (  # noqa: E402
     DEFAULT_MEDIAN_FILTER_FRAMES,
+    MAX_MEDIAN_FRAMES,
     adaptive_median_sizes,
     class_event_durations,
     clip_level_map,
@@ -51,13 +52,16 @@ def luoi_nguong(spec: str) -> list[float]:
     return [round(dau + i * buoc, 4) for i in range(n)]
 
 
-def cua_so_loc(du_doan, thich_ung: bool):
+def cua_so_loc(du_doan, thich_ung: bool, max_frames: int = MAX_MEDIAN_FRAMES):
     """Cửa sổ lọc trung vị: một số chung, hoặc một cửa sổ cho mỗi lớp.
 
     ⚠️ Cửa sổ thích ứng ở đây suy từ độ dài sự kiện của CHÍNH tập đang chấm. Đó là rò rỉ
     nhẹ (dùng nhãn của tập đánh giá để chọn một siêu tham số hậu xử lý) và chỉ chấp nhận
     được vì đây là dev, không phải test. Lúc train, `median_sizes_for` lấy thống kê từ
     tập train chứ không từ tập val — hai chỗ khác nhau có chủ đích.
+
+    `max_frames` chỉ có tác dụng khi `thich_ung=True` — dùng để dò xem trần mặc định
+    51 khung (~0,5s) có đang chặn thật cửa sổ của lớp `long_event` hay không.
     """
     if not thich_ung:
         return DEFAULT_MEDIAN_FILTER_FRAMES
@@ -66,7 +70,31 @@ def cua_so_loc(du_doan, thich_ung: bool):
                                du_doan.ref_onset, du_doan.ref_offset, strict=True):
         su_kien[int(row)].append((int(c), float(on), float(off)))
     do_dai = class_event_durations(su_kien, len(du_doan.class_ids))
-    return adaptive_median_sizes(do_dai, frames_per_second=du_doan.n_frames / du_doan.duration)
+    return adaptive_median_sizes(do_dai, frames_per_second=du_doan.n_frames / du_doan.duration,
+                                 max_frames=max_frames)
+
+
+def cua_so_loc_tu_train(class_ids: list[str], frames_per_second: float,
+                        features_dir: Path = FEATURES_DIR, split: str = "train",
+                        max_frames: int = MAX_MEDIAN_FRAMES):
+    """Cửa sổ lọc thích ứng suy từ độ dài sự kiện của TẬP TRAIN — không rò rỉ.
+
+    `cua_so_loc()` ở trên dùng nhãn của chính tập đang chấm để chọn cửa sổ, đó là rò rỉ
+    (xem cảnh báo ở đó). Hàm này đọc thẳng `{features_dir}/{split}_meta.json` — không
+    nhận `du_doan` nào cả, nên nhãn của tập đang chấm không có đường nào lọt vào phép
+    tính. Cùng nguồn dữ liệu mà `median_sizes_for` ở `train_sed.py` dùng lúc train.
+    """
+    meta = json.loads((features_dir / f"{split}_meta.json").read_text(encoding="utf-8"))
+    if list(meta["class_ids"]) != list(class_ids):
+        raise ValueError(
+            f"{split}_meta.json và run đang chấm lệch thứ tự lớp: "
+            f"{meta['class_ids']} != {class_ids} — class_event_durations sẽ gán nhầm "
+            "độ dài của lớp này cho lớp khác một cách im lặng."
+        )
+    su_kien = [[(int(c), float(on), float(off)) for c, on, off in clip["events"]]
+              for clip in meta["clips"]]
+    do_dai = class_event_durations(su_kien, len(class_ids))
+    return adaptive_median_sizes(do_dai, frames_per_second=frames_per_second, max_frames=max_frames)
 
 
 def quet(du_doan, nguongs: list[float], median_size, khung=None) -> list[dict]:

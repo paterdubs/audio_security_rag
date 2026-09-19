@@ -385,3 +385,28 @@ def test_ablation_khong_ghi_de_len_bao_cao_mac_dinh():
     tính lại mỗi lần, và không có lỗi nào bắn ra."""
     assert ea.ten_bao_cao(False) != ea.ten_bao_cao(True)
     assert ea.ten_bao_cao(False) == "analysis"
+
+
+def test_ten_bao_cao_tran_51_giu_ten_cu():
+    """max_frames=51 là mặc định của MAX_MEDIAN_FRAMES — phải ra đúng tên cũ
+    'analysis_adaptive', không thì mọi lệnh --adaptive-postproc chạy trước khi tham số
+    này tồn tại sẽ đọc nhầm sang file khác."""
+    assert ea.ten_bao_cao(True, 51) == "analysis_adaptive"
+
+
+def test_ten_bao_cao_moi_tran_ra_ten_rieng():
+    """Ablation quét MAX_MEDIAN_FRAMES ∈ {101, 201, 401} — ghi đè lẫn nhau thì bảng so
+    sánh theo trần không còn dữ liệu để so, giống lỗi đã né ở test phía trên."""
+    ten = {ea.ten_bao_cao(True, m) for m in (101, 201, 401)}
+    assert len(ten) == 3
+    assert ea.ten_bao_cao(False) not in ten
+    assert "analysis_adaptive" not in ten
+
+
+def test_ten_bao_cao_nguon_train_khac_ten_nguon_dev():
+    """`--adaptive-source train` (không rò rỉ) và mặc định `dev` (rò rỉ) phải ra hai file
+    khác nhau — gộp chung thì bảng 3 cột 7-khung/theo-lớp-từ-dev/theo-lớp-từ-train mất
+    một cột, và không ai biết con số nào rò rỉ, con số nào không."""
+    assert ea.ten_bao_cao(True, nguon_cua_so="train") == "analysis_adaptive_train"
+    assert ea.ten_bao_cao(True, nguon_cua_so="dev") == "analysis_adaptive"
+    assert ea.ten_bao_cao(True) == ea.ten_bao_cao(True, nguon_cua_so="dev")
