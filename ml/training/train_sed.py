@@ -13,8 +13,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import random
 import sys
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
@@ -31,12 +34,22 @@ from common import enable_utf8_output  # noqa: E402
 enable_utf8_output()
 
 from ml.evaluation.sed_metrics import (  # noqa: E402
-    DEFAULT_MEDIAN_FILTER_FRAMES, SedScores, adaptive_median_sizes, class_event_durations,
-    clip_level_map, event_and_segment_f1, frames_to_events,
+    DEFAULT_MEDIAN_FILTER_FRAMES,
+    SedScores,
+    adaptive_median_sizes,
+    class_event_durations,
+    clip_level_map,
+    event_and_segment_f1,
+    frames_to_events,
 )
 from ml.models.panns_sed import (  # noqa: E402
-    DEFAULT_TIME_POOL_BLOCKS, PannsSed, trainable_parameters,
+    DEFAULT_TIME_POOL_BLOCKS,
+    PannsSed,
+    trainable_parameters,
 )
+from ml.tracking.fingerprint import van_tay_chia_tap, van_tay_du_lieu  # noqa: E402
+from ml.tracking.run_manifest import ghi as ghi_manifest  # noqa: E402
+from ml.tracking.run_manifest import ghi_epoch, tao_manifest  # noqa: E402
 from ml.training.mixup import LABEL_HARD, LABEL_SOFT, mix_batch  # noqa: E402
 from ml.training.sed_data import PrecomputedSedDataset, split_indices  # noqa: E402
 
@@ -48,6 +61,25 @@ CHECKPOINT_PATH = REPO_ROOT / "data" / "reference" / "Cnn14_DecisionLevelMax.pth
 # cực thấp; để pos_weight tự do sẽ ra hệ số hàng nghìn, biến loss thành gần như chỉ còn
 # một lớp đó và mọi lớp khác bị bỏ rơi.
 MAX_POS_WEIGHT = 30.0
+
+
+def gieo_mam(seed: int) -> dict:
+    """Gieo MỌI nguồn ngẫu nhiên, không chỉ phép chia train/val.
+
+    Trước 19/09/2026 `--seed` chỉ đi vào `split_indices`; thứ tự xáo của DataLoader, hệ
+    số trộn của mixup và SpecAugment đều chạy trên RNG toàn cục chưa gieo. Hệ quả: v1/v2/v3
+    KHÔNG lặp lại được, và chênh lệch giữa hai run không tách được phần do thay đổi thật
+    với phần do may rủi. Đây là yêu cầu R1 của TRAINING_OPS_PLAN.
+
+    `PYTHONHASHSEED` chỉ có tác dụng với tiến trình con (DataLoader worker); tiến trình
+    hiện tại đã khởi động xong nên đặt ở đây là để worker kế thừa, không phải cho bản thân nó.
+    """
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    return {"split": seed, "python": seed, "numpy": seed, "torch": seed, "cuda": seed}
 
 
 def detect_frame_count(model: nn.Module, device: torch.device, n_samples: int) -> int:
@@ -135,6 +167,7 @@ def evaluate(model: nn.Module, loader: DataLoader, dataset: PrecomputedSedDatase
 
 
 def run(args: argparse.Namespace) -> int:
+    seeds = gieo_mam(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     checkpoint = CHECKPOINT_PATH if CHECKPOINT_PATH.exists() else None
     if checkpoint is None:
@@ -167,6 +200,23 @@ def run(args: argparse.Namespace) -> int:
     RUNS_DIR.mkdir(parents=True, exist_ok=True)
     run_dir = RUNS_DIR / (args.name or time.strftime("sed_%Y%m%d_%H%M%S"))
     run_dir.mkdir(parents=True, exist_ok=True)
+
+    # Manifest ghi TRƯỚC epoch đầu tiên: một run bị ngắt giữa chừng vẫn phải để lại đủ
+    # lineage để biết checkpoint dở dang đó thuộc về dữ liệu nào, mã nào, cấu hình nào.
+    manifest = tao_manifest(
+        run_dir.name, vars(args), split=args.split,
+        van_tay=van_tay_du_lieu(FEATURES_DIR, args.split, args.sample_rate,
+                                bam_waveform=not args.khong_bam_waveform),
+        chia_tap=van_tay_chia_tap(train_idx, val_idx), seeds=seeds,
+    )
+    manifest["timing"]["bat_dau"] = datetime.now(UTC).isoformat(timespec="seconds")
+    manifest["model"] = {"n_frames": n_frames, "n_classes": n_classes,
+                         "tham_so_hoc_duoc": trainable_parameters(model)}
+    ghi_manifest(run_dir, manifest)
+    hop_dong = manifest["data"]["hop_dong"]["ket_qua"]
+    if hop_dong != "PASSED":
+        print(f"hop dong du lieu: {hop_dong} - xem data.hop_dong trong manifest.json. "
+              "Pha 2 phai PASS truoc khi so cua run nay duoc dung de ket luan.")
 
     median_size = median_sizes_for(train_set, n_classes, n_frames, args.adaptive_postproc)
     if args.adaptive_postproc:
@@ -243,6 +293,11 @@ def run(args: argparse.Namespace) -> int:
         history.append({"epoch": epoch, "loss": total_loss / len(train_loader),
                         "clip_map": scores.clip_map, "segment_f1": scores.segment_f1,
                         "event_f1": scores.event_f1, "seconds": elapsed})
+        ghi_epoch(run_dir, manifest, {
+            "epoch": epoch, "seconds": round(elapsed, 1), "full_eval": full_eval,
+            "clip_map": scores.clip_map,
+            "ket_thuc": datetime.now(UTC).isoformat(timespec="seconds"),
+        })
 
         if scores.clip_map > best_map:
             best_map = scores.clip_map
@@ -260,6 +315,9 @@ def run(args: argparse.Namespace) -> int:
         json.dumps({"args": vars(args), "history": history,
                     "final": scores.__dict__}, ensure_ascii=False, indent=2, default=str),
         encoding="utf-8")
+    manifest["ket_qua_cuoi"] = scores.__dict__
+    manifest["best_clip_map"] = best_map
+    ghi_manifest(run_dir, manifest)
     print(f"\n✓ {run_dir.relative_to(REPO_ROOT)} · mAP tốt nhất {best_map:.4f}")
     return 0
 
@@ -290,6 +348,9 @@ def main() -> int:
     parser.add_argument("--time-pool-blocks", type=int, default=DEFAULT_TIME_POOL_BLOCKS,
                         help="5=323ms (CNN14 gốc) · 4=161ms · 3=80ms · 2=40ms. "
                              "Collar của DCASE là 200ms nên 5 là KHÔNG ĐỦ")
+    parser.add_argument("--khong-bam-waveform", action="store_true",
+                        help="bo bam 5 GB waveform khi lap manifest (chay thu nhanh); "
+                             "van tay se KHONG phat hien duoc cache da sinh lai")
     parser.add_argument("--freeze-backbone", action="store_true")
     parser.add_argument("--zero-shot", action="store_true")
     parser.add_argument("--name")

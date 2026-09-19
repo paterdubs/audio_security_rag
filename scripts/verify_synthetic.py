@@ -265,7 +265,7 @@ def kiem_ty_le_slice(config: dict, dem_slice: dict[str, int], tong: int) -> list
 # ── Điều phối ────────────────────────────────────────────────────────────────
 
 
-def run(split: str, limit: int | None) -> int:
+def run(split: str, limit: int | None, output: Path | None = None) -> int:
     split_dir = SYNTHETIC_DIR / split
     if not (split_dir / "jams").exists():
         print(f"❌ không thấy {split_dir / 'jams'}")
@@ -331,7 +331,7 @@ def run(split: str, limit: int | None) -> int:
         vi_pham.append({"file_id": f"<{split}>", "reason_code": ma, "detail": chi_tiet})
 
     bao_cao(split, len(jams_files), dem_slice, do_dai_theo_lop, vi_pham)
-    ghi_csv(vi_pham)
+    ghi_csv(vi_pham, output)
     return 1 if vi_pham else 0
 
 
@@ -367,27 +367,35 @@ def bao_cao(split, n_clips, dem_slice, do_dai_theo_lop, vi_pham) -> None:
         print(f"  [{v['reason_code']}] {v['file_id']}: {v['detail']}")
 
 
-def ghi_csv(vi_pham: list[dict]) -> None:
+def ghi_csv(vi_pham: list[dict], output: Path | None = None) -> None:
     """Ghi theo đúng schema của exclusions.csv — lỗi dữ liệu nằm cùng một chỗ với mọi
-    quyết định loại bỏ khác, không phải một định dạng riêng chỉ script này hiểu."""
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    quyết định loại bỏ khác, không phải một định dạng riêng chỉ script này hiểu.
+
+    `output` cho phép giữ bằng chứng của TỪNG lượt: đường dẫn mặc định là một file chung
+    bị ghi đè mỗi lần chạy, nên sau khi kiểm dev xong thì báo cáo của train biến mất và
+    manifest của run không còn gì để trỏ tới.
+    """
+    path = output or REPORT_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
     now = datetime.now(timezone.utc).isoformat()
-    with REPORT_PATH.open("w", encoding="utf-8", newline="") as handle:
+    with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(
             handle, fieldnames=["file_id", "stage", "reason_code", "detail",
                                 "decided_by", "decided_at"])
         writer.writeheader()
         for v in vi_pham:
             writer.writerow({**v, "stage": STAGE, "decided_by": "auto", "decided_at": now})
-    print(f"\n✓ {REPORT_PATH.relative_to(REPO_ROOT)}")
+    print(f"\n✓ {path.relative_to(REPO_ROOT) if path.is_relative_to(REPO_ROOT) else path}")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--split", default="train")
     parser.add_argument("--limit", type=int, help="chỉ kiểm N clip đầu (chạy thử nhanh)")
+    parser.add_argument("--output", type=Path,
+                        help="nơi ghi báo cáo; mặc định là file chung bị ghi đè mỗi lượt")
     args = parser.parse_args()
-    return run(args.split, args.limit)
+    return run(args.split, args.limit, args.output)
 
 
 if __name__ == "__main__":

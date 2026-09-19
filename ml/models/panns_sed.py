@@ -148,7 +148,13 @@ class PannsSed(nn.Module):
 
         frame_logits = self.interpolator(segment_logits)
         frame_logits = pad_framewise_output(frame_logits, frames_num)
-        return {"frame_logits": frame_logits, "clip_logits": clip_logits}
+        # Trả về CẢ `segment_logits`: khâu lưu dự đoán (Pha 3 của TRAINING_OPS_PLAN) chỉ
+        # cần mức đoạn, vì `frame_logits` là bản lặp nguyên xi của nó — mỗi giá trị lặp
+        # đúng `2**time_pool_blocks` lần rồi đệm khung cuối. Lưu mức khung tốn gấp 32 lần
+        # mà không thêm một bit thông tin nào; `ml/evaluation/predictions.khung_tu_doan`
+        # dựng lại mức khung và có test khẳng định hai đường trùng khít.
+        return {"frame_logits": frame_logits, "clip_logits": clip_logits,
+                "segment_logits": segment_logits}
 
 
 def trainable_parameters(model: nn.Module) -> int:
