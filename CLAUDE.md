@@ -43,8 +43,8 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 ## 3. Trạng thái hiện tại
 
 **Tuần:** W1 (15–21/09/2026). Walking skeleton và baseline SED được làm sớm song song.
-**Đối soát workspace:** 19/09/2026, sau khi Pha 1 + Pha 3 của Training Ops và lượt quét
-ngưỡng đã hoàn tất.
+**Đối soát workspace:** 19/09/2026, sau khi Pha 1 + Pha 3 + Pha 4 của Training Ops,
+lượt quét ngưỡng và lượt phân tích lỗi đã hoàn tất.
 Số đo, phạm vi và bằng chứng ở [docs/STATUS.md](docs/STATUS.md); nhật ký §10 là lịch sử,
 không phải trạng thái hiện hành.
 
@@ -82,10 +82,16 @@ không phải trạng thái hiện hành.
   đúng. Bảng cũ chấm ở 0,5 (mAP 0,8372/0,8176/0,8123 · event-F1 0,1282/0,1897/0,1077) đo
   trên ba tập val khác nhau và **không dùng để xếp hạng ba run được nữa**; nó vẫn còn ở
   STATUS §3 làm bản ghi lịch sử. Confound chưa gỡ: dev sinh cùng recipe với train của v3.
-- **Pha 1 + Pha 3 của [TRAINING_OPS_PLAN](docs/TRAINING_OPS_PLAN.md) đã xong (19/09):**
-  `ml/tracking/{fingerprint,run_manifest}.py`, `ml/evaluation/{predictions,threshold_sweep}.py`.
-  `train_sed.py` gieo toàn bộ RNG và ghi `manifest.json` trước epoch đầu. Pha 4/5 chưa có.
-- **580 test đạt** (19/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 573.
+- **Pha 1 + Pha 3 + Pha 4 của [TRAINING_OPS_PLAN](docs/TRAINING_OPS_PLAN.md) đã xong (19/09):**
+  `ml/tracking/{fingerprint,run_manifest}.py`,
+  `ml/evaluation/{predictions,threshold_sweep,error_taxonomy,error_analysis}.py`.
+  `train_sed.py` gieo toàn bộ RNG và ghi `manifest.json` trước epoch đầu. Pha 5 chưa có.
+- **Phân tích lỗi đã chạy trên cả ba run** (`ml/runs/{run}/analysis.{json,md}`). Ở θ = 0,5
+  v3 chỉ bỏ sót **9/4.873** sự kiện nhưng chèn thêm **61.020** — hỏng ở ngưỡng, không phải
+  ở năng lực phát hiện. **37,4%** lỗi biên của v1 là trần cứng do bước lưới onset 319,7 ms
+  (v2/v3: 79,9 ms → trần 0%), nên **so event-F1 của v1 với v2/v3 là so một phần độ phân
+  giải bộ giải mã**. Số đo: `docs/measurements/error_analysis_20260919.md`.
+- **601 test đạt** (19/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 580.
 
 ### Đang làm / chưa nghiệm thu
 
@@ -107,10 +113,11 @@ không phải trạng thái hiện hành.
 
 ### Ba việc tiếp theo
 
-1. **Pha 4 của Training Ops** — chạy được ngay trên CPU vì prediction đã có sẵn cho cả ba
-   run: phân loại lỗi (chèn/sót/nhầm lớp/lệch biên), ma trận nhầm lẫn 15×15 đối chiếu
-   `confusable_with`, bảng F1 **theo lát cắt** (join `slice_index.jsonl` theo `clip_id`),
-   và đường cong ngưỡng **theo từng lớp** — khoảng cách theo lớp hiện rất rộng.
+1. **Việc do chính Pha 4 sinh ra.** (a) Bổ sung cặp nhầm thật vào `confusable_with` —
+   chỉ **31%** lượt nhầm lớp rơi vào cặp đã khai, và `running_footsteps` là trung tâm
+   nhầm lẫn hút bốn lớp xung lực. Đây là sửa tài liệu cho khớp số đo, không phải sửa
+   model. (b) Tìm nguyên nhân `long_event` — lát cắt tệ nhất ở cả v2 lẫn v3, thấp hơn mốc
+   clip sạch ~0,15 F1; cửa sổ lọc cố định 7 khung là ứng viên nhưng **chưa ablation**.
 2. **Đưa 937 AudioSet-strong WAV vào manifest/split không rò rỉ**, chuẩn bị real dev và
    gold; sau đó pilot gán mù theo DATA_PLAN §8. Đây là thứ DUY NHẤT gỡ được confound
    "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
@@ -226,11 +233,12 @@ docker compose down                   # dừng, giữ named volumes; không dùn
 .venv/Scripts/python.exe -m ml.evaluation.eval_sed --run panns_ft_v1
 # eval_sed đọc time_pool_blocks từ checkpoint → history → mặc định kèm CẢNH BÁO.
 
-# Training Ops (TRAINING_OPS_PLAN Pha 1 + Pha 3)
+# Training Ops (TRAINING_OPS_PLAN Pha 1 + Pha 3 + Pha 4)
 .venv/Scripts/python.exe -m ml.tracking.run_manifest --run panns_ft_v3 --du-lieu hien-tai
 .venv/Scripts/python.exe -m ml.evaluation.predictions --run panns_ft_v3 --split dev
 .venv/Scripts/python.exe -m ml.evaluation.threshold_sweep --run panns_ft_v3 --split dev
-# Grounded AAC, Pha 4 (phân tích lỗi) và Pha 5 (so run): chưa triển khai.
+.venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 --split dev
+# Grounded AAC và Pha 5 (so run): chưa triển khai.
 
 # Chất lượng
 .venv/Scripts/python.exe -m pytest tests/ -q
@@ -376,6 +384,37 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-19 (chiều) — Training Ops Pha 4: phân tích lỗi
+
+- **`ml/evaluation/error_taxonomy.py` + `error_analysis.py`.** Đọc dự đoán đã lưu, chấm
+  trên CPU, ~3 phút/run. Xuất `ml/runs/{run}/analysis.{json,md}`.
+- **Ranh giới cố ý với `sed_eval`:** S/D/I lấy từ `sed_eval` (chân lý); phép ghép cặp
+  ref↔pred tự viết chỉ để dựng Boundary/Fragmentation/Merge và ma trận nhầm — vì
+  `sed_eval` chỉ trả **tỉ lệ**, không phơi ra cặp nào khớp cặp nào. Đối chiếu tường minh
+  trên v3: số khớp đúng **2.901 vs 2.901** (θ=0,50) và **2.362 vs 2.362** (θ=0,90), lệch
+  +0. Không có phép đối chiếu này thì bảng phân loại lỗi không đứng được.
+- **θ = 0,5 hỏng theo kiểu nào, đã có số.** v3 ở θ=0,5 bỏ sót **9 trên 4.873** sự kiện
+  (0,2%) nhưng chèn thêm **61.020** — 12,52 chèn trên mỗi sự kiện thật. Lỗi nằm ở ngưỡng
+  và hậu xử lý, KHÔNG ở năng lực phát hiện. Việc cần làm vì thế không phải thêm dữ liệu
+  cho lớp hiếm.
+- **Một phần lỗi biên của v1 là trần cứng, đo được chứ không suy luận.** Onset dự báo của
+  v1 rơi **100%** trên lưới 319,7 ms (31 đoạn); onset lấy tại đầu đoạn hoạt động đầu tiên
+  nên sai số lượng tử phân bố đều trong `[0, bước)`, cho trần **37,4%** số cặp không thể
+  lọt collar 200 ms dù model đoán hoàn hảo. Quan sát 49,5%. v2/v3 lưới 79,9 ms → trần 0%,
+  quan sát 29%. **Hệ quả: so event-F1 của v1 với v2/v3 là so một phần độ phân giải bộ
+  giải mã, không thuần chất lượng model.** mAP mức clip không dính vì không xét vị trí.
+- **θ riêng từng lớp KHÔNG phải cải tiến mặc định** — nó làm v1 tệ đi (0,2953 → 0,2897).
+  F1 sự kiện tổng của `sed_eval` là micro-average, nên argmax F1 của từng lớp riêng không
+  tối đa hoá con số gộp. Lợi ở v2/v3 (+0,006 / +0,018) cũng là chặn trên chọn trên chính
+  tập chấm.
+- **Giả định thiết kế bị số đo bác một phần:** chỉ **31%** lượt nhầm lớp rơi vào cặp đã
+  khai trong `confusable_with`. `running_footsteps` là trung tâm nhầm lẫn, hút nhầm từ
+  `fireworks`/`door_slam`/`gunshot`/`object_drop_dishes` và bắn nhầm ngược lại.
+- **Lát cắt:** thứ tự khó giống nhau ở cả ba run nên là tính chất của **dữ liệu**.
+  `long_event` tệ nhất (v3 0,2685 so với mốc clip sạch 0,4487); `causal_chain` **không**
+  khó hơn clip sạch bao nhiêu, ngược giả định lúc thiết kế lát cắt.
+- 580 → **601 test đạt**. Chi tiết: `docs/measurements/error_analysis_20260919.md`.
 
 ### 2026-09-19 — Training Ops Pha 1 + Pha 3, và một kết luận bị bác bỏ
 

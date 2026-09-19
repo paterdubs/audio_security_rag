@@ -1,6 +1,7 @@
 # Trạng thái dự án đã đối soát
 
-> **Snapshot hiện hành: 19/09/2026, sau Pha 1 + Pha 3 của Training Ops và lượt quét ngưỡng.**
+> **Snapshot hiện hành: 19/09/2026, sau Pha 1 + Pha 3 + Pha 4 của Training Ops, lượt quét
+> ngưỡng và lượt phân tích lỗi.**
 > Trước đó: 18/09 sau B0–B9, train `panns_ft_v3` và dọn artifact.
 > Các phép đo dữ liệu/training được thực hiện ngày 17/09; kiểm kê file và cache trong workspace
 > được đối chiếu lại ngày 18/09. Phân biệt rõ **lô legacy** (bằng chứng trước-sửa) với **lô mới**
@@ -32,9 +33,16 @@
   mức đoạn và chấm lại **cả ba run trên cùng tập dev 1.440 clip**: ngưỡng 0,5 sai nghiêm
   trọng ở cả ba, và thứ tự v2/v3 **đảo lại**. Bảng đầy đủ ở §3; phép đo ở
   [measurements/threshold_sweep_20260919.md](measurements/threshold_sweep_20260919.md).
-- Pha 1 và Pha 3 của [TRAINING_OPS_PLAN](TRAINING_OPS_PLAN.md) đã có module và đã chạy:
-  `ml/runs/{v1,v2,v3}/manifest.json` + `predictions/dev_all.npz`. `train_sed.py` nay gieo
-  toàn bộ RNG và ghi manifest trước epoch đầu.
+- 🔴 **19/09 — phân tích lỗi (Pha 4) chỉ ra θ=0,5 hỏng theo kiểu nào, và một trần cứng
+  của v1.** Ở θ=0,5, v3 bỏ sót **9 trên 4.873** sự kiện (0,2%) nhưng chèn thêm **61.020**
+  — lỗi nằm ở ngưỡng/hậu xử lý, không ở năng lực phát hiện. Riêng v1: onset dự báo rơi
+  **100%** trên lưới 319,7 ms (31 đoạn), cho **trần 37,4%** số cặp không thể lọt collar
+  200 ms dù model đoán hoàn hảo (v2/v3 lưới 79,9 ms → trần 0%). **So event-F1 của v1 với
+  v2/v3 là so một phần độ phân giải bộ giải mã.** Phép đo ở
+  [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md).
+- Pha 1, Pha 3 và Pha 4 của [TRAINING_OPS_PLAN](TRAINING_OPS_PLAN.md) đã có module và đã
+  chạy: `ml/runs/{v1,v2,v3}/manifest.json` + `predictions/dev_all.npz` +
+  `analysis.{json,md}`. `train_sed.py` nay gieo toàn bộ RNG và ghi manifest trước epoch đầu.
 - Lô legacy đã được chuyển sang `data/synthetic_legacy/`: giữ **9.360 JAMS**, hai
   `slice_index.jsonl` và hai stdout log; WAV legacy, cache tạm, recovery trùng và stderr log đã xoá.
   Đây là bằng chứng trước-sửa, không phải dữ liệu để train lại.
@@ -207,10 +215,11 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **580 test đạt** (19/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho Pha 1,
-  Pha 3, phép gom sự kiện và lỗi pickle memmap. Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
+- **601 test đạt** (19/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho Pha 1,
+  Pha 3, phép gom sự kiện và lỗi pickle memmap, rồi 21 test nữa cho Pha 4 (phép ghép cặp,
+  lát cắt, ghi bền, đối chiếu `sed_eval`). Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
 - Lượt 19/09 **có** chạy lại suite trước và sau thay đổi mã: 573 đạt trước khi thêm test mới,
-  580 đạt sau. `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết. Không tuyên bố đã chạy lại test API/frontend.
+  580 sau Pha 1 + Pha 3, **601** sau Pha 4. `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết. Không tuyên bố đã chạy lại test API/frontend.
 - **`slice_index.jsonl` vẫn khớp code hiện tại.** `scaper_generate.py` được sửa lúc
   12:35:54, sau khi clip cuối sinh lúc 12:20:22 — tức dữ liệu sinh bằng code cũ. Đã chạy
   lại `plan_clips` với code mới và so từng clip: **0/7.920 khác biệt**. Tỉ lệ 5 lát cắt
@@ -430,7 +439,8 @@ lại sản phẩm thật và bắt được cả thứ chưa ai nghĩ tới, nh
 |---|---|
 | Ops Pha 1 + 3 | ✅ **xong 19/09** — manifest/vân tay/seed đầy đủ, prediction mức đoạn + quét ngưỡng cho cả ba run |
 | A/B | ✅ **đã chạy cùng giao thức** (§3). Kết luận có điều kiện: v3 tốt nhất trên dev, nhưng dev cùng recipe với train của v3 — confound còn nguyên |
-| Ops Pha 4 | **việc tiếp theo** — phân loại lỗi, ma trận nhầm lẫn, bảng theo lát cắt, đường cong ngưỡng theo lớp. Chạy được ngay trên CPU vì prediction đã có |
+| Ops Pha 4 | **xong 19/09** — 6 loại lỗi, ma trận nhầm 16×16, bảng theo lát cắt, θ theo từng lớp; chạy trên CPU ~3 phút/run. Số đo: [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md) |
+| Ops Pha 5 | **việc tiếp theo** — `compare_runs.py`; manifest đã đủ để chỉ rõ confound dữ liệu |
 | Cổng hợp đồng | `train_sed.py` mới **cảnh báo** khi hợp đồng khác PASSED, chưa **chặn**. Một lô FAILED vẫn train được |
 | Hiệu chuẩn | Cả ba run đỉnh ở θ≈0,9 — chưa đo reliability diagram, chưa ablation `pos_weight` |
 | gold_test | vẫn RỖNG; DATA_PLAN D8–D10 là nút thắt, cần người gán mù |

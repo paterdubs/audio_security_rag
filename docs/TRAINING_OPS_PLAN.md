@@ -9,9 +9,10 @@
 > (quy trình dữ liệu) · [SYSTEM.md](SYSTEM.md) (kiến trúc) ·
 > [RELATED_WORK_2026.md](RELATED_WORK_2026.md) (đối chiếu văn liệu)
 
-> **Đối soát 19/09/2026: Pha 1, Pha 2 và Pha 3 đã có module và đã chạy thật.**
-> Pha 4 và Pha 5 vẫn là kế hoạch. Bằng chứng ở [STATUS.md](STATUS.md) và
-> [measurements/threshold_sweep_20260919.md](measurements/threshold_sweep_20260919.md).
+> **Đối soát 19/09/2026: Pha 1–4 đã có module và đã chạy thật.** Pha 5 vẫn là kế hoạch.
+> Bằng chứng ở [STATUS.md](STATUS.md),
+> [measurements/threshold_sweep_20260919.md](measurements/threshold_sweep_20260919.md) và
+> [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md).
 >
 > **R5 đã gỡ, và ngay lượt đầu nó bác bỏ một kết luận đang nằm trong tài liệu.** Sau khi
 > lưu dự đoán mức đoạn cho cả ba run rồi quét ngưỡng trên cùng một tập dev 1.440 clip:
@@ -67,8 +68,8 @@ chạy riêng, nhưng chưa được nối thành cổng chặn training tự đ
 | `manifest.json` cho v1/v2/v3 (hồi cứu) và tự động cho run mới; vân tay dữ liệu/mã/git/env | Vân tay dữ liệu của v1/v2 là `null` vĩnh viễn — audio legacy đã xoá |
 | Gieo toàn bộ seed Python/NumPy/Torch/CUDA trong `train_sed.py` | Checkpoint vẫn chỉ có weights; chưa lưu optimizer/scheduler/RNG để resume |
 | Dự đoán mức đoạn `predictions/{split}_{subset}.npz` cho cả ba run (1,3–4,6 MB/run) | Chưa lưu cho real dev/gold vì hai tập đó chưa tồn tại |
-| Quét ngưỡng chạy được trên CPU, 5 s/ngưỡng trên 1.440 clip | Chưa quét ngưỡng **theo từng lớp**; chưa có F1 theo **lát cắt** |
-| mAP theo lớp, event-F1 theo lớp ở mọi ngưỡng | Không phân loại lỗi (chèn / sót / nhầm lớp / lệch biên) — Pha 4 |
+| Quét ngưỡng chạy được trên CPU, 5 s/ngưỡng trên 1.440 clip | θ riêng từng lớp đã đo và **làm v1 tệ đi** — F1 tổng là micro-average, xem measurements §5 |
+| Phân loại 6 loại lỗi, F1 theo lát cắt, ma trận nhầm 16×16, θ theo lớp | Chưa có tập độc lập để xác nhận: `gold_test` rỗng, chưa có real dev |
 | `verify_synthetic.py --output`: legacy FAIL, lô B0–B9 PASS train/dev | Cổng chặn tự động trong train mới chỉ CẢNH BÁO, chưa chặn; index vẫn ghi cuối lượt sinh |
 
 **Tài sản đang bị bỏ phí.** Dự án đã kỳ công dựng 5 lát cắt ép buộc và 5 chuỗi nhân quả:
@@ -196,7 +197,14 @@ chiếu, ngưỡng và cửa sổ lọc đã dùng.
 Cho phép làm **không cần GPU**: quét ngưỡng · đổi cửa sổ lọc · ma trận nhầm lẫn · phân
 tích theo lát cắt · so hai run.
 
-### ☐ Pha 4 — Phân tích lỗi có thể hành động
+### ✅ Pha 4 — Phân tích lỗi có thể hành động *(xong 19/09)*
+
+> **Đã chạy thật trên cả ba run.** Số đo:
+> [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md).
+> Ba kết quả đáng chú ý: (a) ở θ = 0,5, v3 chỉ bỏ sót **9/4.873** sự kiện nhưng chèn thêm
+> **61.020** — hỏng ở ngưỡng, không phải ở năng lực phát hiện; (b) **37,4%** lỗi biên của
+> v1 là **trần cứng** do bước lưới onset 319,7 ms, đo được chứ không suy luận; (c) chỉ
+> **31%** lượt nhầm lớp rơi vào cặp đã khai trong `confusable_with`.
 
 **File:** `ml/evaluation/error_analysis.py` → `ml/runs/{name}/analysis.json` + báo cáo `.md`
 
@@ -268,8 +276,10 @@ file như đã làm với `dcase_util`; nếu không an toàn thì đẩy qua RE
 .venv/Scripts/python.exe -m ml.evaluation.predictions --run panns_ft_v3 --split dev
 .venv/Scripts/python.exe -m ml.evaluation.threshold_sweep --run panns_ft_v3 --split dev
 
-# LỆNH DỰ KIẾN — Pha 4/5 CHƯA CÓ module, không phải runbook đang chạy được
-.venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v1
+# Pha 4 — phân tích lỗi (CPU, ~3 phút/run)
+.venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v3 --split dev
+
+# LỆNH DỰ KIẾN — Pha 5 CHƯA CÓ module, không phải runbook đang chạy được
 .venv/Scripts/python.exe -m ml.tracking.compare_runs panns_ft_v1 panns_ft_v2
 
 .venv/Scripts/python.exe -m pytest tests/ -q          # test cũ vẫn xanh
@@ -294,7 +304,7 @@ chứng minh verifier từng bắt được lỗi thật.
 | 1 · Vân tay + manifest | 1.5–2 h | ✅ | **xong 19/09** |
 | 2 · Kiểm tra hợp đồng dữ liệu | 2–2.5 h | ✅ ⭐ | **xong** (cổng mới CẢNH BÁO, chưa chặn) |
 | 3 · Lưu dự đoán + quét ngưỡng | 1 h | ✅ | **xong 19/09** |
-| 4 · Phân tích lỗi | 2–3 h | ✅ | chưa bắt đầu |
+| 4 · Phân tích lỗi | 2–3 h | ✅ | **xong 19/09** |
 | 5 · So run + MLflow | 1 h | tuỳ chọn | chưa bắt đầu |
 
 ---
@@ -303,12 +313,12 @@ chứng minh verifier từng bắt được lỗi thật.
 
 1. ✅ **Pha 2** — PASS cho B0–B9; còn phải nâng từ cảnh báo lên cổng chặn thật trong train.
 2. ✅ **Pha 1 + 3** — xong 19/09. v1/v2 chỉ hồi cứu được một phần (dữ liệu legacy đã xoá).
-3. **Pha 4 — việc tiếp theo.** Prediction đã có sẵn cho cả ba run nên chạy được ngay trên
-   CPU: phân loại lỗi, ma trận nhầm lẫn, bảng theo lát cắt (join `slice_index.jsonl` theo
-   `clip_id`), và đường cong ngưỡng **theo từng lớp**. Bảng theo lớp ở §2 của
-   [measurements/threshold_sweep_20260919.md](measurements/threshold_sweep_20260919.md)
-   cho thấy khoảng cách theo lớp rất rộng — đó là nơi Pha 4 có giá trị nhất.
-4. **Pha 5** — chỉ thực hiện sau Pha 4; manifest đã đủ để chỉ rõ confound dữ liệu.
+3. ✅ **Pha 4** — xong 19/09 trên cả ba run, CPU, ~3 phút/run. Kết quả ở
+   [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md).
+   Việc theo sau mà chính Pha 4 sinh ra: bổ sung các cặp nhầm thật vào `confusable_with`
+   (69% lượt nhầm chưa được khai), và tìm nguyên nhân `long_event` — lát cắt tệ nhất ở
+   cả v2 lẫn v3.
+4. **Pha 5 — việc tiếp theo.** Manifest đã đủ để chỉ rõ confound dữ liệu.
 
 ---
 
