@@ -29,13 +29,38 @@ class PrecomputedSedDataset(Dataset):
         self.clips = meta["clips"]
 
         # mmap_mode="r": không nạp 4 GB vào RAM, để hệ điều hành lo phần cache trang.
-        self.waves = np.load(features_dir / f"{split}_wave{sample_rate // 1000}k.npy", mmap_mode="r")
+        self.wave_path = features_dir / f"{split}_wave{sample_rate // 1000}k.npy"
+        self._waves: np.memmap | None = None
         if len(self.waves) != len(self.clips):
             raise ValueError(
                 f"memmap có {len(self.waves)} dòng nhưng meta có {len(self.clips)} clip — "
                 "hai file lệch nhau, phải chạy lại precompute_waveform."
             )
         self.indices = np.arange(len(self.clips)) if indices is None else indices
+
+    @property
+    def waves(self) -> np.memmap:
+        """Mở memmap LƯỜI, mỗi tiến trình một lần.
+
+        Giữ memmap làm thuộc tính thường là một cái bẫy im lặng: `DataLoader` với
+        `num_workers>0` trên Windows dùng spawn, tức nó **pickle cả dataset** rồi đẩy qua
+        pipe cho từng worker — và `np.memmap` không pickle theo kiểu "một đường dẫn", nó
+        pickle **toàn bộ nội dung mảng**.
+
+        Đo thật 19/09/2026: pickle của dataset dev là **921,8 MB** trên đúng một file .npy
+        921,6 MB; với split train thì là **5,07 GB nhân số worker**. Hậu quả có hai mặt:
+        khi may thì mỗi epoch tốn thêm vài GB RAM và vài chục giây dựng worker — đúng thứ
+        mà `mmap_mode="r"` sinh ra để tránh; khi không may thì pipe vỡ và tiến trình chết
+        với `_pickle.UnpicklingError: pickle data was truncated`, đã xảy ra hai lần trong
+        cùng một phiên. v1/v2/v3 đều train ở `--workers 2` nên đều đã trả cái giá này.
+        """
+        if self._waves is None:
+            self._waves = np.load(self.wave_path, mmap_mode="r")
+        return self._waves
+
+    def __getstate__(self) -> dict:
+        """Bỏ memmap ra khỏi bản pickle; worker tự mở lại từ `wave_path`."""
+        return {**self.__dict__, "_waves": None}
 
     def __len__(self) -> int:
         return len(self.indices)

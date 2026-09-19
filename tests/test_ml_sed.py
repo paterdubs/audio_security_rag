@@ -300,3 +300,40 @@ def test_doc_time_pool_blocks_khong_biet_thi_CANH_BAO(tmp_path, capsys):
 
     assert ra == DEFAULT_TIME_POOL_BLOCKS
     assert "⚠️" in capsys.readouterr().out
+
+
+# ── Dataset không được pickle nguyên memmap sang worker ──────────────────────
+
+
+def test_pickle_dataset_khong_keo_theo_ca_memmap(tmp_path):
+    """Lỗi thật 19/09/2026, làm chết hai lượt chạy trong cùng một phiên.
+
+    `DataLoader(num_workers>0)` trên Windows dùng spawn: nó **pickle cả dataset** rồi đẩy
+    qua pipe cho từng worker. `np.memmap` không pickle theo kiểu "một đường dẫn" mà pickle
+    **toàn bộ nội dung mảng** — đo thật: pickle của dataset dev là 921,8 MB trên đúng một
+    file .npy 921,6 MB; với split train là 5,07 GB nhân số worker.
+
+    Khi may thì chỉ tốn vài GB RAM mỗi epoch — đúng thứ `mmap_mode="r"` sinh ra để tránh.
+    Khi không may thì pipe vỡ: `_pickle.UnpicklingError: pickle data was truncated`.
+    v1/v2/v3 đều train ở `--workers 2` nên đều đã trả cái giá này.
+    """
+    import json
+    import pickle
+
+    from ml.training.sed_data import PrecomputedSedDataset
+
+    n_clip, n_mau = 4, 1000
+    (tmp_path / "train_meta.json").write_text(json.dumps({
+        "split": "train", "sample_rate": 32000, "duration": 10.0, "class_ids": ["gunshot"],
+        "clips": [{"clip_id": f"c{i}", "events": [[0, 1.0, 2.0]]} for i in range(n_clip)],
+    }), encoding="utf-8")
+    song = np.arange(n_clip * n_mau, dtype=np.int16).reshape(n_clip, n_mau)
+    np.save(tmp_path / "train_wave32k.npy", song)
+
+    dataset = PrecomputedSedDataset(tmp_path, "train", n_frames=100)
+    truoc = dataset[2]["waveform"].numpy()
+    goi = pickle.dumps(dataset, protocol=pickle.HIGHEST_PROTOCOL)
+
+    # Ngưỡng rộng rãi: bản pickle chỉ nên chứa metadata, không chứa n_clip × n_mau × 2 byte.
+    assert len(goi) < song.nbytes // 2, f"pickle {len(goi)} byte, dữ liệu {song.nbytes} byte"
+    np.testing.assert_array_equal(pickle.loads(goi)[2]["waveform"].numpy(), truoc)
