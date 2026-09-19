@@ -45,7 +45,8 @@ classes:
     urbansound_labels: ["gun_shot"]                   # ⚠️
     desed_labels: []
     mivia_labels: ["gunshot"]                         # ⚠️
-    confusable_with: ["fireworks", "explosion", "door_slam"]
+    confusable_with: ["fireworks", "explosion", "door_slam", "running_footsteps"]
+    # +running_footsteps: 34 lượt nhầm đo trên panns_ft_v3 @θ=0,90 (19/09/2026)
     target_foreground: 200
     min_acceptable: 80
     notes: >
@@ -62,7 +63,8 @@ classes:
     urbansound_labels: []
     desed_labels: []
     mivia_labels: []
-    confusable_with: ["gunshot", "fireworks"]
+    confusable_with: ["gunshot", "fireworks", "door_slam", "running_footsteps"]
+    # +door_slam 14 · +running_footsteps 13 lượt, đo trên panns_ft_v3 @θ=0,90 (19/09/2026)
     target_foreground: 120
     min_acceptable: 50
     risk: "🟢 dồi dào hơn dự kiến — xem notes"
@@ -119,7 +121,8 @@ classes:
     urbansound_labels: []
     desed_labels: []
     mivia_labels: ["crash"]                           # MIVIA Road — ⚠️ chờ duyệt đơn
-    confusable_with: ["glass_breaking"]
+    confusable_with: ["glass_breaking", "siren"]
+    # +siren: 11 lượt, panns_ft_v3 @θ=0,90 (19/09/2026)
     target_foreground: 80
     min_acceptable: 30
     risk: "🔴 RỦI RO CAO NHẤT"
@@ -159,7 +162,9 @@ classes:
     urbansound_labels: []
     desed_labels: []
     mivia_labels: []
-    confusable_with: ["object_drop_dishes", "gunshot"]
+    confusable_with: ["object_drop_dishes", "gunshot", "explosion", "fireworks",
+                      "running_footsteps"]
+    # +explosion 14 · +fireworks 13 · +running_footsteps 32 lượt, panns_ft_v3 @θ=0,90 (19/09/2026)
     target_foreground: 250
     min_acceptable: 100
     notes: >
@@ -178,7 +183,11 @@ classes:
     urbansound_labels: []
     desed_labels: []
     mivia_labels: []
-    confusable_with: ["object_drop_dishes"]
+    confusable_with: ["object_drop_dishes", "gunshot", "explosion", "fireworks",
+                      "door_slam", "applause_cheering"]
+    # Trung tâm nhầm lẫn đo được: hút nhầm từ 4 lớp xung lực + applause_cheering.
+    # +fireworks 39 · +gunshot 34 · +door_slam 32 · +applause_cheering 14 · +explosion 13,
+    # panns_ft_v3 @θ=0,90 (19/09/2026)
     target_foreground: 250
     min_acceptable: 100
     notes: >
@@ -199,7 +208,8 @@ classes:
     urbansound_labels: ["siren"]                      # ⚠️
     desed_labels: []
     mivia_labels: []
-    confusable_with: ["alarm_bell"]
+    confusable_with: ["alarm_bell", "vehicle_crash"]
+    # +vehicle_crash: 11 lượt, panns_ft_v3 @θ=0,90 (19/09/2026)
     target_foreground: 300
     min_acceptable: 120
 
@@ -234,7 +244,8 @@ classes:
     urbansound_labels: []
     desed_labels: []
     mivia_labels: []
-    confusable_with: ["gunshot", "explosion"]
+    confusable_with: ["gunshot", "explosion", "door_slam", "running_footsteps"]
+    # +door_slam 13 · +running_footsteps 39 lượt, panns_ft_v3 @θ=0,90 (19/09/2026)
     target_foreground: 200
     min_acceptable: 80
     risk: "🟡 pháo quốc tế có thể khác pháo VN về phổ — buổi thu thực địa số 2"
@@ -281,7 +292,8 @@ classes:
     urbansound_labels: []
     desed_labels: []
     mivia_labels: []
-    confusable_with: ["scream", "shout_yell"]
+    confusable_with: ["scream", "shout_yell", "running_footsteps"]
+    # +running_footsteps: 14 lượt, panns_ft_v3 @θ=0,90 (19/09/2026)
     target_foreground: 250
     min_acceptable: 100
     notes: >

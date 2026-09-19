@@ -42,6 +42,7 @@ enable_utf8_output()
 from ml.datasets.synthetic_sed import BACKGROUND_CLASS  # noqa: E402
 from ml.evaluation.error_taxonomy import (  # noqa: E402
     LOAI_TANG_MOT,
+    MOI_LOAI,
     ma_tran_nham,
     nham_theo_cap,
     phan_loai,
@@ -199,22 +200,40 @@ def bang_loi(tham_chieu, du_bao, class_ids) -> dict:
     }
 
 
+DEM_RONG = dict.fromkeys(MOI_LOAI, 0)
+
+
+def ten_bao_cao(thich_ung: bool) -> str:
+    """Tên file báo cáo. Hai cấu hình hậu xử lý phải ra hai file — ghi đè lên nhau thì
+    lượt ablation sau xoá mất lượt trước mà không báo gì."""
+    return "analysis_adaptive" if thich_ung else "analysis"
+
+
 def bang_lat_cat(tham_chieu, du_bao, class_ids, duration, nhom) -> list[dict]:
-    """F1 riêng cho từng lát cắt. Chấm lại sed_eval trên tập con clip, không nội suy."""
+    """F1 + phân loại 6 loại lỗi riêng cho từng lát cắt.
+
+    Chấm lại sed_eval VÀ phân loại lại trên tập con clip, không nội suy từ tổng: lát cắt
+    chồng nhau nên một clip đóng góp lỗi cho nhiều hàng, nhân tỉ lệ với tổng toàn tập sẽ
+    ra số nhỏ hơn thật mà không có lỗi nào bắn ra.
+    """
     hang = []
     for ten, clip_ids in nhom.items():
         if not clip_ids:
-            hang.append({"lat_cat": ten, "n_clip": 0, "n_ref": 0,
-                         "segment_f1": float("nan"), "event_f1": float("nan")})
+            hang.append({"lat_cat": ten, "n_clip": 0, "n_ref": 0, "n_pred": 0,
+                         "segment_f1": float("nan"), "event_f1": float("nan"),
+                         "dem": dict(DEM_RONG), "phan_manh": 0, "gop": 0})
             continue
         ref_con = {c: tham_chieu.get(c, []) for c in clip_ids}
         pred_con = {c: du_bao.get(c, []) for c in clip_ids}
         segment_f1, event_f1, _ = event_and_segment_f1(ref_con, pred_con, class_ids, duration)
+        kq = phan_loai(ref_con, pred_con, ONSET_COLLAR_SEC)
         hang.append({
             "lat_cat": ten, "n_clip": len(clip_ids),
             "n_ref": sum(len(v) for v in ref_con.values()),
             "n_pred": sum(len(v) for v in pred_con.values()),
             "segment_f1": segment_f1, "event_f1": event_f1,
+            "dem": {k: int(kq.dem[k]) for k in MOI_LOAI},
+            "phan_manh": kq.n_phan_manh, "gop": kq.n_gop,
         })
         print(f"  {ten:<14}{len(clip_ids):>6} clip  F1(sự kiện)={event_f1:.4f}", flush=True)
     return hang
@@ -300,6 +319,20 @@ def dong_bao_cao(p: dict) -> Iterator[str]:
         [[h["lat_cat"], f"{h['n_clip']}", f"{h['n_ref']}",
           "—" if h["n_clip"] == 0 else f"{h['event_f1']:.4f}",
           "—" if h["n_clip"] == 0 else f"{h['segment_f1']:.4f}"] for h in p["lat_cat"]],
+    )
+    yield ""
+    yield ("Phân loại lỗi **đếm lại trên từng tập con clip**, không chia tỉ lệ từ tổng — "
+           "lát cắt chồng nhau nên cộng cột sẽ lớn hơn tổng toàn tập. Cột *phân mảnh/thật* "
+           "là số sự kiện thật bị cắt thành nhiều mảnh, chia cho số sự kiện thật của chính "
+           "lát cắt đó, nên so ngang giữa các hàng được.")
+    yield ""
+    yield from _bang(
+        ["lát cắt", "thật", *NHAN_LOAI.values(), "phân mảnh", "phân mảnh/thật", "gộp"],
+        [[h["lat_cat"], f"{h['n_ref']}",
+          *(f"{h['dem'][k]}" for k in NHAN_LOAI),
+          f"{h['phan_manh']}",
+          "—" if not h["n_ref"] else so(h["phan_manh"] / h["n_ref"], 3),
+          f"{h['gop']}"] for h in p["lat_cat"]],
     )
     yield ""
 
@@ -430,6 +463,7 @@ def run(args: argparse.Namespace) -> int:
         "nguon": str(nguon.relative_to(REPO_ROOT)).replace("\\", "/"),
         "n_clip": len(du_doan.clip_ids), "n_ref": kq_sao.n_ref,
         "class_ids": class_ids, "collar_sec": ONSET_COLLAR_SEC,
+        "adaptive_postproc": bool(args.adaptive_postproc),
         "median_size": (int(median_size) if np.isscalar(median_size)
                         else [int(x) for x in median_size]),
         "theta_sao": theta_sao,
@@ -446,9 +480,10 @@ def run(args: argparse.Namespace) -> int:
                     "theo thiết kế; θ* và θ theo lớp chọn trên chính tập đang chấm → rò rỉ"),
     }
 
-    out_json = RUNS_DIR / args.run / "analysis.json"
+    ten = ten_bao_cao(args.adaptive_postproc)
+    out_json = RUNS_DIR / args.run / f"{ten}.json"
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-    out_md = viet_dan(RUNS_DIR / args.run / "analysis.md", dong_bao_cao(payload))
+    out_md = viet_dan(RUNS_DIR / args.run / f"{ten}.md", dong_bao_cao(payload))
     print(f"\n✓ {out_json.relative_to(REPO_ROOT)}\n✓ {out_md.relative_to(REPO_ROOT)} "
           f"· {payload['giay']:.0f}s", flush=True)
     return 0

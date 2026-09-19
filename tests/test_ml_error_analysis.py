@@ -325,3 +325,63 @@ def test_viet_dan_ghi_tung_dong_khong_don_toi_cuoi(tmp_path):
         ea.viet_dan(path, dong_loi())
 
     assert path.read_text(encoding="utf-8").splitlines() == ["dòng 1", "dòng 2"]
+
+
+def test_bang_lat_cat_tach_rieng_sau_loai_loi_cho_tung_lat_cat():
+    """Pha 4 chỉ xuất F1 theo lát cắt, nên 927 sự kiện phân mảnh của v3 là một con số
+    GỘP: không trả lời được bao nhiêu trong đó rơi vào `long_event` — đúng câu hỏi cần
+    trả lời. Mỗi hàng phải mang phân loại lỗi của riêng tập con clip đó."""
+    class_ids = ["gunshot", "siren"]
+    tham_chieu = {
+        "dai": [{"event_label": "siren", "onset": 0.0, "offset": 6.0}],
+        "ngan": [{"event_label": "gunshot", "onset": 1.0, "offset": 1.2}],
+    }
+    du_bao = {
+        # Một sự kiện dài bị cắt làm ba mảnh — kiểu lỗi nghi cho long_event.
+        "dai": [{"event_label": "siren", "onset": 0.0, "offset": 1.5},
+                {"event_label": "siren", "onset": 2.5, "offset": 3.5},
+                {"event_label": "siren", "onset": 4.5, "offset": 6.0}],
+        "ngan": [{"event_label": "gunshot", "onset": 1.0, "offset": 1.2}],
+    }
+    nhom = {"long_event": ["dai"], ea.LAT_CAT_SACH: ["ngan"]}
+    hang = {h["lat_cat"]: h for h in
+            ea.bang_lat_cat(tham_chieu, du_bao, class_ids, 10.0, nhom)}
+
+    assert hang["long_event"]["phan_manh"] == 1
+    assert hang[ea.LAT_CAT_SACH]["phan_manh"] == 0
+    assert hang["long_event"]["dem"]["thua"] == 2
+    assert hang[ea.LAT_CAT_SACH]["dem"] == {"dung": 1, "bien": 0, "thay_the": 0,
+                                            "thieu": 0, "thua": 0}
+    for h in hang.values():
+        tang_mot = sum(h["dem"][k] for k in ("dung", "bien", "thay_the", "thieu"))
+        assert tang_mot == h["n_ref"]
+
+
+def test_bang_lat_cat_dem_lai_tren_tap_con_chu_khong_chia_ti_le_tu_tong():
+    """Lát cắt CHỒNG NHAU: một clip vừa `overlap` vừa `reverb` đóng góp lỗi cho cả hai
+    hàng. Suy ra số lỗi của lát cắt bằng cách nhân tỉ lệ với tổng toàn tập là sai lặng
+    lẽ — tổng theo hàng phải LỚN HƠN tổng toàn tập, không bằng."""
+    class_ids = ["gunshot"]
+    tham_chieu = {"a": [{"event_label": "gunshot", "onset": 0.0, "offset": 0.5}]}
+    du_bao = {"a": []}
+    nhom = {"overlap": ["a"], "reverb": ["a"]}
+    hang = ea.bang_lat_cat(tham_chieu, du_bao, class_ids, 10.0, nhom)
+
+    assert sum(h["dem"]["thieu"] for h in hang) == 2  # một Deletion thật, đếm ở hai hàng
+
+
+def test_bang_lat_cat_lat_cat_rong_khong_lam_no_phan_loai():
+    """`sach` có thể rỗng khi chấm trên subset nhỏ. phan_loai() ném AssertionError nếu
+    tổng tầng 1 lệch số sự kiện, nên hàng rỗng phải được xử lý riêng chứ không gọi vào."""
+    hang = ea.bang_lat_cat({}, {}, ["gunshot"], 10.0, {"long_event": []})
+    assert hang[0]["n_clip"] == 0
+    assert hang[0]["dem"] == {"dung": 0, "bien": 0, "thay_the": 0, "thieu": 0, "thua": 0}
+    assert hang[0]["phan_manh"] == 0
+
+
+def test_ablation_khong_ghi_de_len_bao_cao_mac_dinh():
+    """Chạy `--adaptive-postproc` để làm ablation mà vẫn ghi vào `analysis.json` thì lượt
+    sau xoá mất lượt trước, và bảng so sánh hai cấu hình không còn gì để so. Mất 3 phút
+    tính lại mỗi lần, và không có lỗi nào bắn ra."""
+    assert ea.ten_bao_cao(False) != ea.ten_bao_cao(True)
+    assert ea.ten_bao_cao(False) == "analysis"
