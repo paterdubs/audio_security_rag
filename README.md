@@ -2,11 +2,13 @@
 
 Khoá luận tốt nghiệp — Khoa học dữ liệu, IUH K18.
 
-> Đối soát 18/09/2026: [trạng thái và bằng chứng mới nhất](docs/STATUS.md).
+> Đối soát 19/09/2026: [trạng thái và bằng chứng mới nhất](docs/STATUS.md).
 > Hiện chạy được **upload offline → PANNs pretrained → caption template → RAG + dashboard**.
 > Streaming và Grounded AAC nghiên cứu mô tả dưới đây là mục tiêu, chưa triển khai đầy đủ.
-> Baseline nghiên cứu PANNs v3 đã train trên lô synthetic đã qua hợp đồng; chưa có real dev/gold,
-> chưa deploy checkpoint v3 vào serving và chưa quét threshold. Vì vậy không đọc đây là kết quả cuối.
+> Baseline nghiên cứu PANNs v1/v2/v3 đã được chấm lại trên cùng một tập dev có quét
+> ngưỡng (19/09) — xem [STATUS §3](docs/STATUS.md). Vẫn **chưa có real dev/gold** và chưa deploy
+> checkpoint v3 vào serving, nên không đọc đây là kết quả cuối: dev tổng hợp sinh cùng recipe
+> với train của v3 nên thiên vị v3 theo thiết kế.
 
 Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện an ninh có định vị thời gian →
 sinh mô tả ngôn ngữ tự nhiên **được ràng buộc vào bằng chứng âm học** → đánh giá rủi ro và

@@ -43,7 +43,8 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 ## 3. Trạng thái hiện tại
 
 **Tuần:** W1 (15–21/09/2026). Walking skeleton và baseline SED được làm sớm song song.
-**Đối soát workspace:** 18/09/2026, sau khi lô dữ liệu B0–B9, train v3 và dọn artifact đã hoàn tất.
+**Đối soát workspace:** 19/09/2026, sau khi Pha 1 + Pha 3 của Training Ops và lượt quét
+ngưỡng đã hoàn tất.
 Số đo, phạm vi và bằng chứng ở [docs/STATUS.md](docs/STATUS.md); nhật ký §10 là lịch sử,
 không phải trạng thái hiện hành.
 
@@ -67,21 +68,24 @@ không phải trạng thái hiện hành.
   nợ kỹ thuật nếu job sau này bị ngắt.
 - Precompute waveform PANNs 32 kHz hiện có đủ **train 7.920** (5,07 GB) và **dev 1.440**
   (0,92 GB). Đây là cache waveform cho baseline PANNs, **không phải** feature BEATs.
-- **Cả ba run PANNs đã hoàn tất 25 epoch**:
+- **Cả ba run PANNs đã hoàn tất 25 epoch**, và 19/09 đã được **chấm lại trên cùng một
+  tập dev 1.440 clip** với ngưỡng riêng từng run:
 
-  | epoch cuối | v1 · legacy/pool 5 | v2 · legacy/pool 3 + mixup + adaptive | v3 · dữ liệu mới, tham số v2 |
+  | dev chung, θ tối ưu | v1 · pool 5 · legacy | v2 · pool 3 · legacy | v3 · pool 3 · lô mới |
   |---|---:|---:|---:|
-  | clip mAP | 0.8372 | 0.8176 | 0.8123 |
-  | segment-F1 | 0.4120 | 0.2980 | 0.2748 |
-  | event-F1 | 0.1282 | 0.1897 | 0.1077 |
+  | clip mAP | 0,7464 | 0,7555 | **0,8132** |
+  | event-F1 @ θ=0,50 | 0,1147 | 0,1123 | 0,0820 |
+  | event-F1 @ θ* | 0,2981 (θ 0,96) | 0,3531 (θ 0,89) | **0,3986** (θ 0,91) |
+  | segment-F1 @ θ* | 0,6208 | 0,6564 | **0,7159** |
 
-  v1/v2 dùng snapshot legacy 6.568 clip; v3 dùng dữ liệu mới. Đây là baseline nội bộ,
-  không phải kết quả gold độc lập. Chưa quét threshold nên không được kết luận nguyên nhân
-  của các chênh lệch F1; chi tiết ở STATUS §3 và TRAINING_OPS_PLAN Pha 3.
-- Có `verify_synthetic.py`; chưa hoàn tất toàn bộ kế hoạch tracking/analysis ở
-  [TRAINING_OPS_PLAN](docs/TRAINING_OPS_PLAN.md) — Pha 1/3/4/5 chưa có module.
-- Mốc test gần nhất ghi trong B9 là **550 test đạt**. Lượt cập nhật tài liệu không tự nhận
-  là đã chạy lại test code; phải chạy lại trước một thay đổi mã tiếp theo.
+  🔴 **Ngưỡng 0,5 sai nghiêm trọng ở cả ba run** — v3 tăng **4,86 lần** khi chọn ngưỡng
+  đúng. Bảng cũ chấm ở 0,5 (mAP 0,8372/0,8176/0,8123 · event-F1 0,1282/0,1897/0,1077) đo
+  trên ba tập val khác nhau và **không dùng để xếp hạng ba run được nữa**; nó vẫn còn ở
+  STATUS §3 làm bản ghi lịch sử. Confound chưa gỡ: dev sinh cùng recipe với train của v3.
+- **Pha 1 + Pha 3 của [TRAINING_OPS_PLAN](docs/TRAINING_OPS_PLAN.md) đã xong (19/09):**
+  `ml/tracking/{fingerprint,run_manifest}.py`, `ml/evaluation/{predictions,threshold_sweep}.py`.
+  `train_sed.py` gieo toàn bộ RNG và ghi `manifest.json` trước epoch đầu. Pha 4/5 chưa có.
+- **580 test đạt** (19/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 573.
 
 ### Đang làm / chưa nghiệm thu
 
@@ -103,14 +107,16 @@ không phải trạng thái hiện hành.
 
 ### Ba việc tiếp theo
 
-1. Hoàn thiện Pha 1 và Pha 3 của Training Ops trước lần train mới: run manifest,
-   config/seed/fingerprint, prediction mức đoạn và quét threshold; sửa loader đánh giá để
-   lấy `time_pool_blocks` từ checkpoint.
-2. Đưa 937 AudioSet-strong WAV vào manifest/split không rò rỉ, chuẩn bị real dev và gold;
-   sau đó thực hiện pilot gán mù theo DATA_PLAN §8. Không dùng test để chọn threshold.
-3. Snapshot GitHub giữ code, tài liệu, manifest, metric và JAMS legacy; loại weight/cache/secret.
-   Sau khi clone, cộng tác viên phải tự tái tạo dữ liệu/cache theo README thay vì trông chờ đường dẫn
-   tuyệt đối trong JAMS legacy.
+1. **Pha 4 của Training Ops** — chạy được ngay trên CPU vì prediction đã có sẵn cho cả ba
+   run: phân loại lỗi (chèn/sót/nhầm lớp/lệch biên), ma trận nhầm lẫn 15×15 đối chiếu
+   `confusable_with`, bảng F1 **theo lát cắt** (join `slice_index.jsonl` theo `clip_id`),
+   và đường cong ngưỡng **theo từng lớp** — khoảng cách theo lớp hiện rất rộng.
+2. **Đưa 937 AudioSet-strong WAV vào manifest/split không rò rỉ**, chuẩn bị real dev và
+   gold; sau đó pilot gán mù theo DATA_PLAN §8. Đây là thứ DUY NHẤT gỡ được confound
+   "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
+3. **Nâng cổng hợp đồng dữ liệu từ cảnh báo lên chặn** trong `train_sed.py`, và đo hiệu
+   chuẩn xác suất (reliability diagram + ablation `pos_weight`) — cả ba run đạt đỉnh ở
+   θ≈0,9 là triệu chứng chưa được giải thích bằng số đo.
 
 ---
 
@@ -216,10 +222,15 @@ docker compose down                   # dừng, giữ named volumes; không dùn
 # validate_annotations.py, agreement.py, slice_coverage.py: chưa triển khai
 
 # Huấn luyện & đánh giá
-.venv/Scripts/python.exe -m ml.training.train_sed --help
+.venv/Scripts/python.exe -m ml.training.train_sed --help      # tự ghi manifest + gieo seed
 .venv/Scripts/python.exe -m ml.evaluation.eval_sed --run panns_ft_v1
-# eval_sed hiện mặc định pool=5: KHÔNG dùng cho v2 (pool=3) khi chưa sửa loader.
-# Grounded AAC và evaluation tổng hợp: chưa triển khai.
+# eval_sed đọc time_pool_blocks từ checkpoint → history → mặc định kèm CẢNH BÁO.
+
+# Training Ops (TRAINING_OPS_PLAN Pha 1 + Pha 3)
+.venv/Scripts/python.exe -m ml.tracking.run_manifest --run panns_ft_v3 --du-lieu hien-tai
+.venv/Scripts/python.exe -m ml.evaluation.predictions --run panns_ft_v3 --split dev
+.venv/Scripts/python.exe -m ml.evaluation.threshold_sweep --run panns_ft_v3 --split dev
+# Grounded AAC, Pha 4 (phân tích lỗi) và Pha 5 (so run): chưa triển khai.
 
 # Chất lượng
 .venv/Scripts/python.exe -m pytest tests/ -q
@@ -365,6 +376,33 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-19 — Training Ops Pha 1 + Pha 3, và một kết luận bị bác bỏ
+
+- **Pha 1:** `ml/tracking/fingerprint.py` + `run_manifest.py` — vân tay ba tầng (nhãn /
+  waveform SHA-256 / thống kê độ dài theo lớp), vân tay mã, git dirty diff, env, hợp đồng
+  dữ liệu. `train_sed.py` gieo toàn bộ RNG (trước đó `--seed` chỉ chia train/val) và ghi
+  manifest **trước** epoch đầu. Manifest hồi cứu cho v1/v2 (vân tay `null`, hợp đồng
+  FAILED) và v3 (vân tay đầy đủ, PASSED).
+- **Lỗi bắt được ngay lần chạy đầu của chính module mới:** hồi cứu v1/v2 đọc mặc định
+  `synthetic_contract.csv` — file đang ghi lô B0–B9 PASS — nên khai **PASSED** cho hai run
+  train trên lô legacy đã FAILED. Đã sửa thành `KHONG_RO` + `--hop-dong`, kèm test.
+- **Pha 3:** `predictions.py` lưu xác suất mức **đoạn** (float16); mức khung là bản lặp
+  nguyên xi nên lưu khung tốn gấp 32 lần mà không thêm bit nào — có test khẳng định dựng
+  lại khớp **từng phần tử** ở cả pool 5 và pool 3. 1,3–4,6 MB/run cho 1.440 clip.
+- **`threshold_sweep.py` bác bỏ một kết luận đang nằm trong tài liệu.** Chấm lại cả ba run
+  trên cùng dev 1.440 clip: θ=0,5 sai ở cả ba (v3 **0,0820 → 0,3986**, 4,86×), và thứ tự
+  v2/v3 **đảo lại**. "v3 kém hơn v2 ở cả ba chỉ số" là hiện vật của một ngưỡng cố định,
+  không phải của model. Confound còn nguyên: dev cùng recipe với train của v3.
+- **Một lỗi bậc hai đã sửa:** `event_and_segment_f1` gọi `MetaDataContainer.filter` cho
+  từng clip — quét tuyến tính, O(clip × sự kiện). Đo: filter **101,5 s** so với evaluate
+  **4,7 s**; gom một lượt đưa một lần chấm từ **102,3 s xuống 5,2 s**, điểm số giống hệt.
+- **Lỗi thứ hai, tìm ra khi kiểm chứng chính phần mới viết:** `PrecomputedSedDataset` giữ
+  `np.memmap` làm thuộc tính, nên `DataLoader(num_workers>0)` pickle **toàn bộ nội dung**
+  sang từng worker — đo: pickle dev **921,8 MB → 0,159 MB** sau khi mở lười. v1/v2/v3 đều
+  train ở `--workers 2` nên đều đã trả giá này; triệu chứng là crash KHÔNG ĐỀU
+  (`pickle data was truncated`), đã đánh hỏng hai lượt chạy trong phiên.
+- 550 → **580 test đạt**. Chi tiết số đo: `docs/measurements/threshold_sweep_20260919.md`.
 
 ### 2026-09-18 — Dọn artifact và đồng bộ tài liệu
 

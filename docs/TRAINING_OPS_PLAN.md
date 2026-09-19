@@ -9,20 +9,20 @@
 > (quy trình dữ liệu) · [SYSTEM.md](SYSTEM.md) (kiến trúc) ·
 > [RELATED_WORK_2026.md](RELATED_WORK_2026.md) (đối chiếu văn liệu)
 
-> **Đối soát 18/09/2026:** đây vẫn là kế hoạch, không phải danh sách đã làm xong.
-> Pha 2 có `verify_synthetic.py`: legacy đã FAIL đúng như mong đợi, lô B0–B9 mới đã PASS ở
-> cả train/dev. Các pha 1/3/4/5 chưa có module triển khai. QA và bằng chứng ở
-> [STATUS.md](STATUS.md).
+> **Đối soát 19/09/2026: Pha 1, Pha 2 và Pha 3 đã có module và đã chạy thật.**
+> Pha 4 và Pha 5 vẫn là kế hoạch. Bằng chứng ở [STATUS.md](STATUS.md) và
+> [measurements/threshold_sweep_20260919.md](measurements/threshold_sweep_20260919.md).
 >
-> **Chi phí thật của việc thiếu Pha 3 đã hiện ra.** v1, v2 và v3 đều xong; v3 trên dữ liệu
-> mới có segment-F1 0,2748 và event-F1 0,1077. Không thể biết phần nào là do dữ liệu khó hơn,
-> hiệu chuẩn thay đổi hay threshold 0,5 không còn đúng vì predictions chưa được lưu; phải
-> inference lại checkpoint. Đây chính là R5, và nó đang chặn một kết luận thật chứ không phải
-> rủi ro lý thuyết.
+> **R5 đã gỡ, và ngay lượt đầu nó bác bỏ một kết luận đang nằm trong tài liệu.** Sau khi
+> lưu dự đoán mức đoạn cho cả ba run rồi quét ngưỡng trên cùng một tập dev 1.440 clip:
+> ngưỡng 0,5 sai nghiêm trọng ở cả ba (v3: event-F1 **0,0820 → 0,3986** ở θ=0,91, tăng
+> 4,86 lần), và thứ tự v2/v3 **đảo lại** so với bảng chấm ở 0,5. Đây đúng là thứ mà
+> "không lưu dự đoán" đã che suốt hai ngày.
 >
-> Thêm một khoảng trống R1 đã lộ: `history.json` của v1 ghi `time_pool_blocks: null,
-> mixup_alpha: null` vì v1 chạy trước khi hai cờ đó tồn tại — config của baseline không
-> được ghi đầy đủ, nên so sánh v1/v2 không tự chứng minh được là sạch.
+> **R1 gỡ được cho v3, KHÔNG gỡ được hồi cứu cho v1.** `panns_ft_v1` không ghi
+> `time_pool_blocks` ở checkpoint lẫn history; đo gián tiếp ủng hộ pool 5 (mAP 0,7464 so
+> với 0,7244) nhưng không chứng minh. Từ 19/09 `train_sed.py` gieo toàn bộ RNG và ghi
+> `manifest.json` ngay trước epoch đầu, nên khoảng trống này không lặp lại ở run sau.
 
 ---
 
@@ -64,11 +64,12 @@ chạy riêng, nhưng chưa được nối thành cổng chặn training tự đ
 
 | Đã có | Còn thiếu |
 |---|---|
-| `history.json` cho v1/v2/v3; `best.pt` + `class_ids` | **Chỉ ghi history khi kết thúc run**; chưa có fingerprint dữ liệu, trạng thái mã nguồn hay seed thực tế đầy đủ |
-| mAP theo lớp | Không có F1 theo **lát cắt** |
-| — | Không lưu dự đoán → phải inference lại checkpoint, không nhất thiết train lại |
-| — | Không phân loại lỗi (chèn / sót / nhầm lớp / lệch biên) |
-| `verify_synthetic.py`: legacy FAIL, lô B0–B9 PASS train/dev | Thiếu fingerprint, cổng chặn tự động trong train và xác minh biên nghe được; index vẫn ghi cuối lượt sinh |
+| `manifest.json` cho v1/v2/v3 (hồi cứu) và tự động cho run mới; vân tay dữ liệu/mã/git/env | Vân tay dữ liệu của v1/v2 là `null` vĩnh viễn — audio legacy đã xoá |
+| Gieo toàn bộ seed Python/NumPy/Torch/CUDA trong `train_sed.py` | Checkpoint vẫn chỉ có weights; chưa lưu optimizer/scheduler/RNG để resume |
+| Dự đoán mức đoạn `predictions/{split}_{subset}.npz` cho cả ba run (1,3–4,6 MB/run) | Chưa lưu cho real dev/gold vì hai tập đó chưa tồn tại |
+| Quét ngưỡng chạy được trên CPU, 5 s/ngưỡng trên 1.440 clip | Chưa quét ngưỡng **theo từng lớp**; chưa có F1 theo **lát cắt** |
+| mAP theo lớp, event-F1 theo lớp ở mọi ngưỡng | Không phân loại lỗi (chèn / sót / nhầm lớp / lệch biên) — Pha 4 |
+| `verify_synthetic.py --output`: legacy FAIL, lô B0–B9 PASS train/dev | Cổng chặn tự động trong train mới chỉ CẢNH BÁO, chưa chặn; index vẫn ghi cuối lượt sinh |
 
 **Tài sản đang bị bỏ phí.** Dự án đã kỳ công dựng 5 lát cắt ép buộc và 5 chuỗi nhân quả:
 
@@ -106,9 +107,10 @@ Không phát minh lại; mọi thứ dưới đây đã có tiền lệ trong re
 
 ## 4. Các pha
 
-### ☐ Pha 1 — Vân tay dữ liệu & sổ ghi lần chạy
+### ✅ Pha 1 — Vân tay dữ liệu & sổ ghi lần chạy *(xong 19/09/2026)*
 
-**File:** `ml/tracking/run_manifest.py` → ghi `ml/runs/{name}/manifest.json`
+**File:** `ml/tracking/fingerprint.py` + `ml/tracking/run_manifest.py`
+→ ghi `ml/runs/{name}/manifest.json`
 
 | Trường | Vì sao cần |
 |---|---|
@@ -138,8 +140,14 @@ epoch, clip_map. `eval_sed.py` mặc định pool=5 nên **chưa dùng an toàn 
 Verifier đã chạy trên cả hai thế hệ dữ liệu. Báo cáo legacy riêng theo split ở
 `data/manifests/synthetic_contract_{train,dev}_20260917.csv` ghi các lỗi đã biết;
 `data/manifests/synthetic_contract.csv` hiện chỉ có header, tức lô B0–B9 PASS với **0**
-vi phạm. Lệnh CLI vẫn ghi đè file chung này mỗi lần, chưa có `--output`, nên phải copy/đặt
-tên báo cáo khi cần lưu bằng chứng của từng run.
+vi phạm. **19/09: thêm `--output`** nên mỗi lượt kiểm giữ được báo cáo riêng, và
+`manifest.json` trỏ thẳng vào file báo cáo kèm SHA-256 của nó.
+
+⚠️ **Không được mượn báo cáo của lô khác.** Lỗi này xảy ra thật ngay lần chạy đầu của
+`run_manifest.py`: manifest hồi cứu cho v1/v2 đọc mặc định `synthetic_contract.csv` —
+file đang ghi lô B0–B9 PASS — nên khai **PASSED** cho hai run train trên lô legacy đã
+**FAILED**. Đã sửa: hồi cứu không có `--hop-dong` thì ghi `KHONG_RO` kèm cảnh báo, chứ
+không mượn.
 
 Thiếu index thì verifier fallback dựng plan, không xác minh được reverb từ dữ liệu lịch sử.
 Đếm file bằng nhau chưa chứng minh ID khớp, audio giải mã được hay đạt số lượng đích; verifier
@@ -169,9 +177,14 @@ ngắt. Đây là nợ kỹ thuật còn lại cùng loại lỗi đã làm mấ
 Đã sửa riêng việc công bố WAV/JAMS: ghi `.pending` rồi chuyển sang tên cuối sau RIR.
 Index của cả hai split mới hiện có sau khi chạy xong, nhưng đây chưa phải incremental index.
 
-### ☐ Pha 3 — Lưu dự đoán thô
+### ✅ Pha 3 — Lưu dự đoán thô *(xong 19/09/2026)*
 
-**File:** `ml/evaluation/predictions.py` → `ml/runs/{name}/predictions/{split}.npz`
+**File:** `ml/evaluation/predictions.py` → `ml/runs/{name}/predictions/{split}_{subset}.npz`
+· quét ngưỡng: `ml/evaluation/threshold_sweep.py`
+
+Đo thật: v1 **1,3 MB**, v2 **4,6 MB**, v3 **4,5 MB** cho 1.440 clip dev (v1 chỉ 31 đoạn/clip
+nên nhỏ hơn ba lần). Inference 11–30 s/run trên RTX 3070. Ước tính ~8 MB/run của kế hoạch
+là đúng bậc.
 
 Lưu xác suất **mức đoạn** (31 hoặc 125 đoạn × 15 lớp, float16), kèm `clip_id`, nhãn tham
 chiếu, ngưỡng và cửa sổ lọc đã dùng.
@@ -246,11 +259,17 @@ file như đã làm với `dcase_util`; nếu không an toàn thì đẩy qua RE
 # Lô B0–B9 hiện tại phải PASS; lỗi khác 0 là cổng chặn train.
 .venv/Scripts/python.exe scripts/verify_synthetic.py --split train
 
-# LỆNH DỰ KIẾN — các module bên dưới CHƯA CÓ, không phải runbook đang chạy được
-# Phân tích CPU sau khi đã lưu dự đoán
-.venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v1
+# Pha 1 — manifest hồi cứu (chỉ cho run đã xong; run mới tự ghi khi train)
+.venv/Scripts/python.exe -m ml.tracking.run_manifest --run panns_ft_v3 --du-lieu hien-tai
+.venv/Scripts/python.exe -m ml.tracking.run_manifest --run panns_ft_v1 --du-lieu khong-con \
+    --hop-dong data/manifests/synthetic_contract_train_20260917.csv
 
-# So v1 (323 ms) vs v2 (80 ms + mixup)
+# Pha 3 — lưu dự đoán rồi quét ngưỡng (khâu quét chạy trên CPU)
+.venv/Scripts/python.exe -m ml.evaluation.predictions --run panns_ft_v3 --split dev
+.venv/Scripts/python.exe -m ml.evaluation.threshold_sweep --run panns_ft_v3 --split dev
+
+# LỆNH DỰ KIẾN — Pha 4/5 CHƯA CÓ module, không phải runbook đang chạy được
+.venv/Scripts/python.exe -m ml.evaluation.error_analysis --run panns_ft_v1
 .venv/Scripts/python.exe -m ml.tracking.compare_runs panns_ft_v1 panns_ft_v2
 
 .venv/Scripts/python.exe -m pytest tests/ -q          # test cũ vẫn xanh
@@ -270,22 +289,26 @@ chứng minh verifier từng bắt được lỗi thật.
 **Độ phức tạp: TRUNG BÌNH — 6–9 giờ.** Chạy được song song với sinh dữ liệu và train
 (không chiếm GPU).
 
-| Pha | Thời gian | Bắt buộc |
-|---|---|---|
-| 1 · Vân tay + manifest | 1.5–2 h | ✅ |
-| 2 · Kiểm tra hợp đồng dữ liệu | 2–2.5 h | ✅ ⭐ |
-| 3 · Lưu dự đoán | 1 h | ✅ |
-| 4 · Phân tích lỗi | 2–3 h | ✅ |
-| 5 · So run + MLflow | 1 h | tuỳ chọn |
+| Pha | Thời gian | Bắt buộc | Trạng thái |
+|---|---|---|---|
+| 1 · Vân tay + manifest | 1.5–2 h | ✅ | **xong 19/09** |
+| 2 · Kiểm tra hợp đồng dữ liệu | 2–2.5 h | ✅ ⭐ | **xong** (cổng mới CẢNH BÁO, chưa chặn) |
+| 3 · Lưu dự đoán + quét ngưỡng | 1 h | ✅ | **xong 19/09** |
+| 4 · Phân tích lỗi | 2–3 h | ✅ | chưa bắt đầu |
+| 5 · So run + MLflow | 1 h | tuỳ chọn | chưa bắt đầu |
 
 ---
 
 ## 8. Thứ tự thực thi
 
-1. **Pha 2 trước tiên** — đã PASS cho B0–B9; giữ nó thành cổng chặn dữ liệu mới.
-2. **Pha 1 + 3** — bắt buộc trước lần train tiếp theo; v3 không có đủ lineage/prediction hồi cứu.
-3. **Pha 4** — chạy lại được trên v1/v2/v3 sau khi có prediction, không vội kết luận từ history.
-4. **Pha 5** — đã có 3 run nhưng chỉ thực hiện sau khi fingerprint/config giúp chỉ rõ confound.
+1. ✅ **Pha 2** — PASS cho B0–B9; còn phải nâng từ cảnh báo lên cổng chặn thật trong train.
+2. ✅ **Pha 1 + 3** — xong 19/09. v1/v2 chỉ hồi cứu được một phần (dữ liệu legacy đã xoá).
+3. **Pha 4 — việc tiếp theo.** Prediction đã có sẵn cho cả ba run nên chạy được ngay trên
+   CPU: phân loại lỗi, ma trận nhầm lẫn, bảng theo lát cắt (join `slice_index.jsonl` theo
+   `clip_id`), và đường cong ngưỡng **theo từng lớp**. Bảng theo lớp ở §2 của
+   [measurements/threshold_sweep_20260919.md](measurements/threshold_sweep_20260919.md)
+   cho thấy khoảng cách theo lớp rất rộng — đó là nơi Pha 4 có giá trị nhất.
+4. **Pha 5** — chỉ thực hiện sau Pha 4; manifest đã đủ để chỉ rõ confound dữ liệu.
 
 ---
 
@@ -301,5 +324,11 @@ mAP 0.8123 ở epoch 25, segment-F1 0.2748, event-F1 0.1077. V2 đồng thời �
 mixup và hậu xử lý; v3 đổi dữ liệu. Không quy toàn bộ chênh lệch cho kiến trúc hay dữ liệu.
 F1=0 trên epoch không full-eval nghĩa là chưa đo.
 
-Manifest có `data_contract` tự động, fingerprint và prediction là **việc cần bổ sung**;
-legacy phải được gắn `FAILED`, v3 phải được gắn `PASSED` khi tạo manifest hồi cứu/ở lần sau.
+**19/09: đã làm.** `ml/runs/{v1,v2,v3}/manifest.json` tồn tại; v1/v2 gắn `FAILED` (trỏ
+báo cáo legacy `synthetic_contract_train_20260917.csv`, vân tay dữ liệu `null` vì audio đã
+xoá), v3 gắn `PASSED` với vân tay đầy đủ. Dự đoán mức đoạn có cho cả ba trên dev.
+
+Và số của chúng đã đổi nghĩa: chấm lại trên **cùng dev 1.440 clip** ở ngưỡng tối ưu riêng
+từng run, event-F1 là v1 **0,2981** · v2 **0,3531** · v3 **0,3986**, mAP clip là
+0,7464 · 0,7555 · 0,8132. Bảng cũ ở θ=0,5 cố định không còn là cơ sở để xếp hạng ba run.
+Confound còn lại: dev sinh cùng recipe với train của v3 — xem measurements 19/09.

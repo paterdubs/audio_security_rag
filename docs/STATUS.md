@@ -1,6 +1,7 @@
 # Trạng thái dự án đã đối soát
 
-> **Snapshot hiện hành: 18/09/2026, sau B0–B9, train `panns_ft_v3` và dọn artifact.**
+> **Snapshot hiện hành: 19/09/2026, sau Pha 1 + Pha 3 của Training Ops và lượt quét ngưỡng.**
+> Trước đó: 18/09 sau B0–B9, train `panns_ft_v3` và dọn artifact.
 > Các phép đo dữ liệu/training được thực hiện ngày 17/09; kiểm kê file và cache trong workspace
 > được đối chiếu lại ngày 18/09. Phân biệt rõ **lô legacy** (bằng chứng trước-sửa) với **lô mới**
 > đang dùng cho v3. Các mục lịch sử trong CLAUDE.md/ADR giữ nguyên ngữ cảnh tại thời điểm ghi.
@@ -26,8 +27,14 @@
 - Cache waveform PANNs 32 kHz hiện có cả train (**5.068.800.128 byte**) lẫn dev
   (**921.600.128 byte**). Nó là cache tái tạo được, không phải feature BEATs.
 - `panns_ft_v3` hoàn tất 25 epoch: clip mAP **0,8123**, segment-F1 **0,2748**,
-  event-F1 **0,1077**. Kết quả không được dùng để kết luận data mới kém/tốt hơn trước khi
-  Pha 3 Training Ops lưu prediction và quét threshold.
+  event-F1 **0,1077** — đo trên val tách từ train, ở ngưỡng cố định 0,5.
+- 🔴 **19/09 — quét ngưỡng bác bỏ kết luận rút ra từ bảng đó.** Sau khi Pha 3 lưu dự đoán
+  mức đoạn và chấm lại **cả ba run trên cùng tập dev 1.440 clip**: ngưỡng 0,5 sai nghiêm
+  trọng ở cả ba, và thứ tự v2/v3 **đảo lại**. Bảng đầy đủ ở §3; phép đo ở
+  [measurements/threshold_sweep_20260919.md](measurements/threshold_sweep_20260919.md).
+- Pha 1 và Pha 3 của [TRAINING_OPS_PLAN](TRAINING_OPS_PLAN.md) đã có module và đã chạy:
+  `ml/runs/{v1,v2,v3}/manifest.json` + `predictions/dev_all.npz`. `train_sed.py` nay gieo
+  toàn bộ RNG và ghi manifest trước epoch đầu.
 - Lô legacy đã được chuyển sang `data/synthetic_legacy/`: giữ **9.360 JAMS**, hai
   `slice_index.jsonl` và hai stdout log; WAV legacy, cache tạm, recovery trùng và stderr log đã xoá.
   Đây là bằng chứng trước-sửa, không phải dữ liệu để train lại.
@@ -140,15 +147,42 @@ tự chứng minh được một thay đổi cụ thể gây ra chênh lệch. V
 không đồng nghĩa sửa dữ liệu thất bại: nó học/chấm trên bài khác và threshold 0,5 chưa được
 tối ưu lại.
 
-Hai khoảng trống đang chặn kết luận:
-1. **Pha 3 chưa lưu prediction mức đoạn**, nên chưa quét được threshold/hậu xử lý hoặc phân
-   tích theo lớp/lát cắt mà không inference lại checkpoint.
-2. **Pha 1 chưa có run manifest/fingerprint/seed đầy đủ.** `history.json` v1 ghi
-   `time_pool_blocks: null, mixup_alpha: null`; checkpoint chỉ chứa weights/class_ids/epoch/mAP,
-   không có optimizer/scheduler/RNG để resume đầy đủ.
+Nguồn số của bảng trên: `ml/runs/panns_ft_{v1,v2,v3}/history.json`.
 
-`eval_sed.py` vẫn khởi tạo pooling mặc định 5; chưa dùng an toàn để chấm v2/v3 pooling 3
-trước khi loader đọc tham số từ checkpoint. Nguồn số: `ml/runs/panns_ft_{v1,v2,v3}/history.json`.
+### Chấm lại trên giao thức chung — 19/09
+
+Bảng trên có ba khuyết tật đã được gỡ: mỗi run chấm trên một tập khác nhau, ngưỡng cố định
+0,5, và không có dự đoán để kiểm lại. Sau Pha 3, cả ba được chấm trên **cùng
+`data/synthetic/dev` — 1.440 clip / 4.873 sự kiện tham chiếu**, không run nào từng huấn
+luyện trên đó, cùng bộ lọc 7 khung, cùng mã chấm điểm:
+
+| chỉ số (dev chung) | v1 · pool 5 · legacy | v2 · pool 3 · legacy | v3 · pool 3 · lô B0–B9 |
+|---|---:|---:|---:|
+| mAP mức clip | 0,7464 | 0,7555 | **0,8132** |
+| event-F1 @ θ=0,50 | 0,1147 | 0,1123 | 0,0820 |
+| θ* tối ưu event-F1 | 0,96 | 0,89 | 0,91 |
+| **event-F1 @ θ\*** | 0,2981 | 0,3531 | **0,3986** |
+| **segment-F1 @ θ\*** | 0,6208 | 0,6564 | **0,7159** |
+
+**Ba điều bảng này chứng minh.** (1) θ=0,5 sai ở cả ba run — v3 tăng **4,86 lần**
+(0,0820 → 0,3986); ở 0,5 nó dự báo 65.884 sự kiện cho 4.873 sự kiện thật. (2) Xếp hạng ở
+θ=0,5 **không có giá trị**: ở đó v3 trông tệ nhất, ở ngưỡng đúng nó tốt nhất trên cả ba
+chỉ số. (3) Mức tăng "+48 % tương đối" của v2 so với v1 không tái hiện trên tập chung ở
+θ=0,5 (0,1123 so với 0,1147); khoảng cách thật chỉ hiện ra khi mỗi run dùng ngưỡng riêng.
+
+**Điều bảng này KHÔNG chứng minh.** `data/synthetic/dev` sinh bằng **cùng recipe B0–B9**
+với train của v3, chỉ khác seed; v1/v2 học trên lô legacy có phân bố khác hẳn. Dev vì thế
+thiên vị v3 **theo thiết kế**. Bảng chứng minh v3 khớp phân bố đích hiện hành tốt hơn, không
+chứng minh kiến trúc hay dữ liệu mới tốt hơn nói chung. Chỉ real dev / gold_test tách được.
+
+**Một giả thuyết chưa đo.** Cả ba đạt đỉnh ở θ ≈ 0,90–0,96, tức xác suất bị thổi lên có hệ
+thống. `pos_weight` trần 30 trong `BCEWithLogitsLoss` là cơ chế khả dĩ — **giả thuyết**,
+cần reliability diagram + ablation trước khi viết vào báo cáo.
+
+`eval_sed.py` **đã** đọc `time_pool_blocks` theo thứ tự checkpoint → `history.json` →
+mặc định kèm cảnh báo (`doc_time_pool_blocks`, 3 test). Riêng `panns_ft_v1` không ghi ở
+đâu cả nên vẫn rơi về mặc định 5; đo gián tiếp trên dev ủng hộ (pool 5 → mAP 0,7464, pool 3
+→ 0,7244) nhưng **không chứng minh**. Đây là khoảng trống R1 không xoá hồi cứu được.
 
 ## 4. Hệ thống và MLOps
 
@@ -173,9 +207,10 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **550 test đạt** là mốc kiểm chứng cuối của B9 (17/09), sau khi thêm test cho B0–B9.
-  Mốc 394 test ở snapshot 15:05 chỉ là bộ test trước các thay đổi này. Lượt 18/09 chỉ cập nhật
-  tài liệu và kiểm kê artifact, không thay thế việc chạy lại suite trước thay đổi mã kế tiếp.
+- **580 test đạt** (19/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho Pha 1,
+  Pha 3, phép gom sự kiện và lỗi pickle memmap. Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
+- Lượt 19/09 **có** chạy lại suite trước và sau thay đổi mã: 573 đạt trước khi thêm test mới,
+  580 đạt sau. `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết. Không tuyên bố đã chạy lại test API/frontend.
 - **`slice_index.jsonl` vẫn khớp code hiện tại.** `scaper_generate.py` được sửa lúc
   12:35:54, sau khi clip cuối sinh lúc 12:20:22 — tức dữ liệu sinh bằng code cũ. Đã chạy
   lại `plan_clips` với code mới và so từng clip: **0/7.920 khác biệt**. Tỉ lệ 5 lát cắt
@@ -393,7 +428,10 @@ lại sản phẩm thật và bắt được cả thứ chưa ai nghĩ tới, nh
 
 | # | Việc |
 |---|---|
-| Ops Pha 1 + 3 | run manifest/fingerprint/seed và prediction mức đoạn; quét threshold — **chưa từng chạy**, vẫn là confound cho mọi kết luận F1 |
-| A/B | so v3 (dữ liệu mới) với v1/v2 (legacy) sau khi ghi rõ confound dữ liệu và đánh giá cùng giao thức; không chọn theo con số đẹp |
+| Ops Pha 1 + 3 | ✅ **xong 19/09** — manifest/vân tay/seed đầy đủ, prediction mức đoạn + quét ngưỡng cho cả ba run |
+| A/B | ✅ **đã chạy cùng giao thức** (§3). Kết luận có điều kiện: v3 tốt nhất trên dev, nhưng dev cùng recipe với train của v3 — confound còn nguyên |
+| Ops Pha 4 | **việc tiếp theo** — phân loại lỗi, ma trận nhầm lẫn, bảng theo lát cắt, đường cong ngưỡng theo lớp. Chạy được ngay trên CPU vì prediction đã có |
+| Cổng hợp đồng | `train_sed.py` mới **cảnh báo** khi hợp đồng khác PASSED, chưa **chặn**. Một lô FAILED vẫn train được |
+| Hiệu chuẩn | Cả ba run đỉnh ở θ≈0,9 — chưa đo reliability diagram, chưa ablation `pos_weight` |
 | gold_test | vẫn RỖNG; DATA_PLAN D8–D10 là nút thắt, cần người gán mù |
 | Publish prep | ✅ Weight/cache/secret đã ignore; JAMS legacy theo dõi có chủ đích; snapshot được audit trước khi push GitHub |

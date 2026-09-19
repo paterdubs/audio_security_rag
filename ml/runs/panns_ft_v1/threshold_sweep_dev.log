@@ -1,0 +1,125 @@
+D:\IUH_K18\HK1N5\KLTN\audio-security-rag\.venv\Lib\site-packages\dcase_util\utils\utils.py:12: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+▶ panns_ft_v1 · dev/all · 1440 clip · 31 đoạn · lọc 7
+  mAP(clip) = 0.7464 (không phụ thuộc ngưỡng)
+
+  θ=0.05  F1(đoạn)=0.1771  F1(sự kiện)=0.0261  ( 45763 sự kiện dự báo, 5s)
+  θ=0.06  F1(đoạn)=0.1856  F1(sự kiện)=0.0274  ( 44697 sự kiện dự báo, 5s)
+  θ=0.07  F1(đoạn)=0.1934  F1(sự kiện)=0.0286  ( 43711 sự kiện dự báo, 5s)
+  θ=0.08  F1(đoạn)=0.2012  F1(sự kiện)=0.0298  ( 42741 sự kiện dự báo, 5s)
+  θ=0.09  F1(đoạn)=0.2088  F1(sự kiện)=0.0317  ( 41779 sự kiện dự báo, 5s)
+  θ=0.10  F1(đoạn)=0.2164  F1(sự kiện)=0.0332  ( 40787 sự kiện dự báo, 5s)
+  θ=0.11  F1(đoạn)=0.2239  F1(sự kiện)=0.0343  ( 39674 sự kiện dự báo, 5s)
+  θ=0.12  F1(đoạn)=0.2312  F1(sự kiện)=0.0357  ( 38692 sự kiện dự báo, 4s)
+  θ=0.13  F1(đoạn)=0.2381  F1(sự kiện)=0.0373  ( 37720 sự kiện dự báo, 4s)
+  θ=0.14  F1(đoạn)=0.2454  F1(sự kiện)=0.0390  ( 36675 sự kiện dự báo, 4s)
+  θ=0.15  F1(đoạn)=0.2529  F1(sự kiện)=0.0405  ( 35648 sự kiện dự báo, 4s)
+  θ=0.16  F1(đoạn)=0.2599  F1(sự kiện)=0.0418  ( 34748 sự kiện dự báo, 4s)
+  θ=0.17  F1(đoạn)=0.2669  F1(sự kiện)=0.0433  ( 33758 sự kiện dự báo, 4s)
+  θ=0.18  F1(đoạn)=0.2739  F1(sự kiện)=0.0452  ( 32817 sự kiện dự báo, 4s)
+  θ=0.19  F1(đoạn)=0.2812  F1(sự kiện)=0.0473  ( 31885 sự kiện dự báo, 4s)
+  θ=0.20  F1(đoạn)=0.2881  F1(sự kiện)=0.0493  ( 30965 sự kiện dự báo, 4s)
+  θ=0.21  F1(đoạn)=0.2948  F1(sự kiện)=0.0508  ( 30105 sự kiện dự báo, 4s)
+  θ=0.22  F1(đoạn)=0.3013  F1(sự kiện)=0.0529  ( 29316 sự kiện dự báo, 4s)
+  θ=0.23  F1(đoạn)=0.3080  F1(sự kiện)=0.0545  ( 28482 sự kiện dự báo, 4s)
+  θ=0.24  F1(đoạn)=0.3143  F1(sự kiện)=0.0560  ( 27749 sự kiện dự báo, 4s)
+  θ=0.25  F1(đoạn)=0.3206  F1(sự kiện)=0.0576  ( 27004 sự kiện dự báo, 4s)
+  θ=0.26  F1(đoạn)=0.3271  F1(sự kiện)=0.0603  ( 26324 sự kiện dự báo, 4s)
+  θ=0.27  F1(đoạn)=0.3337  F1(sự kiện)=0.0626  ( 25659 sự kiện dự báo, 4s)
+  θ=0.28  F1(đoạn)=0.3398  F1(sự kiện)=0.0641  ( 25036 sự kiện dự báo, 4s)
+  θ=0.29  F1(đoạn)=0.3456  F1(sự kiện)=0.0662  ( 24383 sự kiện dự báo, 4s)
+  θ=0.30  F1(đoạn)=0.3517  F1(sự kiện)=0.0688  ( 23773 sự kiện dự báo, 4s)
+  θ=0.31  F1(đoạn)=0.3571  F1(sự kiện)=0.0701  ( 23235 sự kiện dự báo, 4s)
+  θ=0.32  F1(đoạn)=0.3633  F1(sự kiện)=0.0717  ( 22648 sự kiện dự báo, 4s)
+  θ=0.33  F1(đoạn)=0.3691  F1(sự kiện)=0.0726  ( 22116 sự kiện dự báo, 4s)
+  θ=0.34  F1(đoạn)=0.3748  F1(sự kiện)=0.0752  ( 21647 sự kiện dự báo, 4s)
+  θ=0.35  F1(đoạn)=0.3809  F1(sự kiện)=0.0773  ( 21139 sự kiện dự báo, 4s)
+  θ=0.36  F1(đoạn)=0.3870  F1(sự kiện)=0.0798  ( 20631 sự kiện dự báo, 4s)
+  θ=0.37  F1(đoạn)=0.3928  F1(sự kiện)=0.0814  ( 20132 sự kiện dự báo, 4s)
+  θ=0.38  F1(đoạn)=0.3988  F1(sự kiện)=0.0840  ( 19698 sự kiện dự báo, 3s)
+  θ=0.39  F1(đoạn)=0.4045  F1(sự kiện)=0.0862  ( 19214 sự kiện dự báo, 4s)
+  θ=0.40  F1(đoạn)=0.4102  F1(sự kiện)=0.0888  ( 18745 sự kiện dự báo, 3s)
+  θ=0.41  F1(đoạn)=0.4158  F1(sự kiện)=0.0915  ( 18288 sự kiện dự báo, 3s)
+  θ=0.42  F1(đoạn)=0.4218  F1(sự kiện)=0.0938  ( 17845 sự kiện dự báo, 3s)
+  θ=0.43  F1(đoạn)=0.4275  F1(sự kiện)=0.0968  ( 17434 sự kiện dự báo, 3s)
+  θ=0.44  F1(đoạn)=0.4335  F1(sự kiện)=0.0992  ( 16973 sự kiện dự báo, 3s)
+  θ=0.45  F1(đoạn)=0.4392  F1(sự kiện)=0.1017  ( 16576 sự kiện dự báo, 3s)
+  θ=0.46  F1(đoạn)=0.4446  F1(sự kiện)=0.1043  ( 16240 sự kiện dự báo, 3s)
+  θ=0.47  F1(đoạn)=0.4501  F1(sự kiện)=0.1068  ( 15893 sự kiện dự báo, 3s)
+  θ=0.48  F1(đoạn)=0.4550  F1(sự kiện)=0.1092  ( 15548 sự kiện dự báo, 3s)
+  θ=0.49  F1(đoạn)=0.4607  F1(sự kiện)=0.1117  ( 15166 sự kiện dự báo, 3s)
+  θ=0.50  F1(đoạn)=0.4657  F1(sự kiện)=0.1147  ( 14829 sự kiện dự báo, 3s)
+  θ=0.51  F1(đoạn)=0.4707  F1(sự kiện)=0.1175  ( 14471 sự kiện dự báo, 3s)
+  θ=0.52  F1(đoạn)=0.4759  F1(sự kiện)=0.1199  ( 14167 sự kiện dự báo, 3s)
+  θ=0.53  F1(đoạn)=0.4810  F1(sự kiện)=0.1228  ( 13837 sự kiện dự báo, 3s)
+  θ=0.54  F1(đoạn)=0.4871  F1(sự kiện)=0.1270  ( 13520 sự kiện dự báo, 3s)
+  θ=0.55  F1(đoạn)=0.4922  F1(sự kiện)=0.1294  ( 13231 sự kiện dự báo, 3s)
+  θ=0.56  F1(đoạn)=0.4973  F1(sự kiện)=0.1320  ( 12950 sự kiện dự báo, 3s)
+  θ=0.57  F1(đoạn)=0.5028  F1(sự kiện)=0.1356  ( 12650 sự kiện dự báo, 3s)
+  θ=0.58  F1(đoạn)=0.5086  F1(sự kiện)=0.1402  ( 12361 sự kiện dự báo, 3s)
+  θ=0.59  F1(đoạn)=0.5145  F1(sự kiện)=0.1438  ( 12039 sự kiện dự báo, 3s)
+  θ=0.60  F1(đoạn)=0.5194  F1(sự kiện)=0.1470  ( 11778 sự kiện dự báo, 3s)
+  θ=0.61  F1(đoạn)=0.5238  F1(sự kiện)=0.1489  ( 11492 sự kiện dự báo, 3s)
+  θ=0.62  F1(đoạn)=0.5293  F1(sự kiện)=0.1524  ( 11239 sự kiện dự báo, 3s)
+  θ=0.63  F1(đoạn)=0.5346  F1(sự kiện)=0.1558  ( 10957 sự kiện dự báo, 3s)
+  θ=0.64  F1(đoạn)=0.5397  F1(sự kiện)=0.1595  ( 10710 sự kiện dự báo, 3s)
+  θ=0.65  F1(đoạn)=0.5449  F1(sự kiện)=0.1634  ( 10423 sự kiện dự báo, 3s)
+  θ=0.66  F1(đoạn)=0.5500  F1(sự kiện)=0.1663  ( 10157 sự kiện dự báo, 3s)
+  θ=0.67  F1(đoạn)=0.5546  F1(sự kiện)=0.1696  (  9915 sự kiện dự báo, 3s)
+  θ=0.68  F1(đoạn)=0.5596  F1(sự kiện)=0.1734  (  9668 sự kiện dự báo, 3s)
+  θ=0.69  F1(đoạn)=0.5642  F1(sự kiện)=0.1777  (  9364 sự kiện dự báo, 3s)
+  θ=0.70  F1(đoạn)=0.5687  F1(sự kiện)=0.1817  (  9106 sự kiện dự báo, 3s)
+  θ=0.71  F1(đoạn)=0.5731  F1(sự kiện)=0.1837  (  8867 sự kiện dự báo, 3s)
+  θ=0.72  F1(đoạn)=0.5779  F1(sự kiện)=0.1871  (  8652 sự kiện dự báo, 3s)
+  θ=0.73  F1(đoạn)=0.5826  F1(sự kiện)=0.1915  (  8393 sự kiện dự báo, 3s)
+  θ=0.74  F1(đoạn)=0.5874  F1(sự kiện)=0.1973  (  8176 sự kiện dự báo, 3s)
+  θ=0.75  F1(đoạn)=0.5916  F1(sự kiện)=0.2008  (  7987 sự kiện dự báo, 3s)
+  θ=0.76  F1(đoạn)=0.5968  F1(sự kiện)=0.2047  (  7732 sự kiện dự báo, 3s)
+  θ=0.77  F1(đoạn)=0.6008  F1(sự kiện)=0.2090  (  7511 sự kiện dự báo, 3s)
+  θ=0.78  F1(đoạn)=0.6058  F1(sự kiện)=0.2141  (  7278 sự kiện dự báo, 3s)
+  θ=0.79  F1(đoạn)=0.6102  F1(sự kiện)=0.2168  (  7085 sự kiện dự báo, 3s)
+  θ=0.80  F1(đoạn)=0.6143  F1(sự kiện)=0.2201  (  6876 sự kiện dự báo, 3s)
+  θ=0.81  F1(đoạn)=0.6185  F1(sự kiện)=0.2248  (  6693 sự kiện dự báo, 3s)
+  θ=0.82  F1(đoạn)=0.6227  F1(sự kiện)=0.2304  (  6462 sự kiện dự báo, 3s)
+  θ=0.83  F1(đoạn)=0.6281  F1(sự kiện)=0.2372  (  6240 sự kiện dự báo, 3s)
+  θ=0.84  F1(đoạn)=0.6304  F1(sự kiện)=0.2412  (  6047 sự kiện dự báo, 3s)
+  θ=0.85  F1(đoạn)=0.6339  F1(sự kiện)=0.2445  (  5860 sự kiện dự báo, 3s)
+  θ=0.86  F1(đoạn)=0.6371  F1(sự kiện)=0.2486  (  5635 sự kiện dự báo, 3s)
+  θ=0.87  F1(đoạn)=0.6394  F1(sự kiện)=0.2519  (  5440 sự kiện dự báo, 3s)
+  θ=0.88  F1(đoạn)=0.6418  F1(sự kiện)=0.2539  (  5243 sự kiện dự báo, 3s)
+  θ=0.89  F1(đoạn)=0.6442  F1(sự kiện)=0.2616  (  5058 sự kiện dự báo, 3s)
+  θ=0.90  F1(đoạn)=0.6456  F1(sự kiện)=0.2678  (  4850 sự kiện dự báo, 3s)
+  θ=0.91  F1(đoạn)=0.6465  F1(sự kiện)=0.2717  (  4636 sự kiện dự báo, 2s)
+  θ=0.92  F1(đoạn)=0.6447  F1(sự kiện)=0.2747  (  4401 sự kiện dự báo, 3s)
+  θ=0.93  F1(đoạn)=0.6429  F1(sự kiện)=0.2806  (  4194 sự kiện dự báo, 3s)
+  θ=0.94  F1(đoạn)=0.6393  F1(sự kiện)=0.2867  (  3960 sự kiện dự báo, 3s)
+  θ=0.95  F1(đoạn)=0.6326  F1(sự kiện)=0.2953  (  3721 sự kiện dự báo, 3s)
+  θ=0.96  F1(đoạn)=0.6208  F1(sự kiện)=0.2981  (  3460 sự kiện dự báo, 2s)
+  θ=0.97  F1(đoạn)=0.6055  F1(sự kiện)=0.2948  (  3199 sự kiện dự báo, 2s)
+  θ=0.98  F1(đoạn)=0.5756  F1(sự kiện)=0.2843  (  2886 sự kiện dự báo, 2s)
+  θ=0.99  F1(đoạn)=0.5119  F1(sự kiện)=0.2609  (  2418 sự kiện dự báo, 2s)
+
+chỉ số                θ=0,50   θ tốt nhất      θ     chênh
+----------------------------------------------------------
+F1(sự kiện)           0.1147       0.2981   0.96   +0.1834
+F1(đoạn 1s)           0.4657       0.6465   0.91   +0.1808
+
+lớp                     AP(clip)  F1(sk) θ=0,50  F1(sk) θ tốt
+-------------------------------------------------------------
+alarm_bell                0.8236         0.1392        0.3273
+applause_cheering         0.9284         0.2654        0.3733
+door_slam                 0.5655         0.0842        0.1620
+explosion                 0.7453         0.0974        0.3982
+fireworks                 0.7898         0.1445        0.2760
+glass_breaking            0.7866         0.1147        0.3240
+gunshot                   0.5549         0.0595        0.2368
+laughter                  0.7827         0.1454        0.3977
+object_drop_dishes        0.5758         0.0496        0.1154
+running_footsteps         0.5055         0.0738        0.1371
+scream                    0.8928         0.1484        0.4159
+shout_yell                0.8265         0.1130        0.2949
+siren                     0.9396         0.2206        0.4092
+speech_normal             0.8077         0.1488        0.2821
+vehicle_crash             0.6706         0.0640        0.2309
+
+✓ ml\runs\panns_ft_v1\threshold_sweep_dev_all.json

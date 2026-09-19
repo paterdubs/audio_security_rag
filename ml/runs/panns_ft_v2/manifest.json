@@ -1,0 +1,391 @@
+{
+  "manifest_version": 1,
+  "run": "panns_ft_v2",
+  "tao_luc": "2026-09-19T03:50:49+00:00",
+  "hoi_cuu": true,
+  "config": {
+    "args": {
+      "split": "train",
+      "epochs": 25,
+      "batch_size": 16,
+      "lr": 0.001,
+      "backbone_lr_scale": 0.05,
+      "workers": 0,
+      "val_ratio": 0.1,
+      "seed": 20260917,
+      "sample_rate": 32000,
+      "duration": 10.0,
+      "threshold": 0.5,
+      "clip_loss_weight": 0.5,
+      "full_eval_every": 5,
+      "mixup_alpha": 0.2,
+      "mixup_prob": 0.5,
+      "mixup_label": "hard",
+      "adaptive_postproc": true,
+      "time_pool_blocks": 3,
+      "freeze_backbone": false,
+      "zero_shot": false,
+      "name": "panns_ft_v2"
+    },
+    "seeds": {
+      "split": 20260917,
+      "python": null,
+      "numpy": null,
+      "torch": null
+    },
+    "files": {
+      "ml/configs/ontology_map.yaml": {
+        "ton_tai": true,
+        "bytes": 16391,
+        "sha256": "1fca4e0f7be974a01ae5c0b67aeb8b8d56edb475c29ed18b047956c8f3ed87dc",
+        "noi_dung": "# ontology_map.yaml — NGUỒN CHÂN LÝ DUY NHẤT cho ánh xạ 15 class ↔ nhãn của các dataset nguồn\n#\n# Mọi script tải dữ liệu, sàng lọc, sinh Scaper đều đọc file này. KHÔNG hardcode class ở nơi khác.\n# Kiểm tra tính đúng đắn: python scripts/verify_ontology.py\n#\n# ─────────────────────────────────────────────────────────────────────────────\n# TRẠNG THÁI XÁC MINH (cập nhật 2026-09-14)\n#   ✅ audioset_ids        — đã đối chiếu với data/reference/audioset_ontology.json (file gốc, 632 lớp)\n#   ✅ audioset_strong     — đã đối chiếu với audioset_strong_mid_to_display_name.tsv (456 lớp có strong label)\n#   ✅ esc50_labels        — đã đối chiếu với data/reference/esc50_meta.csv (2000 clip / 50 lớp)\n#   ✅ fsd50k_labels       — SINH TỰ ĐỘNG từ audioset_ids qua data/reference/fsd50k_vocabulary.csv\n#                            (ánh xạ bằng MÃ AudioSet, không phải khớp chuỗi tên — chắc hơn hẳn)\n#   ⚠️  urbansound_labels  — CẦN XÁC MINH khi có UrbanSound8K/metadata/UrbanSound8K.csv\n#   ⚠️  desed_labels       — CẦN XÁC MINH khi có metadata DESED\n#   ⚠️  mivia_labels       — CẦN XÁC MINH sau khi đơn xin dataset được duyệt\n# ─────────────────────────────────────────────────────────────────────────────\n\nmeta:\n  version: \"0.2.0\"\n  n_classes: 16   # 2026-09-15: laughter_cheering tách thành laughter + applause_cheering\n  reference_files:\n    audioset_ontology: data/reference/audioset_ontology.json\n    audioset_strong_vocab: data/reference/audioset_strong_mid_to_display_name.tsv\n    esc50_meta: data/reference/esc50_meta.csv\n    fsd50k_vocab: data/reference/fsd50k_vocabulary.csv\n  # Các nguồn chưa tải về; verify_ontology.py sẽ cảnh báo (không fail) khi thiếu.\n  reference_files_pending:\n    urbansound_meta: data/reference/UrbanSound8K.csv\n    desed_vocab: data/reference/desed_classes.txt\n\n# Nhóm A — sự kiện an ninh (10 lớp). Đây là các lớp sinh cảnh báo.\n# Nhóm B — lớp gây nhầm lẫn & nền (5 lớp). Tồn tại để model học cách KHÔNG báo động.\n\nclasses:\n\n  # ══════════════════════════ NHÓM A ══════════════════════════\n\n  gunshot:\n    group: A\n    tier: Critical\n    audioset_ids: [\"/m/032s66\", \"/m/04zjc\", \"/m/073cg4\"]\n    audioset_names: [\"Gunshot, gunfire\", \"Machine gun\", \"Cap gun\"]\n    fsd50k_labels: [\"Gunshot_and_gunfire\"]\n    esc50_labels: []                                  # ESC-50 KHÔNG có lớp súng\n    urbansound_labels: [\"gun_shot\"]                   # ⚠️\n    desed_labels: []\n    mivia_labels: [\"gunshot\"]                         # ⚠️\n    confusable_with: [\"fireworks\", \"explosion\", \"door_slam\"]\n    target_foreground: 200\n    min_acceptable: 80\n    notes: >\n      Loạt bắn (burst) phải tách thành từng phát riêng hoặc gán một event dài liên tục —\n      quyết định ghi trong annotation_guideline.md, không để mỗi người làm một kiểu.\n\n  explosion:\n    group: A\n    tier: Critical\n    audioset_ids: [\"/m/014zdl\", \"/m/0_1c\"]\n    audioset_names: [\"Explosion\", \"Artillery fire\"]\n    fsd50k_labels: [\"Explosion\"]\n    esc50_labels: []                                  # ESC-50 KHÔNG có lớp nổ\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: []\n    confusable_with: [\"gunshot\", \"fireworks\"]\n    target_foreground: 120\n    min_acceptable: 50\n    risk: \"🟢 dồi dào hơn dự kiến — xem notes\"\n    notes: >\n      SỬA ĐÁNH GIÁ (D1): lớp này từng bị xếp 🔴 \"khan hiếm tự nhiên ở mọi nguồn\".\n      SAI. FSD50K có 1388 clip gắn nhãn Explosion, thừa xa mục tiêu 120.\n      Đánh giá cũ dựa trên trực giác chứ không dựa trên số đếm.\n      Vẫn phải sàng lọc kỹ vì nhãn FSD50K là weak và nhiễu.\n      CỐ Ý KHÔNG lấy \"/m/07qsvvw Burst, pop\": lớp đó gồm cả bóng bay nổ, nắp chai —\n      đưa vào sẽ làm bẩn lớp explosion. Dùng nó làm tín hiệu LOẠI khi sàng lọc.\n\n  scream:\n    group: A\n    tier: Critical\n    audioset_ids: [\"/m/03qc9zr\"]\n    audioset_names: [\"Screaming\"]\n    fsd50k_labels: [\"Screaming\"]\n    esc50_labels: []\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: [\"scream\"]                          # ⚠️\n    confusable_with: [\"shout_yell\", \"laughter\", \"applause_cheering\"]\n    target_foreground: 200\n    min_acceptable: 80\n    notes: >\n      Ranh giới scream / shout_yell là nguồn bất đồng lớn nhất giữa hai người gán nhãn.\n      Tiêu chí phân biệt phải nằm trong annotation_guideline.md TRƯỚC buổi pilot 30 clip.\n\n  glass_breaking:\n    group: A\n    tier: Critical\n    audioset_ids: [\"/m/039jq\", \"/m/07rn7sz\", \"/m/07pc8lb\"]\n    audioset_names: [\"Glass\", \"Shatter\", \"Breaking\"]\n    fsd50k_labels: [\"Glass\", \"Shatter\"]\n    esc50_labels: [\"glass_breaking\"]\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: [\"glass_breaking\"]                  # ⚠️\n    confusable_with: [\"object_drop_dishes\", \"vehicle_crash\"]\n    target_foreground: 250\n    min_acceptable: 100\n    notes: >\n      \"/m/039jq Glass\" và \"/m/07pc8lb Breaking\" rộng hơn ta cần (gồm cả rót nước vào ly,\n      bẻ gỗ). Bắt buộc qua sàng lọc §4.2 rồi mới vào bank, không nhận thẳng.\n\n  vehicle_crash:\n    group: A\n    tier: Critical\n    audioset_ids: [\"/m/07pjjrj\", \"/m/0h9mv\", \"/m/07rknqz\"]\n    audioset_names: [\"Smash, crash\", \"Tire squeal\", \"Skidding\"]\n    audioset_weak_only: [\"/m/07rknqz\"]                # Skidding KHÔNG có trong bộ strong 456 lớp\n    fsd50k_labels: []\n    esc50_labels: []\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: [\"crash\"]                           # MIVIA Road — ⚠️ chờ duyệt đơn\n    confusable_with: [\"glass_breaking\"]\n    target_foreground: 80\n    min_acceptable: 30\n    risk: \"🔴 RỦI RO CAO NHẤT\"\n    notes: >\n      PHÁT HIỆN QUAN TRỌNG (D1): AudioSet KHÔNG có lớp nào nghĩa là \"va chạm xe\".\n      \"/m/07pjjrj Smash, crash\" là tiếng vỡ/đập nói chung, không đặc thù xe cộ.\n      Nghĩa là lớp này phụ thuộc MIVIA Road gần như tuyệt đối, rủi ro cao hơn cả\n      đánh giá ban đầu trong DATA_PLAN §2. Nộp đơn MIVIA ngay ngày đầu.\n      Dùng \"Smash, crash\" + \"Tire squeal\" chỉ như nguồn dự phòng, và mọi clip lấy\n      từ đó PHẢI qua người duyệt, không được auto-accept.\n\n  shout_yell:\n    group: A\n    tier: High\n    audioset_ids: [\"/m/07p6fty\", \"/m/07sr1lc\"]\n    audioset_names: [\"Shout\", \"Yell\"]\n    fsd50k_labels: [\"Shout\", \"Yell\"]\n    esc50_labels: []\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: []\n    confusable_with: [\"scream\", \"laughter\", \"applause_cheering\", \"speech_normal\"]\n    target_foreground: 200\n    min_acceptable: 80\n    notes: >\n      \"/t/dd00135 Children shouting\" CỐ Ý xếp sang applause_cheering: trẻ con la hét\n      ở sân trường là cảnh bình thường, không phải sự kiện an ninh. Đây là quyết định\n      taxonomy có ảnh hưởng trực tiếp đến FAR ở khu vực trường học.\n\n  door_slam:\n    group: A\n    tier: High\n    audioset_ids: [\"/m/02dgv\", \"/m/07rjzl8\"]\n    audioset_names: [\"Door\", \"Slam\"]\n    fsd50k_labels: [\"Door\", \"Slam\"]\n    esc50_labels: []                                  # xem notes\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: []\n    confusable_with: [\"object_drop_dishes\", \"gunshot\"]\n    target_foreground: 250\n    min_acceptable: 100\n    notes: >\n      SỬA SO VỚI DATA_PLAN §2: ESC-50 KHÔNG dùng được cho lớp này. Hai lớp cửa của\n      ESC-50 là \"door_wood_knock\" (gõ cửa) và \"door_wood_creaks\" (cửa kêu cọt kẹt) —\n      cả hai đều KHÔNG phải đóng sầm. Đã đối chiếu esc50_meta.csv.\n      \"/m/02dgv Door\" rộng (gồm mở cửa, tra chìa) → bắt buộc qua sàng lọc.\n\n  running_footsteps:\n    group: A\n    tier: Medium\n    audioset_ids: [\"/m/07pbtc8\", \"/m/06h7j\"]\n    audioset_names: [\"Walk, footsteps\", \"Run\"]\n    fsd50k_labels: [\"Walk_and_footsteps\", \"Run\"]\n    esc50_labels: [\"footsteps\"]                       # xem notes\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: []\n    confusable_with: [\"object_drop_dishes\"]\n    target_foreground: 250\n    min_acceptable: 100\n    notes: >\n      CẢNH BÁO: \"footsteps\" của ESC-50 và \"/m/07pbtc8 Walk, footsteps\" phần lớn là ĐI BỘ,\n      không phải CHẠY. Lớp của ta là running_footsteps. Tiêu chí phân biệt (nhịp bước,\n      cường độ) phải có trong annotation_guideline.md, và tỉ lệ loại ở lớp này sẽ cao —\n      đừng hoảng khi thấy nhiều clip bị reject với mã wrong_class.\n\n  siren:\n    group: A\n    tier: Medium\n    audioset_ids: [\"/m/03kmc9\", \"/m/04qvtq\", \"/m/012n7d\", \"/m/012ndj\", \"/m/0dgbq\"]\n    audioset_names:\n      [\"Siren\", \"Police car (siren)\", \"Ambulance (siren)\",\n       \"Fire engine, fire truck (siren)\", \"Civil defense siren\"]\n    fsd50k_labels: [\"Siren\"]\n    esc50_labels: [\"siren\"]\n    urbansound_labels: [\"siren\"]                      # ⚠️\n    desed_labels: []\n    mivia_labels: []\n    confusable_with: [\"alarm_bell\"]\n    target_foreground: 300\n    min_acceptable: 120\n\n  alarm_bell:\n    group: A\n    tier: Medium\n    audioset_ids: [\"/m/07pp_mv\", \"/m/0c3f7m\", \"/m/01y3hg\", \"/m/02mfyn\", \"/m/046dlr\",\n                   \"/m/0395lw\", \"/m/03wwcy\"]\n    audioset_names:\n      [\"Alarm\", \"Fire alarm\", \"Smoke detector, smoke alarm\", \"Car alarm\",\n       \"Alarm clock\", \"Bell\", \"Doorbell\"]\n    fsd50k_labels: [\"Alarm\", \"Bell\", \"Doorbell\"]\n    esc50_labels: [\"clock_alarm\", \"church_bells\"]\n    urbansound_labels: []\n    desed_labels: [\"Alarm_bell_ringing\"]              # ⚠️ DESED cho strong label trực tiếp\n    mivia_labels: []\n    confusable_with: [\"siren\"]\n    target_foreground: 250\n    min_acceptable: 100\n\n  # ══════════════════════════ NHÓM B ══════════════════════════\n  # 5 lớp gây nhầm lẫn. Không sinh cảnh báo. Tồn tại để đo FAR và để model học\n  # phân biệt — bỏ nhóm này là bỏ luôn đóng góp chính về mặt độ tin cậy.\n\n  fireworks:\n    group: B\n    tier: Negative\n    audioset_ids: [\"/m/0g6b5\", \"/g/122z_qxw\"]\n    audioset_names: [\"Fireworks\", \"Firecracker\"]\n    fsd50k_labels: [\"Fireworks\"]\n    esc50_labels: [\"fireworks\"]\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: []\n    confusable_with: [\"gunshot\", \"explosion\"]\n    target_foreground: 200\n    min_acceptable: 80\n    risk: \"🟡 pháo quốc tế có thể khác pháo VN về phổ — buổi thu thực địa số 2\"\n\n  object_drop_dishes:\n    group: B\n    tier: Negative\n    audioset_ids: [\"/m/04brg2\", \"/m/07qnq_y\"]\n    audioset_names: [\"Dishes, pots, and pans\", \"Thump, thud\"]\n    fsd50k_labels: [\"Dishes_and_pots_and_pans\", \"Thump_and_thud\"]\n    esc50_labels: []\n    urbansound_labels: []\n    desed_labels: [\"Dishes\"]                          # ⚠️ DESED cho strong label trực tiếp\n    mivia_labels: []\n    confusable_with: [\"glass_breaking\", \"door_slam\", \"running_footsteps\"]\n    target_foreground: 250\n    min_acceptable: 100\n\n  laughter:\n    group: B\n    tier: Negative\n    audioset_ids: [\"/m/01j3sz\"]\n    audioset_names: [\"Laughter\"]\n    fsd50k_labels: [\"Laughter\"]\n    esc50_labels: [\"laughing\"]\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: []\n    confusable_with: [\"scream\", \"shout_yell\"]\n    target_foreground: 150\n    min_acceptable: 60\n    notes: >\n      TÁCH KHỎI `laughter_cheering` cũ (D-tách-16, 2026-09-15): tiếng cười là MỘT\n      giọng liên tục, khác hẳn tiếng vỗ tay/reo hò về phổ và nhịp — gộp chung từng\n      làm model học sai đặc trưng chung cho hai âm rất khác nhau.\n\n  applause_cheering:\n    group: B\n    tier: Negative\n    audioset_ids: [\"/m/053hz1\", \"/t/dd00135\", \"/m/028ght\"]\n    audioset_names: [\"Cheering\", \"Children shouting\", \"Applause\"]\n    fsd50k_labels: [\"Cheering\", \"Applause\"]\n    esc50_labels: [\"clapping\"]\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: []\n    confusable_with: [\"scream\", \"shout_yell\"]\n    target_foreground: 250\n    min_acceptable: 100\n    notes: >\n      TÁCH KHỎI `laughter_cheering` cũ (D-tách-16, 2026-09-15): vỗ tay và reo hò\n      đều là NHIỀU giọng/nguồn chồng nhau có nhịp lặp, cùng nhóm âm học hơn tiếng cười.\n      \"/t/dd00135 Children shouting\" CỐ Ý xếp vào đây, không vào `laughter`: trẻ con\n      la hét ở sân trường giống đám đông cổ vũ hơn giống một người cười — quyết định\n      taxonomy có ảnh hưởng trực tiếp đến FAR ở khu vực trường học.\n      CỐ Ý KHÔNG lấy \"/m/03qtwd Crowd\": lớp đó là \"có đám đông\", quá rộng, gồm cả\n      đám đông đang hoảng loạn — đưa vào sẽ dạy model rằng đám đông = an toàn.\n\n  speech_normal:\n    group: B\n    tier: Negative\n    audioset_ids: [\"/m/09x0r\", \"/m/05zppz\", \"/m/02zsn\", \"/m/0ytgt\", \"/m/01h8n0\"]\n    audioset_names:\n      [\"Speech\", \"Male speech, man speaking\", \"Female speech, woman speaking\",\n       \"Child speech, kid speaking\", \"Conversation\"]\n    fsd50k_labels: [\"Speech\", \"Male_speech_and_man_speaking\", \"Female_speech_and_woman_speaking\", \"Child_speech_and_kid_speaking\", \"Conversation\"]\n    esc50_labels: []\n    urbansound_labels: []\n    desed_labels: [\"Speech\"]                          # ⚠️ DESED cho strong label trực tiếp\n    mivia_labels: []\n    confusable_with: [\"shout_yell\"]\n    target_foreground: 300\n    min_acceptable: 120\n    notes: >\n      QUYỀN RIÊNG TƯ: lớp này chỉ dùng để phát hiện \"có tiếng nói\", TUYỆT ĐỐI không\n      nhận dạng nội dung hay người nói. Không lưu transcript. Xem SYSTEM.md §1.4.\n      Ưu tiên clip đa ngôn ngữ để model không gắn \"tiếng nói\" với một ngôn ngữ cụ thể.\n\n  ambient_noise:\n    group: B\n    tier: Negative\n    audioset_ids: []\n    audioset_names: []\n    fsd50k_labels: []\n    esc50_labels: []\n    urbansound_labels: []\n    desed_labels: []\n    mivia_labels: []\n    confusable_with: []\n    target_foreground: 0                              # không có foreground — đây là background bank\n    min_acceptable: 0\n    notes: >\n      Lớp này KHÔNG lấy từ ontology. Nó là background bank (§5 DATA_PLAN): cảnh nền\n      đã được XÁC MINH là không chứa bất kỳ sự kiện Nhóm A nào. Nguồn: TAU/DCASE\n      acoustic scenes, UrbanSound8K nền, và thu thực địa tại IUH.\n\n# Các AudioSet id mà nếu xuất hiện trong một clip background thì clip đó bị LOẠI.\n# Dùng bởi scripts/screen_background.py với ngưỡng thấp (0.15) — thà loại nhầm còn hơn\n# để lọt một tiếng súng vào nền rồi Scaper dán nhãn \"không có sự kiện\" lên nó.\nbackground_reject_ids:\n  - \"/m/032s66\"   # Gunshot, gunfire\n  - \"/m/04zjc\"    # Machine gun\n  - \"/m/014zdl\"   # Explosion\n  - \"/m/03qc9zr\"  # Screaming\n  - \"/m/07p6fty\"  # Shout\n  - \"/m/07sr1lc\"  # Yell\n  - \"/m/07rn7sz\"  # Shatter\n  - \"/m/07pc8lb\"  # Breaking\n  - \"/m/07pjjrj\"  # Smash, crash\n  - \"/m/07rjzl8\"  # Slam\n  - \"/m/03kmc9\"   # Siren\n  - \"/m/07pp_mv\"  # Alarm\n  - \"/m/0c3f7m\"   # Fire alarm\n  - \"/m/0g6b5\"    # Fireworks\n  - \"/g/122z_qxw\" # Firecracker\n"
+      },
+      "ml/configs/scaper_train.yaml": {
+        "ton_tai": true,
+        "bytes": 4032,
+        "sha256": "6f799a615b97525ff5b4c3642f583d7dab72940e317e44de94e506bfcb9c3152",
+        "noi_dung": "# Sinh train set bằng Scaper — DATA_PLAN §7.\n#\n# Mỗi clip sinh ra kèm .jams ghi đủ công thức, nên từ bank + file này tái tạo được\n# chính xác toàn bộ train set. Đó là lý do công bố được \"dataset\" mà không cần công\n# bố audio — phần lớn nguồn của ta là labels_only, không phát hành lại audio được.\n\nduration_sec: 10.0\nref_db: -23                  # trùng mức EBU R128 của bước chuẩn hoá (DATA_PLAN §4.1)\nsample_rate: 16000\nseed: 20260914               # đổi = sinh ra bộ khác. Ghi vào báo cáo.\n\nsplits:\n  train:\n    target_hours: 22.0       # DATA_PLAN: 20–25 h\n  dev:\n    target_hours: 4.0        # DATA_PLAN: 3–5 h\n    seed_offset: 1000000     # lệch seed để dev không lặp lại công thức của train\n\nevents:\n  # 0 sự kiện ~10%: dạy model biết im lặng. Thiếu nhánh này model sẽ luôn tìm ra\n  # một cái gì đó, và đó chính là nguồn báo động giả.\n  #\n  # Bộ \"E\" — chọn 17/09 sau khi quét 6 bộ (STATUS §7 B6, ADR-0008). Bộ cũ\n  # {0:.10, 1:.30, 2:.30, 3:.20, 4:.10} cho độ phủ sóng 37.7% trong khi miền đích\n  # là 53.0%; mà độ phủ sóng CHÍNH LÀ tỉ lệ frame dương, nên lệch đó làm ngưỡng\n  # quyết định chệch có hệ thống. Bộ E đưa về 50.0%.\n  #\n  # Không thể khớp đồng thời phủ sóng và mật độ chồng lấn — xem ADR-0008. Đã ưu\n  # tiên phủ sóng; phần chồng lấn dư làm train khó hơn test, là hướng lệch an toàn.\n  count_weights: {0: 0.10, 1: 0.10, 2: 0.14, 3: 0.20, 4: 0.20, 5: 0.14, 6: 0.08, 7: 0.04}\n  snr_db: [-5, 25]\n  pitch_shift_semitones: [-1, 1]\n  time_stretch: [0.9, 1.1]\n  rir_probability: 0.40\n\n# Tỉ lệ slice ÉP BUỘC — không để phân phối tự nhiên quyết định, vì đây chính là các\n# lát cắt dùng để báo cáo kết quả. Để tự nhiên thì low_snr và overlap sẽ quá thưa\n# để nói được điều gì có ý nghĩa thống kê.\nforced_slices:\n  overlap:      {ratio: 0.30, min_events: 2, min_overlap_ratio: 0.30}\n  low_snr:      {ratio: 0.25, max_snr_db: 5}\n  reverb:       {ratio: 0.40}\n  # Ngưỡng hạ 8.0 → 4.0 sau khi đo (STATUS §7 B5, ADR-0007). Ngưỡng 8 giây vừa bất\n  # khả thi vừa sai thực tế: bank chỉ có 4 lớp cấp nổi, và miền đích cũng chỉ 5.1%\n  # sự kiện vượt 8 giây. Lô 17/09 khai \"long_event 10.0% · 791 clip\" trong khi số\n  # sự kiện ≥ 8s THẬT SỰ sinh ra là 0 — lát cắt hỏng 100%, không triệu chứng.\n  # Ở 4.0 giây có 8/15 lớp đủ điều kiện; danh sách lớp KHÔNG ghi cứng ở đây mà tính\n  # từ bank lúc chạy, để nó không âm thầm lệch khi bank đổi.\n  long_event:   {ratio: 0.10, min_event_duration_sec: 4.0}\n  causal_chain: {ratio: 0.15}\n\n# Kịch bản chuỗi nhân quả — chính là thứ Temporal Aggregator và captioning sinh ra\n# để xử lý, nên phải có mặt tường minh chứ không trông vào ngẫu nhiên.\ncausal_chains:\n  - name: break_in\n    sequence: [glass_breaking, scream, running_footsteps]\n    gaps_sec: [[0.5, 2.0], [0.3, 1.5]]\n  - name: forced_entry\n    sequence: [door_slam, shout_yell, running_footsteps]\n    gaps_sec: [[0.5, 2.0], [0.3, 1.5]]\n  - name: emergency\n    sequence: [alarm_bell, shout_yell, running_footsteps]\n    gaps_sec: [[0.5, 2.5], [0.3, 1.5]]\n  # ★ Hai chuỗi ÂM TÍNH. Chúng dạy model rằng một chuỗi sự kiện liên tiếp KHÔNG\n  # mặc nhiên là sự cố an ninh. Thiếu chúng, model học \"cứ có chuỗi là nguy hiểm\"\n  # và báo động giả mỗi đêm giao thừa.\n  - name: false_alarm_fireworks\n    sequence: [fireworks, applause_cheering]     # pháo giao thừa rồi tiếng đám đông hò reo\n    gaps_sec: [[0.3, 2.0]]\n  - name: false_alarm_dishes\n    sequence: [object_drop_dishes, laughter]     # làm rơi bát đĩa rồi cười ngượng — một giọng\n    gaps_sec: [[0.3, 2.0]]\n"
+      },
+      "ml/configs/preprocessing.yaml": {
+        "ton_tai": true,
+        "bytes": 4203,
+        "sha256": "2d813742e6a42a8bb49fc0aa2d531dd2465364a945d04146254183e48205d7b5",
+        "noi_dung": "# preprocessing.yaml — ngưỡng cho giai đoạn 1 (chuẩn hoá kỹ thuật), DATA_PLAN §4.1.\n#\n# Mọi ngưỡng đều nằm ở đây, không hardcode trong script: các con số này sẽ phải\n# chỉnh sau khi nhìn báo cáo loại bỏ thực tế, và mỗi lần chỉnh phải thấy được\n# trong git diff vì nó thay đổi thành phần dataset.\n\naudio:\n  target_sample_rate: 16000     # BEATs nhận 16 kHz; giữ nguyên suốt pipeline\n  target_channels: 1            # mono — trung bình các kênh, không lấy kênh trái\n  resample_type: soxr_hq        # chất lượng cao; kaldi/scipy cho artefact ở tần số cao\n\nloudness:\n  # Chuẩn hoá độ to theo EBU R128, KHÔNG dùng peak normalize.\n  # Peak normalize chỉnh theo đúng MỘT mẫu to nhất, nên một tiếng nổ lách tách\n  # cũng kéo cả clip xuống; R128 đo độ to cảm nhận trên toàn clip.\n  target_lufs: -23.0            # mức tham chiếu EBU R128\n  # pyloudnorm cần ≥ 0.4 s để lấp đầy một block 400 ms. Clip ngắn hơn thì\n  # bỏ qua chuẩn hoá độ to (vẫn giữ clip) và đánh dấu trong manifest.\n  min_duration_for_lufs: 0.4\n  # Sau khi chỉnh gain có thể vượt 0 dBFS → giới hạn lại để tránh méo khi ghi file.\n  peak_ceiling_dbfs: -1.0\n\nquality_gates:\n  # Mỗi ngưỡng dưới đây tương ứng một mã lý do trong exclusions.csv (N3).\n  # Khớp với annotation_guideline.md §2: \"thời lượng event tối thiểu 100 ms\".\n  # Ngưỡng 0.3 s ban đầu là tuỳ tiện và mâu thuẫn với chính guideline — nó không ràng\n  # buộc gì với ESC-50 (mọi clip đều 5 s) nên không lộ ra, nhưng với soundbank kiểu\n  # DESED thì cắt mất 43% lớp `object_drop_dishes`: một tiếng chén khua thật sự chỉ\n  # dài ~0.2 s (trung vị 0.36 s, phân vị 25 là 0.21 s — đo trên 143 clip).\n  min_duration_sec: 0.1\n  max_duration_sec: 30.0        # dài hơn thì gần như chắc chắn nhiều sự kiện\n  # ── Phát hiện méo (clipping) ───────────────────────────────────────────────\n  # Đo bằng tỉ lệ mẫu nằm trong các đoạn ĐỈNH BỊ CẮT PHẲNG (≥3 mẫu liên tiếp chạm\n  # trần), đo trên FILE GỐC trước khi resample. Đo trên bản đã resample là sai cả\n  # hai chiều, và đây là số liệu đo thật trên 320 clip ESC-50 (D1):\n  #     chạm trần, sau resample     → 138 clip có dấu hiệu (thổi phồng: resampler\n  #                                   tự vượt đỉnh, đếm cả mẫu không hề bị cắt)\n  #     cắt phẳng, sau resample     →  19 clip  (bỏ sót: resample làm MƯỢT đỉnh\n  #                                   phẳng thành cong, xoá mất dấu vết méo)\n  #     cắt phẳng, trên file gốc    → 119 clip  ← đúng\n  clipping_min_run_samples: 3     # dưới 3 mẫu liên tiếp thì chưa phải cắt phẳng\n  clipping_ceiling: 0.999\n  # Máy chỉ tự loại clip méo NẶNG. Vùng xám chuyển sang người nghe, đúng tinh thần\n  # luật định tuyến ở §4.2 — với dữ liệu an ninh vốn khan hiếm và vốn xung nhọn\n  # (tiếng súng, kính vỡ), tự loại 10% ở ngưỡng 0.1% là quá tay.\n  max_clipped_ratio: 0.01         # > 1% đoạn cắt phẳng → tự loại (4.1% số clip)\n  clipping_review_ratio: 0.001    # 0.1%–1% → GẮN CỜ cho người nghe (thêm ~6%)\n  # RMS dưới mức này coi như im lặng (thang tuyến tính, xấp xỉ -60 dBFS).\n  silence_rms_threshold: 0.001\n  # File có sample rate gốc thấp hơn mức này là đã bị nâng mẫu ở đâu đó:\n  # nội dung trên 8 kHz là bịa, sẽ làm hỏng đặc trưng tần số cao.\n  min_original_sample_rate: 16000\n\n# Cố ý KHÔNG tự động loại theo các mã sau — chúng cần tai người:\n#   wrong_class · multiple_events · too_noisy · music_overlay · speech_overlay\n# Máy chỉ được loại theo tiêu chí kỹ thuật đo được.\n"
+      }
+    }
+  },
+  "data": {
+    "split": "train",
+    "van_tay": null,
+    "ghi_chu": "Audio của lô legacy đã bị xoá ngày 18/09/2026 (giữ 9.360 JAMS + slice_index làm bằng chứng trước-sửa). Vân tay dữ liệu KHÔNG khôi phục được và không được thay bằng vân tay của lô B0–B9 hiện tại — đó là một lô dữ liệu khác.",
+    "chia_tap": null,
+    "hop_dong": {
+      "ket_qua": "FAILED",
+      "n_vi_pham": 2662,
+      "bao_cao": "data/manifests/synthetic_contract_train_20260917.csv",
+      "sha256": "574e04b0f5b03bf1e50c0a7c1f1b140afb501395d1487896224e3bf6915a3f75",
+      "mtime": "2026-09-17T05:24:22.550891+00:00"
+    }
+  },
+  "code": {
+    "n_files": 42,
+    "tree_sha256": "aa3cfa7e7a1d3ee9b892a74e19438b6fd9f5e1ffbf36137437d9ecd5c8eee725",
+    "files": {
+      "ml/__init__.py": "315276054d4d9747693fdfdb7ca974b99eabe75e7492a62dc38a6e1410297eee",
+      "ml/captioning/__init__.py": "315276054d4d9747693fdfdb7ca974b99eabe75e7492a62dc38a6e1410297eee",
+      "ml/datasets/__init__.py": "315276054d4d9747693fdfdb7ca974b99eabe75e7492a62dc38a6e1410297eee",
+      "ml/datasets/synthetic_sed.py": "b46162ab58da2fe15640ee10767e4573ef96fca0f276288f114b25ba59d36af0",
+      "ml/evaluation/__init__.py": "315276054d4d9747693fdfdb7ca974b99eabe75e7492a62dc38a6e1410297eee",
+      "ml/evaluation/eval_sed.py": "7cc5667bd40aa7a158e39a2c1634d07d1757d1743b902a87846c663484dce46f",
+      "ml/evaluation/predictions.py": "9d91417483a9c79731e6ab3d55ac71458d8f60843006bf333e42837076680868",
+      "ml/evaluation/sed_metrics.py": "2db42e2d715dc8f1249d82455988e9a5ebc12e9c859b77b303f131b11d175c8e",
+      "ml/evaluation/threshold_sweep.py": "981884e77e123dd65e84c243be6e5ce2eb397cec019841abfd3c5413dc53777a",
+      "ml/features/__init__.py": "315276054d4d9747693fdfdb7ca974b99eabe75e7492a62dc38a6e1410297eee",
+      "ml/features/precompute_waveform.py": "ee6c0693a9be673cde8b41849a7e2713caee0c2d362d6f001d38614dbd44c679",
+      "ml/models/__init__.py": "315276054d4d9747693fdfdb7ca974b99eabe75e7492a62dc38a6e1410297eee",
+      "ml/models/panns_sed.py": "3c1ee4b88c2d9f533fad1454587cd9344961ac0d40dbb4e81a6ca54b9c83440c",
+      "ml/tracking/__init__.py": "d884ff33c623ab79721ca522de86a4622c34b779095f6f60bfb329ea0f40cfd5",
+      "ml/tracking/fingerprint.py": "d53874f60d3ee5e1a1dcf83b8fd4f8f162ff0304f1e1a939777e5d66090da552",
+      "ml/tracking/run_manifest.py": "7a64e89f18e838c3518599e0fc9a72851d8adc7b44788dcb63abe8bf95e45860",
+      "ml/training/__init__.py": "315276054d4d9747693fdfdb7ca974b99eabe75e7492a62dc38a6e1410297eee",
+      "ml/training/mixup.py": "01aeb8c6281e0f8a47a191f6fc87710b37dbe00653c0faba448754fbae17d9d7",
+      "ml/training/sed_data.py": "37abd48d123a28027288ed31c8eccad8184c57939bf38b4916092d5acb837aa8",
+      "ml/training/train_sed.py": "2db5eb8f491c24f33e1866e2c4bba0d840c7c089f73cc9de347f5f994c144ade",
+      "scripts/audioset_ontology.py": "50ea65e8a0139bbc5373e1de4c581901e1d696dc889f7fcb1cd63af12e5edcd6",
+      "scripts/auto_screen.py": "2a02f9559f395f3e97ddf9488e4cd44de5ecb7732bd6547ae7c56f55a43191c0",
+      "scripts/build_background_10s.py": "e0265f755b569d5798db2b3074a3d35215be49c49ab546fa2e65d9e4a09d470b",
+      "scripts/build_background_bank.py": "b0b72cc8f6f27dde048bee89dbaa468aa71c5154d2fbdd44712e828bdaebdba0",
+      "scripts/build_manifest.py": "b39f826fb5d5d553b96062055b9ea62f387ea910299dd7d9644e0788d5cff15c",
+      "scripts/build_rir_bank.py": "e775f7dfe341b5b0f82e4ec5553fa94772de0c2f4cd1f50ed4687a6e1c0f4918",
+      "scripts/check_leakage.py": "93859322afd105a0b62a3535b375e7720a4002af5d43abbb598cf5e67c751333",
+      "scripts/common.py": "697246c47ba3f272e396be6668d0952c34d2a3f0448511b806925ccf62cdd16d",
+      "scripts/coverage_report.py": "039eb58d6ea3c1885ce3a1e76c798795530f83c98c1dbd1d7a424be02143908f",
+      "scripts/data_inventory.py": "e0a18268c29a6505118ccac40f8a56dcc05a2357b1e9ed3429b68e271cacb122",
+      "scripts/download_sources.py": "ed17042809bd539b9b1dbc954292ac7f64f8ad477fcc85a18fd4e4abcca842ea",
+      "scripts/fetch_audioset_strong.py": "bf3c1fa0ba5d0dba837c3e95e6a7a363e700a5fc9bb46a40ad794d018da7c092",
+      "scripts/fetch_vehicle_crash_cc.py": "69be4f40deba2961e952c65f9a60f7a2677ca99ed406e2542b9b233e0071cd7d",
+      "scripts/make_splits.py": "49bcfd0722ffe332c8b1270567ce2b5b9ecc2c74ef09ad412e0d2575d2a272e2",
+      "scripts/measure_distributions.py": "928567066ea1ff5e5b3767170e53493790bc991c93ae485ba3b3691aaeb973b8",
+      "scripts/normalize_audio.py": "fe9e68bfdb5dcb0220edc997b98552d0c631514f28cdb59f5204ac9c15ed04cc",
+      "scripts/probe_bank.py": "1494365101801022fdde10dd284f59f0fff76bdb84169555e96c2843da50023c",
+      "scripts/promote_to_bank.py": "35df9ade972cdbf989ad74631140745f2122fb451ff4960c66ae4fa6818a2ac6",
+      "scripts/scaper_generate.py": "e2c5ca58f8897c265eead878e4bf519729fa4b7620b4cf2ee740f880d56bd475",
+      "scripts/validate_screen.py": "507623e6c5034c383b4f47b568f49cd8dbab5448ab2fa2cad17d6f4d7eb60abd",
+      "scripts/verify_ontology.py": "41d045df036ac80bd9fed317f353967d86818fe3c0bdf6522be0398385fa4508",
+      "scripts/verify_synthetic.py": "62668bd7900e4ec495a094646f8c4b82b82853ac70d18e1fc95518446e69dce8"
+    }
+  },
+  "git": {
+    "co_git": true,
+    "sha": "c5688d7b7d416406e521c61e50449c2afda74008",
+    "dirty": true,
+    "dirty_files": [
+      "CLAUDE.md",
+      "README.md",
+      "docs/PLAN.md",
+      "docs/STATUS.md",
+      "docs/TRAINING_OPS_PLAN.md",
+      "docs/measurements/threshold_sweep_20260919.md",
+      "ml/evaluation/predictions.py",
+      "ml/evaluation/sed_metrics.py",
+      "ml/evaluation/threshold_sweep.py",
+      "ml/models/panns_sed.py",
+      "ml/runs/panns_ft_v1/manifest.json",
+      "ml/runs/panns_ft_v1/predictions/",
+      "ml/runs/panns_ft_v1/threshold_sweep_dev.log",
+      "ml/runs/panns_ft_v1/threshold_sweep_dev_all.json",
+      "ml/runs/panns_ft_v2/manifest.json",
+      "ml/runs/panns_ft_v2/predictions/",
+      "ml/runs/panns_ft_v2/threshold_sweep_dev.log",
+      "ml/runs/panns_ft_v2/threshold_sweep_dev_all.json",
+      "ml/runs/panns_ft_v3/manifest.json",
+      "ml/runs/panns_ft_v3/predictions/",
+      "ml/runs/panns_ft_v3/threshold_sweep_dev.log",
+      "ml/runs/panns_ft_v3/threshold_sweep_dev_all.json",
+      "ml/tracking/",
+      "ml/training/sed_data.py",
+      "ml/training/train_sed.py",
+      "scripts/verify_synthetic.py",
+      "tests/test_ml_predictions.py",
+      "tests/test_ml_sed.py",
+      "tests/test_ml_threshold_sweep.py",
+      "tests/test_ml_tracking.py"
+    ],
+    "diff_sha256": "ed209de2d2bfab175a5dbea973841f181f00b1f986645eff256a13e6abc1a7e1",
+    "diff_bytes": 55295
+  },
+  "env": {
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "torch": "2.5.1+cu121",
+    "numpy": "1.26.4",
+    "cuda_available": true,
+    "cuda_version": "12.1",
+    "gpu": "NVIDIA GeForce RTX 3070 Laptop GPU",
+    "pip_freeze": [
+      "Jinja2==3.1.6",
+      "MarkupSafe==3.0.3",
+      "PyYAML==6.0.2",
+      "attrs==26.1.0",
+      "audioread==3.1.0",
+      "certifi==2026.7.22",
+      "cffi==2.1.1",
+      "charset-normalizer==3.5.1",
+      "cloudpickle==3.1.2",
+      "colorama==0.4.6",
+      "contourpy==1.3.3",
+      "cycler==0.12.1",
+      "dcase_util==0.2.20",
+      "decorator==5.3.1",
+      "filelock==3.32.6",
+      "fonttools==4.65.0",
+      "fsspec==2026.7.0",
+      "future==1.0.0",
+      "idna==3.19",
+      "iniconfig==2.3.0",
+      "jams==0.3.5",
+      "joblib==1.6.0",
+      "jsonschema-specifications==2025.9.1",
+      "jsonschema==4.26.0",
+      "kiwisolver==1.5.1",
+      "lazy-loader==0.5",
+      "librosa==0.10.2.post1",
+      "llvmlite==0.43.0",
+      "matplotlib==3.9.4",
+      "mir_eval==0.8.2",
+      "mpmath==1.3.0",
+      "msgpack==1.2.2",
+      "narwhals==2.26.0",
+      "networkx==3.6.1",
+      "numba==0.60.0",
+      "numpy==1.26.4",
+      "packaging==26.3",
+      "pandas==2.2.3",
+      "panns-inference==0.1.1",
+      "pillow==12.3.0",
+      "platformdirs==4.11.8",
+      "pluggy==1.6.0",
+      "pooch==1.9.0",
+      "pycparser==3.0",
+      "pydot-ng==2.0.0",
+      "pyloudnorm==0.1.1",
+      "pyparsing==3.3.2",
+      "pytest==8.3.4",
+      "python-dateutil==2.9.0.post0",
+      "python-magic==0.4.27",
+      "pytz==2026.3.post1",
+      "referencing==0.37.0",
+      "requests==2.32.3",
+      "rpds-py==2026.6.3",
+      "scaper==1.6.5",
+      "scikit-learn==1.5.2",
+      "scipy==1.13.1",
+      "sed_eval==0.2.1",
+      "setuptools==80.10.2",
+      "six==1.17.0",
+      "sortedcontainers==2.4.0",
+      "soundfile==0.12.1",
+      "sox==1.4.0",
+      "soxr==1.1.0",
+      "sympy==1.13.1",
+      "threadpoolctl==3.6.0",
+      "torch==2.5.1+cu121",
+      "torchaudio==2.5.1",
+      "torchlibrosa==0.1.0",
+      "tqdm==4.67.1",
+      "typing_extensions==4.16.0",
+      "tzdata==2026.4",
+      "urllib3==2.7.0",
+      "validators==0.35.0"
+    ]
+  },
+  "timing": {
+    "bat_dau": null,
+    "ket_thuc": null,
+    "epochs": [
+      {
+        "epoch": 1,
+        "seconds": 198.0019829273224
+      },
+      {
+        "epoch": 2,
+        "seconds": 197.44074034690857
+      },
+      {
+        "epoch": 3,
+        "seconds": 197.59872961044312
+      },
+      {
+        "epoch": 4,
+        "seconds": 247.05419659614563
+      },
+      {
+        "epoch": 5,
+        "seconds": 254.1049461364746
+      },
+      {
+        "epoch": 6,
+        "seconds": 207.76535749435425
+      },
+      {
+        "epoch": 7,
+        "seconds": 222.92702531814575
+      },
+      {
+        "epoch": 8,
+        "seconds": 209.69310235977173
+      },
+      {
+        "epoch": 9,
+        "seconds": 222.8185601234436
+      },
+      {
+        "epoch": 10,
+        "seconds": 221.79857349395752
+      },
+      {
+        "epoch": 11,
+        "seconds": 196.63756155967712
+      },
+      {
+        "epoch": 12,
+        "seconds": 222.26824307441711
+      },
+      {
+        "epoch": 13,
+        "seconds": 225.64585542678833
+      },
+      {
+        "epoch": 14,
+        "seconds": 240.2287871837616
+      },
+      {
+        "epoch": 15,
+        "seconds": 305.992253780365
+      },
+      {
+        "epoch": 16,
+        "seconds": 214.763281583786
+      },
+      {
+        "epoch": 17,
+        "seconds": 193.82496905326843
+      },
+      {
+        "epoch": 18,
+        "seconds": 199.73956513404846
+      },
+      {
+        "epoch": 19,
+        "seconds": 220.8903684616089
+      },
+      {
+        "epoch": 20,
+        "seconds": 207.63175320625305
+      },
+      {
+        "epoch": 21,
+        "seconds": 176.67878127098083
+      },
+      {
+        "epoch": 22,
+        "seconds": 199.1502125263214
+      },
+      {
+        "epoch": 23,
+        "seconds": 195.84692001342773
+      },
+      {
+        "epoch": 24,
+        "seconds": 206.04626393318176
+      },
+      {
+        "epoch": 25,
+        "seconds": 241.7617003917694
+      }
+    ]
+  },
+  "ket_qua_cuoi": {
+    "clip_map": 0.8175830129169256,
+    "clip_ap_per_class": {
+      "alarm_bell": 0.9026348008382394,
+      "applause_cheering": 0.9506669121800794,
+      "door_slam": 0.684694203254622,
+      "explosion": 0.6712489637744932,
+      "fireworks": 0.7557035907950729,
+      "glass_breaking": 0.8418745381414903,
+      "gunshot": 0.7300426116371351,
+      "laughter": 0.9185988353876656,
+      "object_drop_dishes": 0.6647459807008053,
+      "running_footsteps": 0.87072152517233,
+      "scream": 0.9152767472031539,
+      "shout_yell": 0.8829332352373016,
+      "siren": 0.9196113853022172,
+      "speech_normal": 0.8718075358330883,
+      "vehicle_crash": 0.68318432829619
+    },
+    "segment_f1": 0.29799574660050265,
+    "event_f1": 0.18966235931638184,
+    "event_f1_per_class": {
+      "alarm_bell": 0.3819628647214854,
+      "applause_cheering": 0.3878504672897196,
+      "door_slam": 0.11298076923076923,
+      "explosion": 0.17862838915470494,
+      "fireworks": 0.09842931937172775,
+      "glass_breaking": 0.16393442622950818,
+      "gunshot": 0.1407185628742515,
+      "laughter": 0.2525879917184265,
+      "object_drop_dishes": 0.07676767676767678,
+      "running_footsteps": 0.21143473570658036,
+      "scream": 0.33147113594040967,
+      "shout_yell": 0.17338217338217338,
+      "siren": 0.3862928348909657,
+      "speech_normal": 0.25205479452054796,
+      "vehicle_crash": 0.1308980213089802
+    }
+  },
+  "canh_bao": [
+    "Manifest lập HỒI CỨU: code/git/env băm ở thời điểm lập, KHÔNG phải thời điểm train.",
+    "Vân tay dữ liệu null — xem data.ghi_chu."
+  ]
+}

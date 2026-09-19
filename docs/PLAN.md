@@ -18,7 +18,7 @@ Các tuần là lịch dự kiến; làm sớm một phần không đồng nghĩ
 |---|---|---|---|---|
 | **W1** | 15–21/09/2026 | Nền tảng + Walking Skeleton | 🔄 skeleton có; CI/DVC/protocol còn thiếu | ☐ |
 | **W2** | 22–28/09/2026 | Dữ liệu + Scaper + Precompute | 🔄 làm sớm; lô mới PASS QA + waveform PANNs, real dev/gold chưa có | ☐ |
-| **W3** | 29/09–05/10 | 4 Gold set + SED baseline | 🔄 PANNs v1/v2/v3 xong; gold chưa có, baseline BEATs–Conformer chưa làm | ☐ |
+| **W3** | 29/09–05/10 | 4 Gold set + SED baseline | 🔄 PANNs v1/v2/v3 xong + đã chấm lại cùng giao thức có quét ngưỡng; gold chưa có, baseline BEATs–Conformer chưa làm | ☐ |
 | **W4** | 06–12/10 | AAC baseline B1 + hạ tầng metric | 🔜 | ☐ |
 | **W5** | 13–19/10 | **Grounded AAC (P)** — đóng góp chính | 🔜 | ☐ |
 | **W6** | 20–26/10 | Ablation + báo cáo theo slice | 🔜 | ☐ |
@@ -313,8 +313,11 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 | ☐ | Xác nhận ruling chuông quầy thức ăn nhanh trong `data/gold/decision_log.md` (đang ⚠️ CHỜ XÁC NHẬN) | W2 | Ảnh hưởng biên `alarm_bell` |
 | ☑ | Xử lý hàng đợi duyệt | W2 | Hoàn tất 16/09; 1.831 bulk-accept phải nêu là hạn chế, không xem như kiểm định mù |
 | ☑ | Sửa recipe synthetic + kiểm tra âm thanh thật; phiên bản dữ liệu mới riêng | Trước train v3 | B0–B9 xong; lô mới PASS hợp đồng, legacy giữ tách làm bằng chứng. Gold/real dev vẫn chưa có. |
-| ☐ | Hoàn thiện tracking, seed, checkpoint resume, lưu dự đoán và quét threshold | Trước train mới | Theo TRAINING_OPS_PLAN; Pha 1/3/4/5 chưa có. Thiếu prediction đang chặn kết luận v1/v2/v3. |
-| ☐ | Sửa eval_sed để load đúng time_pool_blocks/config checkpoint | Trước eval v2/v3 lại | Hiện mặc định pool=5, v2/v3 dùng pool=3; state_dict không phát hiện khác pooling. |
+| ◐ | Hoàn thiện tracking, seed, checkpoint resume, lưu dự đoán và quét threshold | Trước train mới | **19/09: Pha 1 + 3 xong** — manifest/vân tay/seed đầy đủ, prediction + quét ngưỡng cho cả ba run. Còn thiếu: checkpoint resume (optimizer/scheduler/RNG) và Pha 4/5. |
+| ☑ | Sửa eval_sed để load đúng time_pool_blocks/config checkpoint | Trước eval v2/v3 lại | `doc_time_pool_blocks` đọc checkpoint → history → mặc định kèm CẢNH BÁO; có 3 test. v1 không ghi ở đâu cả nên vẫn rơi về mặc định 5 — đo gián tiếp ủng hộ nhưng không chứng minh. |
+| ☐ | Nâng cổng hợp đồng dữ liệu từ CẢNH BÁO lên CHẶN trong `train_sed.py` | Trước train mới | Hiện chỉ in cảnh báo khi hợp đồng khác PASSED; một lô FAILED vẫn train được. |
+| ☑ | Sửa `PrecomputedSedDataset` pickle nguyên memmap sang worker DataLoader | Trước train mới | Đo: pickle dev **921,8 MB → 0,159 MB**. v1/v2/v3 đều train ở `--workers 2` nên đều đã trả giá này; triệu chứng là crash không đều. |
+| ☐ | Đo hiệu chuẩn xác suất + ablation `pos_weight` | W3 | Cả ba run đạt đỉnh F1 ở θ≈0,90–0,96, tức xác suất bị thổi lên có hệ thống. `pos_weight` trần 30 là giả thuyết, **chưa đo**. |
 | ◐ | Bảo vệ checkpoint/raw lớn khỏi Git và thiết lập DVC | W1–W2 | Weight/checkpoint/cache/secret đã ignore; JAMS legacy theo dõi có chủ đích. DVC pipeline/remote vẫn chưa có. |
 
 ---
@@ -330,4 +333,4 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 
 ---
 
-*Cập nhật lần cuối: 2026-09-18 · W1; số liệu/chứng cứ hiện hành: [STATUS.md](STATUS.md).*
+*Cập nhật lần cuối: 2026-09-19 · W1; số liệu/chứng cứ hiện hành: [STATUS.md](STATUS.md).*
