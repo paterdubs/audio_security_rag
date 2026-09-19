@@ -69,10 +69,15 @@ def cua_so_loc(du_doan, thich_ung: bool):
     return adaptive_median_sizes(do_dai, frames_per_second=du_doan.n_frames / du_doan.duration)
 
 
-def quet(du_doan, nguongs: list[float], median_size) -> list[dict]:
-    """Chấm điểm ở từng ngưỡng. Dựng khung MỘT lần, chỉ đổi ngưỡng."""
+def quet(du_doan, nguongs: list[float], median_size, khung=None) -> list[dict]:
+    """Chấm điểm ở từng ngưỡng. Dựng khung MỘT lần, chỉ đổi ngưỡng.
+
+    `khung` truyền vào được để bên gọi dùng lại — mức khung của dev là ~86 MB float32,
+    dựng hai lần trong cùng một tiến trình là lãng phí thuần tuý.
+    """
     tham_chieu = du_doan.tham_chieu()
-    khung = [du_doan.khung(i) for i in range(len(du_doan.clip_ids))]
+    if khung is None:
+        khung = [du_doan.khung(i) for i in range(len(du_doan.clip_ids))]
 
     ket_qua = []
     for nguong in nguongs:

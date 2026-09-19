@@ -127,7 +127,11 @@ def frames_to_events(probabilities: np.ndarray, class_ids: list[str], duration: 
         # Python trên hàng nghìn khung × 15 lớp.
         padded = np.concatenate(([False], column, [False]))
         edges = np.diff(padded.astype(np.int8))
-        for start, end in zip(np.flatnonzero(edges == 1), np.flatnonzero(edges == -1)):
+        # strict=True: hai mảng cạnh lên/xuống luôn bằng nhau vì mảng đã đệm False hai
+        # đầu. Nếu một ngày chúng lệch thì zip() im lặng cắt bớt sự kiện cuối, và điểm
+        # chỉ thấp đi một chút — đúng kiểu lỗi không có triệu chứng.
+        for start, end in zip(np.flatnonzero(edges == 1), np.flatnonzero(edges == -1),
+                              strict=True):
             events.append({
                 "event_label": class_id,
                 "onset": float(start * seconds_per_frame),
@@ -237,3 +241,48 @@ def event_and_segment_f1(reference: dict[str, list[dict]], predicted: dict[str, 
         for label, values in event_metrics.results_class_wise_metrics().items()
     }
     return segment_f1, event_overall, per_class
+
+
+def thong_ke_su_kien(reference: dict[str, list[dict]], predicted: dict[str, list[dict]],
+                     class_ids: list[str]) -> dict:
+    """Đếm S/D/I mức sự kiện theo sed_eval — thứ `event_and_segment_f1` không trả về.
+
+    sed_eval chỉ công bố các số này dưới dạng TỈ LỆ chuẩn hoá theo Nref, nên muốn có số
+    đếm phải nhân ngược lại. Cần nó để đối chiếu với phép ghép cặp tự viết ở
+    `error_taxonomy.py`: hai cách đếm khác nhau mà không ai đặt cạnh nhau thì cái sai
+    nằm im vô thời hạn.
+    """
+    import sed_eval
+
+    all_clips = sorted(set(reference) | set(predicted))
+    ref_gom = _nhom_theo_clip(reference, all_clips)
+    pred_gom = _nhom_theo_clip(predicted, all_clips)
+
+    metrics = sed_eval.sound_event.EventBasedMetrics(
+        event_label_list=class_ids, t_collar=ONSET_COLLAR_SEC,
+        percentage_of_length=OFFSET_COLLAR_RATIO, evaluate_onset=True, evaluate_offset=False,
+    )
+    for clip_id in all_clips:
+        metrics.evaluate(reference_event_list=ref_gom[clip_id],
+                         estimated_event_list=pred_gom[clip_id])
+
+    overall = metrics.results_overall_metrics()
+    n_ref = sum(len(v) for v in reference.values())
+    ty_le = overall["error_rate"]
+    theo_lop = {}
+    for label, values in metrics.results_class_wise_metrics().items():
+        n_sys = float(values["count"]["Nsys"])
+        precision = float(values["f_measure"]["precision"] or 0.0)
+        theo_lop[label] = {
+            "n_ref": int(values["count"]["Nref"]), "n_sys": int(n_sys),
+            "n_tp": int(round(precision * n_sys)),
+        }
+    return {
+        "n_ref": n_ref,
+        "n_sys": sum(len(v) for v in predicted.values()),
+        "error_rate": float(ty_le["error_rate"]),
+        "substitution": int(round(float(ty_le["substitution_rate"]) * n_ref)),
+        "deletion": int(round(float(ty_le["deletion_rate"]) * n_ref)),
+        "insertion": int(round(float(ty_le["insertion_rate"]) * n_ref)),
+        "theo_lop": theo_lop,
+    }
