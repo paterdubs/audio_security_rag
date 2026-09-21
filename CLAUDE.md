@@ -177,10 +177,19 @@ không phải trạng thái hiện hành.
    sách đầy đủ ở `agreement.py`'s output, mục "Danh sách ca bất đồng"). Ca đáng chú ý
    nhất: `as_strong_0yZGysisqY0_12000` (case "đồ chơi mô phỏng" của lần 1, không gán sự
    kiện) — lần 2 mù lại nghe ra `alarm_bell`+`explosion` (3 Insertion tuyệt đối).
-   **Việc tiếp theo (KHÔNG được bỏ qua theo DATA_PLAN §8.3):** nghe lại lần ba 13 clip bất
-   đồng, chốt, ghi `decision_log.md`, sửa `annotation_guideline.md` theo phát hiện được,
-   rồi cân nhắc một vòng pilot mới trước khi thử lại cổng — **chưa** đủ điều kiện qua
-   checklist §10 để gán đại trà `gold_test`.
+   ✅ **Nghe lại lần ba 13/13 ca XONG 22/09 — 9 mục mới trong `decision_log.md`.** Ba loại
+   nguyên nhân: lệch biên nhẹ (3 ca) · sự kiện thật bị bỏ sót ở lần 1 hoặc lần 2 (4 ca,
+   không có bên nào luôn đúng hơn) · **một đổi lớp thật** (`0BEtPXdDQrs_250000`: `siren`
+   không phải `alarm_bell` — cặp đã có sẵn trong `confusable_with` từ lỗi model, giờ xác
+   nhận thêm ở người). Phát hiện mẫu hình mới: `speech_normal` nền bị bỏ sót dưới
+   `applause_cheering` ở 2 clip — đã thêm cảnh báo vào §4 `annotation_guideline.md`.
+   **Phát hiện quan trọng nhất:** `as_strong_0yZGysisqY0_12000` — phán quyết "đồ chơi" của
+   lần 1 được CỦNG CỐ, nhưng lần 2 mù đã bị đồ chơi đánh lừa hoàn toàn. Kết luận: tự-nhất-
+   quán đo ở §8 có thể **đánh giá thấp** độ tin cậy thật của quyết định "đồ chơi" khi mất
+   ngữ cảnh — phải ghi vào Hạn chế khoá luận.
+   **Vẫn CHƯA đủ điều kiện gán đại trà** — cổng §8.5 chưa đạt (0,7339 < 0,75); cần cân nhắc
+   một vòng pilot mới sau khi áp dụng sửa đổi guideline, trước khi thử lại cổng và qua
+   checklist §10.
    Đây là thứ DUY NHẤT gỡ được confound "dev cùng recipe với train của v3". Không dùng
    test để chọn threshold.
 3. **Ablation `pos_weight`** — `train_sed.py` đã có cờ `--pos-weight-max` (mặc định vẫn

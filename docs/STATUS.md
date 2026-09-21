@@ -101,6 +101,27 @@
   **Chưa đạt cổng → theo đúng DATA_PLAN §8.3: KHÔNG đi bước 4 (gán đại trà).** Việc tiếp
   theo: nghe lại lần ba 13 clip bất đồng, chốt, ghi `decision_log.md`, sửa
   `annotation_guideline.md`, rồi cân nhắc pilot vòng mới trước khi thử lại cổng.
+- 🔴 **22/09 (tiếp) — nghe lại lần ba 13/13 ca bất đồng XONG, chốt và ghi log đầy đủ.**
+  9 mục mới trong `decision_log.md` (DATA_PLAN §8.2 B2). Ba nhóm nguyên nhân: (1) lệch
+  biên nhẹ (3 ca, chỉnh mốc thời gian); (2) sự kiện thật bị bỏ sót — cả ở lần 1 (3 ca, lần
+  2 mù nghe đúng hơn) lẫn ở lần 2 (1 ca `-AIHL5EIKUg`, 2 sự kiện "thừa" bị loại + 1 ca
+  `13ApmSOcZpU`, lần 2 tự nhân đôi dòng `siren` — không phải bất đồng thính giác thật); (3)
+  **một đổi lớp thật** `as_strong_0BEtPXdDQrs_250000` (`siren`, không phải `alarm_bell` —
+  cặp này đã có sẵn trong `confusable_with` hai chiều của `ontology_map.yaml` từ lỗi model
+  19/09, giờ xác nhận thêm nhầm lẫn ở người).
+  **Phát hiện mẫu hình mới:** 2 clip (`-3MV6T3u9Ig`, `-HIozxABvUQ`) đều bị bỏ sót
+  `speech_normal` nền chạy đồng thời với `applause_cheering` — cả hai lần gán trước mặc
+  định coi hai lớp tuần tự dù §4 `annotation_guideline.md` đã ghi rõ quy tắc chồng lấn. Đã
+  thêm cảnh báo cụ thể vào §4.
+  **Phát hiện quan trọng nhất:** `as_strong_0yZGysisqY0_12000` — phán quyết "đồ chơi mô
+  phỏng" của lần 1 được CỦNG CỐ ở lần ba (giữ nguyên không gán), nhưng lần 2 MÙ đã bị đồ
+  chơi đánh lừa hoàn toàn (gán `alarm_bell`+`explosion` không có thật). Kết luận ghi vào
+  decision_log: đồ chơi/mô phỏng có thể đánh lừa ngay cả người đã từng nhận ra nó, khi mất
+  ngữ cảnh (điều kiện mù) — **tự-nhất-quán đo ở §8 có thể ĐÁNH GIÁ THẤP độ tin cậy thật của
+  quyết định "đồ chơi"**, phải ghi vào Hạn chế khoá luận.
+  30 clip pilot vẫn **CHƯA** được coi là gold cuối cùng cho các file này — cổng §8.5 chưa
+  đạt nên chưa chốt là dữ liệu tin cậy để đưa thẳng vào `gold_test`; cần cân nhắc một vòng
+  pilot mới sau khi áp dụng các sửa đổi guideline ở trên.
 - 🔴 **21/09 (tiếp 3) — pilot gold lần 1 XONG (30/30), hạ tầng cho lần 2 + ablation
   `pos_weight` dựng xong trong lúc chờ khoảng nghỉ ≥3 ngày (DATA_PLAN §8.3).**
   `data/gold/pilot_v1_lan1.tsv`: 52 dòng sự kiện, 11/15 lớp có mặt. Phải loại **16 file /
