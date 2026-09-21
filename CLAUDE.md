@@ -150,11 +150,12 @@ không phải trạng thái hiện hành.
    loại (cửa sổ hẹp, trần thấp, khe hở năng lượng — xem trên). Hướng còn lại chưa đo: nghe
    trực tiếp vài clip bị phân mảnh để tìm lý do bằng tai, hoặc so `long_event` với các lát
    cắt khác theo trục SNR/reverb thay vì trục độ dài sự kiện.
-2. **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1)** — hạ tầng xong 21/09 (xem trên), còn lại
-   là việc CHỈ NGƯỜI làm được: gán tay 30 clip trong `data/gold/pilot_v1_candidates.csv`
-   theo `annotation_guideline.md`, nghỉ ≥3 ngày, gán lại mù, tính tự-nhất-quán. Đây là thứ
-   DUY NHẤT gỡ được confound "dev cùng recipe với train của v3". Không dùng test để chọn
-   threshold.
+2. **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — 24/30 xong.** 6 file bị đánh "rác/không
+   liên quan" đã ghi vào `exclusions.csv` (stage `gold_pilot`) và loại khỏi `gold_test`;
+   `select_gold_pilot.py` đã chọn 6 file thay thế (giữ nguyên 24 file cũ nhờ round-robin
+   ổn định theo seed). **Còn thiếu: gán 6 file thay thế**, rồi mới đủ 30 để làm bước 2
+   (nghỉ ≥3 ngày, gán lại mù, tính tự-nhất-quán). Đây là thứ DUY NHẤT gỡ được confound
+   "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
 3. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã
    đo (xem trên); cần train lại nên chi phí khác hẳn phép đo ECE đã có. Cổng hợp đồng
    (mục 3 cũ) và checkpoint resume nay đã xong, xem bên dưới.
@@ -420,6 +421,26 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-21 (tiếp 3) — Pilot gold lần 1: 24/30 gán xong, 6 file rác đã loại
+
+- **Người dùng gán tay xong 30/30 file pilot**, ghi vào `data/gold/pilot_v1_lan1.tsv`
+  thô — có 6 file đánh nhãn tạm `bad` (rác/không liên quan) và 1 file đánh `nothing`
+  (sạch nhưng không có sự kiện nào thuộc 16 lớp, chỉ nhiễu nền).
+- **Xử lý dòng `bad`:** không ghi vào TSV — coi là loại cả clip theo N3. Tra
+  `raw_manifest.csv` lấy đủ mọi `file_id` (mỗi WAV audioset_strong có nhiều dòng sự
+  kiện) cho 6 segment này → **24 dòng exclusion**, ghi vào `exclusions.csv`
+  (`stage=gold_pilot`, `reason_code=unusable`). Chạy lại `select_gold_pilot.py` → đúng
+  **6 file thay thế mới**, 24 file cũ giữ nguyên (tính chất round-robin + seed ổn định).
+- **Xử lý dòng `nothing`:** khác `bad` — clip vẫn hợp lệ, chỉ là không có sự kiện nào
+  đáng gán. Theo §5 của guideline: **không ghi dòng nào** vào TSV (không dùng nhãn
+  `none`/dòng rỗng). File này ĐƯỢC GIỮ trong pilot, không bị loại.
+- **Dọn TSV:** khử 1 dòng trùng lặp y hệt (`object_drop_dishes` lặp ở
+  `-99MQ06mPYE_30000.wav`), chuẩn hoá tab thật (file gốc lẫn khoảng trắng và tab),
+  3 chữ số thập phân, sắp theo `filename` rồi `onset` — đúng §5. Kết quả: **42 dòng sự
+  kiện hợp lệ** cho 23 file (24 file trừ 1 file `nothing`).
+- **Còn lại:** gán 6 file thay thế trong `pilot_v1_candidates.csv` (đã đổi so với bản
+  gán lần đầu) để đủ 30, rồi mới sang bước 2 của §8.3.
 
 ### 2026-09-21 (tiếp 2) — AudioSet-strong vào manifest/split, chọn pilot gold
 
