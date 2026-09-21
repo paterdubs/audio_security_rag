@@ -82,6 +82,63 @@ def gieo_mam(seed: int) -> dict:
     return {"split": seed, "python": seed, "numpy": seed, "torch": seed, "cuda": seed}
 
 
+def kiem_cong_hop_dong(ket_qua: str, bo_qua: bool) -> str | None:
+    """`None` = được train tiếp; chuỗi = thông điệp chặn, in ra rồi dừng.
+
+    Trước 19/09 cổng này chỉ IN CẢNH BÁO khi `ket_qua != "PASSED"` — một lô `FAILED` vẫn
+    train được, và v1/v2 đã train trên lô legacy không đạt hợp đồng mà không có gì chặn
+    lại. `KHONG_RO` ("chưa ai kiểm") bị chặn GIỐNG HỆT `FAILED` ("đã kiểm, hỏng") — "chưa
+    ai kiểm" không phải lý do để train, nó là lý do để KHÔNG train cho tới khi kiểm.
+    """
+    if ket_qua == "PASSED" or bo_qua:
+        return None
+    return (f"hợp đồng dữ liệu: {ket_qua} — chặn train. Dùng --force-du-lieu-chua-dat để "
+            "train dù vậy (cờ này được ghi vào manifest.json).")
+
+
+def luu_checkpoint_resume(path: Path, model: nn.Module, optimizer: torch.optim.Optimizer,
+                          scheduler, scaler: torch.amp.GradScaler, epoch: int,
+                          best_map: float) -> None:
+    """Trạng thái ĐẦY ĐỦ để resume — ghi đè MỖI epoch, khác `best.pt` (chỉ lưu model ở
+    epoch mAP tốt nhất, dùng cho inference). Không gộp hai file: đổi schema của `best.pt`
+    sẽ vỡ `predictions.py`/`eval_sed.py`, cả hai đọc đúng 5 khoá của nó.
+
+    RNG lưu cả bốn nguồn `gieo_mam()` đã gieo — thiếu một nguồn thì lượt resume và lượt
+    chạy liền mạch rẽ nhánh ngay từ mẫu tiếp theo mà không có triệu chứng nào.
+    """
+    torch.save({
+        "epoch": epoch, "best_map": best_map,
+        "model": model.state_dict(), "optimizer": optimizer.state_dict(),
+        "scheduler": scheduler.state_dict(), "scaler": scaler.state_dict(),
+        "rng": {
+            "python": random.getstate(), "numpy": np.random.get_state(),
+            "torch": torch.get_rng_state(),
+            "cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+        },
+    }, path)
+
+
+def nap_checkpoint_resume(path: Path, model: nn.Module, optimizer: torch.optim.Optimizer,
+                          scheduler, scaler: torch.amp.GradScaler) -> tuple[int, float]:
+    """Nạp lại đầy đủ → (epoch đã xong, best_map). Vòng lặp train tiếp tục từ epoch+1.
+
+    Khôi phục RNG SAU KHI đã dựng model/optimizer/scheduler mới (chúng có thể tiêu thụ vài
+    số ngẫu nhiên lúc khởi tạo) — nếu khôi phục trước, bước dựng lại sẽ lệch RNG đi so với
+    lúc lưu.
+    """
+    checkpoint = torch.load(path, map_location="cpu", weights_only=False)
+    model.load_state_dict(checkpoint["model"])
+    optimizer.load_state_dict(checkpoint["optimizer"])
+    scheduler.load_state_dict(checkpoint["scheduler"])
+    scaler.load_state_dict(checkpoint["scaler"])
+    random.setstate(checkpoint["rng"]["python"])
+    np.random.set_state(checkpoint["rng"]["numpy"])
+    torch.set_rng_state(checkpoint["rng"]["torch"])
+    if checkpoint["rng"]["cuda"] is not None and torch.cuda.is_available():
+        torch.cuda.set_rng_state_all(checkpoint["rng"]["cuda"])
+    return int(checkpoint["epoch"]), float(checkpoint["best_map"])
+
+
 def detect_frame_count(model: nn.Module, device: torch.device, n_samples: int) -> int:
     """Hỏi thẳng model xem nó trả về bao nhiêu khung, thay vì tính tay từ hop size.
 
@@ -212,11 +269,16 @@ def run(args: argparse.Namespace) -> int:
     manifest["timing"]["bat_dau"] = datetime.now(UTC).isoformat(timespec="seconds")
     manifest["model"] = {"n_frames": n_frames, "n_classes": n_classes,
                          "tham_so_hoc_duoc": trainable_parameters(model)}
+    manifest["data"]["hop_dong"]["cong_chan_bo_qua"] = bool(args.force_du_lieu_chua_dat)
     ghi_manifest(run_dir, manifest)
     hop_dong = manifest["data"]["hop_dong"]["ket_qua"]
+    thong_diep_chan = kiem_cong_hop_dong(hop_dong, args.force_du_lieu_chua_dat)
+    if thong_diep_chan is not None:
+        print(f"❌ {thong_diep_chan}")
+        return 1
     if hop_dong != "PASSED":
-        print(f"hop dong du lieu: {hop_dong} - xem data.hop_dong trong manifest.json. "
-              "Pha 2 phai PASS truoc khi so cua run nay duoc dung de ket luan.")
+        print(f"⚠️ hợp đồng dữ liệu: {hop_dong} nhưng --force-du-lieu-chua-dat đã bật — "
+              "tiếp tục train, cờ đã ghi vào manifest.json.")
 
     median_size = median_sizes_for(train_set, n_classes, n_frames, args.adaptive_postproc)
     if args.adaptive_postproc:
@@ -251,8 +313,26 @@ def run(args: argparse.Namespace) -> int:
     )
     scaler = torch.amp.GradScaler("cuda", enabled=device.type == "cuda")
 
-    history, best_map = [], -1.0
-    for epoch in range(1, args.epochs + 1):
+    history, best_map, epoch_bat_dau = [], -1.0, 1
+    resume_path = run_dir / "checkpoint_resume.pt"
+    if args.resume:
+        if resume_path.exists():
+            da_xong, best_map = nap_checkpoint_resume(resume_path, model, optimizer,
+                                                       scheduler, scaler)
+            epoch_bat_dau = da_xong + 1
+            history_path = run_dir / "history.json"
+            if history_path.exists():
+                history = json.loads(history_path.read_text(encoding="utf-8"))["history"]
+            print(f"↻ resume từ epoch {da_xong} đã xong · best_map={best_map:.4f} · "
+                  f"tiếp tục từ epoch {epoch_bat_dau}/{args.epochs}", flush=True)
+        else:
+            print(f"⚠️ --resume bật nhưng không thấy {resume_path} — bắt đầu từ epoch 1.")
+    if epoch_bat_dau > args.epochs:
+        print(f"epoch {epoch_bat_dau - 1} đã là epoch cuối ({args.epochs}) — không còn gì "
+              "để resume.")
+        return 0
+
+    for epoch in range(epoch_bat_dau, args.epochs + 1):
         model.train()
         started, total_loss = time.time(), 0.0
         for batch in train_loader:
@@ -311,6 +391,11 @@ def run(args: argparse.Namespace) -> int:
                         "sample_rate": args.sample_rate, "duration": args.duration},
                        run_dir / "best.pt")
 
+        # Ghi đè MỖI epoch, không chỉ epoch tốt nhất — resume phải tiếp tục từ epoch vừa
+        # xong, không phải nhảy lùi về epoch tốt nhất trước đó.
+        luu_checkpoint_resume(resume_path, model, optimizer, scheduler, scaler,
+                              epoch, best_map)
+
     (run_dir / "history.json").write_text(
         json.dumps({"args": vars(args), "history": history,
                     "final": scores.__dict__}, ensure_ascii=False, indent=2, default=str),
@@ -354,6 +439,12 @@ def main() -> int:
     parser.add_argument("--freeze-backbone", action="store_true")
     parser.add_argument("--zero-shot", action="store_true")
     parser.add_argument("--name")
+    parser.add_argument("--force-du-lieu-chua-dat", action="store_true",
+                        help="cho phép train dù hợp đồng dữ liệu FAILED/KHONG_RO; cờ này "
+                             "được ghi vào manifest.json để nhận diện run nào đã bỏ qua cổng")
+    parser.add_argument("--resume", action="store_true",
+                        help="tiếp tục từ ml/runs/<name>/checkpoint_resume.pt nếu có "
+                             "(optimizer/scheduler/RNG đầy đủ), không thì bắt đầu epoch 1")
     return run(parser.parse_args())
 
 
