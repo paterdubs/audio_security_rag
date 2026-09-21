@@ -89,6 +89,15 @@ def doi_ten_theo_anh_xa(events: dict[str, list[dict]],
     return da_doi, sorted(chua_map)
 
 
+def bo_duoi_wav(events: dict[str, list[dict]]) -> dict[str, list[dict]]:
+    """Bỏ `.wav` cuối tên khoá, nếu có. `pilot_v1_lan1.tsv` ghi filename THẬT của WAV
+    (có đuôi, quy ước TSV/DCASE) — còn `file_id` xuyên suốt pipeline (mapping.csv,
+    raw_manifest.csv, splits.csv) KHÔNG có đuôi. Hai quy ước khác nhau gặp nhau đúng ở
+    chỗ này: thiếu bước này thì universe (suy từ mapping) không khớp được khoá nào của
+    lan1 → lan1 rỗng tuyệt đối, event_f1 ra NaN thay vì một cổng KHÔNG ĐẠT có ý nghĩa."""
+    return {(k[:-4] if k.endswith(".wav") else k): v for k, v in events.items()}
+
+
 def day_du_universe(events: dict[str, list[dict]], universe: set[str]) -> dict[str, list[dict]]:
     """Đúng các id trong `universe`: thiếu thì lấp `[]` (không sự kiện nào, không phải
     chưa đo), thừa (ngoài universe) thì loại — tự-nhất-quán chỉ tính trên clip có mặt ở
@@ -108,6 +117,20 @@ def trung_vi(gia_tri: list[float]) -> float | None:
     """`None` nghĩa là không có cặp nào ghép được — không phải lệch bằng 0.0. Cùng kỷ
     luật đã áp cho F1 ở epoch chưa full-eval."""
     return statistics.median(gia_tri) if gia_tri else None
+
+
+def chi_tiet_bat_dong(kq: KetQuaPhanLoai) -> list[dict]:
+    """Mọi cặp KHÔNG phải `dung` — danh sách ca cần **nghe lại lần ba** khi cổng §8.5
+    không đạt (DATA_PLAN §8.3 bước 3 / §8.2 B2: nhật ký bất đồng với chính mình). Không
+    có hàm này thì biết cổng KHÔNG ĐẠT nhưng không biết clip nào cụ thể phải nghe lại.
+    Sắp theo `clip_id` rồi mốc thời gian có mặt (ref trước, không thì pred) để dễ dò khi
+    mở lại từng file."""
+    return sorted(
+        ({"clip_id": c.clip_id, "loai": c.loai, "ref_lop": c.ref_lop, "pred_lop": c.pred_lop,
+          "ref_onset": c.ref_onset, "pred_onset": c.pred_onset}
+         for c in kq.cap if c.loai != "dung"),
+        key=lambda r: (r["clip_id"], r["ref_onset"] if r["ref_onset"] is not None else r["pred_onset"]),
+    )
 
 
 def dong_bao_cao(p: dict):
@@ -151,6 +174,20 @@ def dong_bao_cao(p: dict):
     yield "|---|---|"
     for lop in sorted(p["per_class_event"]):
         yield f"| {lop} | {so(p['per_class_event'][lop], 4)} |"
+    yield ""
+
+    yield "## Danh sách ca bất đồng — nghe lại lần ba (DATA_PLAN §8.3 bước 3 / §8.2 B2)"
+    yield ""
+    if not p["bat_dong"]:
+        yield "Không có ca bất đồng nào — mọi cặp đều khớp `dung` trong collar."
+    else:
+        yield "| clip_id | loại | lớp lần 1 | lớp lần 2 | onset lần 1 | onset lần 2 |"
+        yield "|---|---|---|---|---|---|"
+        for r in p["bat_dong"]:
+            on1 = so(r["ref_onset"], 3) if r["ref_onset"] is not None else "∅"
+            on2 = so(r["pred_onset"], 3) if r["pred_onset"] is not None else "∅"
+            yield (f"| {r['clip_id']} | {r['loai']} | {r['ref_lop'] or '∅'} | "
+                   f"{r['pred_lop'] or '∅'} | {on1} | {on2} |")
 
 
 def run(args: argparse.Namespace) -> int:
@@ -162,7 +199,7 @@ def run(args: argparse.Namespace) -> int:
     anh_xa = doc_anh_xa_pilot(args.mapping)
     universe = set(anh_xa.values())
 
-    lan1_tho = doc_tsv_gold(args.lan1)
+    lan1_tho = bo_duoi_wav(doc_tsv_gold(args.lan1))
     lan1 = day_du_universe(lan1_tho, universe)
 
     lan2_blind = doc_tsv_gold(args.lan2)
@@ -180,6 +217,7 @@ def run(args: argparse.Namespace) -> int:
     viet_dan(args.out, dong_bao_cao({
         "event_f1": event_f1, "lech_onset_med_ms": lech_med_ms,
         "per_class_event": per_class_event, "chua_map_lan2": chua_map,
+        "bat_dong": chi_tiet_bat_dong(kq),
     }))
     print(f"✓ {args.out}")
     return 0

@@ -16,6 +16,8 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from agreement import (  # noqa: E402
+    bo_duoi_wav,
+    chi_tiet_bat_dong,
     day_du_universe,
     doc_anh_xa_pilot,
     doc_tsv_gold,
@@ -77,6 +79,11 @@ def test_doi_ten_theo_anh_xa_map_dung_va_bao_chua_map():
     assert chua_map == ["blind_z.wav"]
 
 
+def test_bo_duoi_wav_bo_dung_duoi():
+    kq = bo_duoi_wav({"p0.wav": [1], "p1": [2]})
+    assert kq == {"p0": [1], "p1": [2]}
+
+
 def test_day_du_universe_dien_rong_cho_thieu():
     kq = day_du_universe({"p0": [{"event_label": "x", "onset": 0.0, "offset": 1.0}]},
                          universe={"p0", "p1"})
@@ -104,6 +111,33 @@ def test_lech_onset_list_chi_lay_cap_co_ca_hai_onset():
     assert len(lech) == 2
     assert lech[0] == pytest.approx(0.05)
     assert lech[1] == pytest.approx(0.5)
+
+
+def test_chi_tiet_bat_dong_bo_qua_dung():
+    """`dung` (khớp trong collar) không phải ca bất đồng — không cần nghe lại lần ba."""
+    cap = [
+        CapGhep(clip_id="c1", loai="dung", ref_lop="x", pred_lop="x", ref_onset=1.0, pred_onset=1.05),
+        CapGhep(clip_id="c1", loai="bien", ref_lop="x", pred_lop="x", ref_onset=2.0, pred_onset=2.5),
+        CapGhep(clip_id="c1", loai="thieu", ref_lop="y", ref_onset=3.0),
+        CapGhep(clip_id="c1", loai="thua", pred_lop="z", pred_onset=4.0),
+    ]
+    kq = KetQuaPhanLoai(cap=cap)
+    bat_dong = chi_tiet_bat_dong(kq)
+    assert len(bat_dong) == 3
+    assert all(r["loai"] != "dung" for r in bat_dong)
+
+
+def test_chi_tiet_bat_dong_sap_theo_clip_id_roi_onset():
+    cap = [
+        CapGhep(clip_id="c2", loai="bien", ref_lop="x", pred_lop="x", ref_onset=5.0, pred_onset=5.5),
+        CapGhep(clip_id="c1", loai="bien", ref_lop="x", pred_lop="x", ref_onset=2.0, pred_onset=2.5),
+        CapGhep(clip_id="c1", loai="thieu", ref_lop="y", ref_onset=1.0),
+    ]
+    kq = KetQuaPhanLoai(cap=cap)
+    bat_dong = chi_tiet_bat_dong(kq)
+    assert [(r["clip_id"], r["ref_onset"]) for r in bat_dong] == [
+        ("c1", 1.0), ("c1", 2.0), ("c2", 5.0),
+    ]
 
 
 def test_trung_vi_rong_tra_none():
@@ -169,3 +203,38 @@ def test_run_gate_khong_dat_khi_lan_2_khac_han_lan_1(tmp_path):
     assert ma == 0
     noi_dung = out.read_text(encoding="utf-8")
     assert "KHÔNG ĐẠT" in noi_dung
+    assert "Danh sách ca bất đồng" in noi_dung
+    assert "p0" in noi_dung.split("Danh sách ca bất đồng")[1]
+
+
+def test_run_lan1_co_duoi_wav_van_khop_duoc_voi_file_id_tran(tmp_path):
+    """Tái hiện lỗi thật gặp khi chạy production 22/09: `pilot_v1_lan1.tsv` ghi filename
+    CÓ đuôi `.wav` (đúng quy ước TSV — tên file WAV thật, ví dụ
+    `as_strong_-0TTFAArJ9k_30000.wav`), còn cột `file_id` của mapping.csv KHÔNG có đuôi
+    (đúng quy ước file_id xuyên suốt pipeline, ví dụ `as_strong_-0TTFAArJ9k_30000`).
+    Trước khi vá, universe (suy từ mapping) không khớp được key nào của lan1 → lan1 rỗng
+    tuyệt đối → event_f1/per_class_event ra NaN cho MỌI lớp, không phải một cổng thật sự
+    không đạt."""
+    repo = tmp_path
+    lan1 = repo / "lan1.tsv"
+    lan2 = repo / "lan2.tsv"
+    mapping = repo / "mapping.csv"
+    out = repo / "report.md"
+
+    ghi_tsv(lan1, [("p0.wav", 1.000, 2.000, "speech_normal")])
+    ghi_tsv(lan2, [("blind_a.wav", 1.040, 2.040, "speech_normal")])
+    with mapping.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=["ten_mu", "file_id", "la_pilot"])
+        writer.writeheader()
+        writer.writerow({"ten_mu": "blind_a.wav", "file_id": "p0", "la_pilot": "True"})
+
+    import argparse
+    args = argparse.Namespace(lan1=lan1, lan2=lan2, mapping=mapping, out=out)
+    ma = run(args)
+    assert ma == 0
+    noi_dung = out.read_text(encoding="utf-8")
+    # 14/15 lớp không xuất hiện trong fixture bé này nên NaN per-class là ĐÚNG (0 ref/0
+    # pred không định nghĩa được) — chỉ cổng tổng hợp và lớp CÓ dữ liệu mới cần là số thật.
+    assert "event-F1: **1,0000**" in noi_dung
+    assert "| speech_normal | 1,0000 |" in noi_dung
+    assert "✅ ĐẠT" in noi_dung
