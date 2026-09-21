@@ -28,6 +28,39 @@ File này là phòng tuyến duy nhất chống trôi tiêu chí. Nên:
 
 ---
 
+## 0.1 Điều kiện tiên quyết — audio có phải ghi âm THẬT không
+
+Phát hiện ở pilot lần 1 (22/09), xem `data/gold/decision_log.md` mục cùng ngày.
+
+`DATA_PLAN.md` §8 định nghĩa gold_test là *"audio THẬT"*, nhưng chưa từng nói rõ **thế
+nào là không thật**. AudioSet lấy nhãn từ audio track của video YouTube; quy trình kiểm
+định của AudioSet chỉ xác nhận *"loại âm thanh X có nghe thấy"*, **không** phân biệt bản
+ghi âm một sự kiện thật ngoài đời với hiệu ứng âm thanh của trò chơi điện tử, phim ảnh,
+hay dàn dựng — hai loại có thể cho sóng âm gần giống hệt nhau (game làm hiệu ứng vỡ kính
+nghe y như kính vỡ thật) nhưng **không** mang đặc trưng ngữ cảnh thật (dội âm phòng thật,
+tạp âm nền thật, động lực học tự nhiên) mà mô hình cần học để hoạt động đúng lúc triển
+khai.
+
+**Trước khi định nghĩa onset/offset của bất kỳ sự kiện nào, tự hỏi: nội dung TOÀN CLIP có
+rõ ràng là trò chơi điện tử / phim ảnh / hiệu ứng dàn dựng không?**
+
+| Dấu hiệu (nghe được, không cần xem hình) | |
+|---|---|
+| Giọng bình luận kiểu người chơi game, tiếng UI/menu, nhạc nền đặc trưng game | Loại |
+| Động lực học âm thanh nén phẳng bất thường, thiếu tạp âm môi trường xung quanh | Loại |
+| Âm thanh có ngữ cảnh vật lý hợp lý (phòng, ngoài trời, tiếng người thật xen kẽ) | Giữ |
+
+**Nếu đúng là game/phim/dàn dựng:** loại **CẢ CLIP**, không gán bất kỳ dòng nào (kể cả
+những đoạn `speech_normal` nghe có vẻ thật xen giữa — cả clip đã mất tư cách "audio thật"
+của gold_test). Ghi vào `data/manifests/exclusions.csv`, `reason_code=synthetic_or_game_audio`
+(khác `unusable` — để đếm riêng được tỉ lệ nhiễm loại này trong nguồn).
+
+**Nếu chỉ một phần clip là game/dàn dựng, phần còn lại rõ ràng là thật:** ghi vào
+[§8 Nhật ký quyết định](#8-nhật-ký-quyết-định) trước khi gán — đây chưa có tiền lệ, không
+tự quyết ngầm.
+
+---
+
 ## 1. Định nghĩa onset và offset
 
 | | Định nghĩa |

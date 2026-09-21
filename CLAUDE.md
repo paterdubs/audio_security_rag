@@ -153,7 +153,13 @@ không phải trạng thái hiện hành.
 2. **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — 24/30 xong.** 6 file bị đánh "rác/không
    liên quan" đã ghi vào `exclusions.csv` (stage `gold_pilot`) và loại khỏi `gold_test`;
    `select_gold_pilot.py` đã chọn 6 file thay thế (giữ nguyên 24 file cũ nhờ round-robin
-   ổn định theo seed). **Còn thiếu: gán 6 file thay thế**, rồi mới đủ 30 để làm bước 2
+   ổn định theo seed). **22/09: phát hiện thêm rủi ro mới** — 1 trong 6 file thay thế
+   (`0QlQLIvLpNI`) là hiệu ứng âm thanh GAME, không phải ghi âm thật, dù AudioSet gán
+   đúng `glass_breaking` theo định nghĩa của họ. Đã thêm quy tắc tường minh vào
+   `annotation_guideline.md` §0.1 + mã loại riêng `synthetic_or_game_audio` (khác
+   `unusable`, để đếm riêng tỉ lệ nhiễm game/phim trong nguồn AudioSet-strong) —
+   **rủi ro có thể lặp lại ở các file khác, không phải ca đơn lẻ.** **Còn thiếu: gán 6
+   file thay thế** (đã đổi 1/6 lần nữa), rồi mới đủ 30 để làm bước 2
    (nghỉ ≥3 ngày, gán lại mù, tính tự-nhất-quán). Đây là thứ DUY NHẤT gỡ được confound
    "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
 3. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã
