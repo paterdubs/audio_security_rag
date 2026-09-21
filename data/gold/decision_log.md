@@ -96,3 +96,30 @@ hiện thật về nguồn dữ liệu, cần ghi vào phần Hạn chế/Phươ
 nghe, nhưng chuẩn bị tinh thần tỉ lệ hỏng cao hơn các lớp khác nhiều lần.
 
 ---
+
+### 2026-09-22 (tiếp) · `as_strong_0yZGysisqY0_12000.wav` · âm thanh đồ chơi
+
+**Tình huống:** Clip có tiếng nổ nghe gần giống súng, nhưng người gán xác định đó là
+**âm thanh đồ chơi** (đồ chơi mô phỏng, không phải súng thật) — khác trường hợp
+game/phim ở các mục trên: đây có thể là bản ghi âm THẬT (ai đó quay cảnh chơi đồ chơi),
+chỉ là nội dung không phải sự kiện `gunshot` thật.
+
+**Quyết định:** **Không gán** dòng `gunshot` cho clip này. Không loại cả file khỏi
+`gold_test` (không có bằng chứng đây là game/rác/nhạc) — xử lý như trường hợp "không có
+sự kiện thuộc 16 lớp", giống `as_strong_-ewBC-6gLSo_30000.wav` ở pilot lần 1: **không ghi
+dòng nào vào TSV**, file vẫn ở trong `gold_test`.
+
+**Lý do:** Cùng nguyên tắc đã áp dụng ở mục **2026-09-15 · chuông quầy phục vụ**: âm
+thanh acoustically giống lớp mục tiêu nhưng KHÔNG mang đúng ý nghĩa của lớp đó (thiết bị
+gọi phục vụ ≠ báo động; đồ chơi ≠ vũ khí thật) thì không được gán vào lớp mục tiêu, dù
+sóng âm nghe tương tự. Gán nhầm sẽ dạy model báo động giả với đồ chơi trẻ em — hậu quả
+thực tế tương tự ca chuông quầy: khu dân cư/trường học là nơi trẻ em chơi đồ chơi phổ
+biến, false alarm liên tục sẽ khiến người dùng tắt hệ thống.
+
+**Áp dụng chung:** mọi âm thanh đồ chơi/mô phỏng mô tả *chức năng* khác lớp mục tiêu
+(dù *âm thanh* giống) → không gán vào lớp mục tiêu; nếu clip không còn sự kiện nào khác
+đáng gán thì coi như "không có sự kiện", giữ nguyên trong `gold_test`, không dùng
+`exclusions.csv`. Nếu việc này lặp lại ≥3 lần, cần bổ sung một dòng vào `taxonomy.md` mục
+`gunshot` phần ❌ Không bao gồm, tương tự đã làm với chuông quầy ở `alarm_bell`.
+
+---
