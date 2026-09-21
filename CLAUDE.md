@@ -128,7 +128,12 @@ không phải trạng thái hiện hành.
   `siren` chỉ **2/311** (p90 4,01 s, do UrbanSound8K cắt sẵn ở 4 s). Vì thế lô mới dùng
   ngưỡng 4 s và chỉ các lớp cấp được; bảng đo và giới hạn ở STATUS §6–§7.
 - AudioSet-strong: **937 WAV / 937 dòng segments** — khớp tuyệt đối. Process tải **đã dừng**,
-  chưa hết hàng đợi. Raw mới chưa vào manifest/split → **real dev/gold chưa sẵn sàng**.
+  chưa hết hàng đợi. **21/09: đã vào manifest/split** — `build_manifest.py --source
+  audioset_strong` (3.977 dòng sự kiện) rồi `make_splits.py` → **1.601 dòng sự kiện / 367
+  file WAV riêng biệt vào `gold_test`** (2.376/570 vào `dev`), khớp đúng tỉ lệ 0,6/0,4 của
+  `splits.yaml`. `scripts/select_gold_pilot.py` chọn 30 clip pilot rải đều 15 lớp (seed cố
+  định, tái lập được) → `data/gold/pilot_v1_candidates.csv`. **Vẫn chưa có nhãn** — đây là
+  danh sách ứng viên để bắt đầu DATA_PLAN §8.3 bước 1, chưa phải gold_test hoàn chỉnh.
 - F1 bằng 0 tại epoch không full-eval là **chưa đo**, không phải F1 thực. Tất cả số trong
   bảng trên lấy từ epoch 25 có full-eval.
 - CI, DVC pipeline, BEATs–Conformer–BART, grounded decoding, streaming Redis Streams,
@@ -145,9 +150,11 @@ không phải trạng thái hiện hành.
    loại (cửa sổ hẹp, trần thấp, khe hở năng lượng — xem trên). Hướng còn lại chưa đo: nghe
    trực tiếp vài clip bị phân mảnh để tìm lý do bằng tai, hoặc so `long_event` với các lát
    cắt khác theo trục SNR/reverb thay vì trục độ dài sự kiện.
-2. **Đưa 937 AudioSet-strong WAV vào manifest/split không rò rỉ**, chuẩn bị real dev và
-   gold; sau đó pilot gán mù theo DATA_PLAN §8. Đây là thứ DUY NHẤT gỡ được confound
-   "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
+2. **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1)** — hạ tầng xong 21/09 (xem trên), còn lại
+   là việc CHỈ NGƯỜI làm được: gán tay 30 clip trong `data/gold/pilot_v1_candidates.csv`
+   theo `annotation_guideline.md`, nghỉ ≥3 ngày, gán lại mù, tính tự-nhất-quán. Đây là thứ
+   DUY NHẤT gỡ được confound "dev cùng recipe với train của v3". Không dùng test để chọn
+   threshold.
 3. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã
    đo (xem trên); cần train lại nên chi phí khác hẳn phép đo ECE đã có. Cổng hợp đồng
    (mục 3 cũ) và checkpoint resume nay đã xong, xem bên dưới.
@@ -413,6 +420,25 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-21 (tiếp 2) — AudioSet-strong vào manifest/split, chọn pilot gold
+
+- **`build_manifest.py --source audioset_strong`** — adapter đã có sẵn từ trước
+  (`adapt_audioset_strong`, `source_group_id=youtube_{ytid}` để cả video luôn đi cùng một
+  split), chỉ chưa ai chạy. 937 file → **3.977 dòng sự kiện** (một ổ 10s nhiều event), 0
+  trùng lặp với nguồn khác đã quét.
+- **`make_splits.py`** — **1.601 dòng sự kiện / 367 file WAV riêng biệt vào `gold_test`**
+  (2.376/570 vào `dev`), khớp đúng tỉ lệ 0,6/0,4 của `splits.yaml`. Mọi lớp trong 15 lớp
+  đều có ≥11 file trong `gold_test` (thấp nhất: `door_slam`).
+- **`scripts/select_gold_pilot.py` mới** — round-robin theo lớp (không random thuần), có
+  seed cố định để tái lập. Chọn ngẫu nhiên thuần trên 367 file sẽ để `speech_normal`
+  (210/367) lấn át `door_slam` (11/367) trong pilot. Cột `classes_tham_khao` trong output
+  CHỈ để chọn mẫu, không được nhìn lúc gán nhãn thật (annotation_guideline.md §7.2 cấm máy
+  đề xuất ở chế độ GOLD).
+- Kết quả: `data/gold/pilot_v1_candidates.csv` — 30 file, đủ 15 lớp (2–23 file/lớp,
+  `speech_normal` nhiều nhất vì hay xuất hiện nền trong các event khác). **Chưa có nhãn**
+  — đây là danh sách để bắt đầu DATA_PLAN §8.3 bước 1 (gán tay), không phải gold_test.
+- 649 → **654 test đạt**.
 
 ### 2026-09-21 (tiếp) — cổng hợp đồng chặn thật, checkpoint resume đầy đủ
 

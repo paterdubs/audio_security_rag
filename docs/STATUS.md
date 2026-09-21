@@ -81,6 +81,16 @@
   nguồn), tách khỏi `best.pt`; `--resume` khôi phục RNG nên dãy số ngẫu nhiên tiếp theo
   giống hệt như chưa hề dừng. Test đơn vị xác nhận, **chưa** kiểm bằng một lượt train thật
   đứt giữa chừng (25 epoch tốn GPU nhiều giờ).
+- 🔴 **21/09 (tiếp 2) — 937 WAV AudioSet-strong vào manifest/split, chọn xong pilot gold.**
+  `build_manifest.py --source audioset_strong` (adapter có sẵn, chỉ chưa ai chạy) →
+  **3.977 dòng sự kiện**, 0 trùng lặp với nguồn khác. `make_splits.py` →
+  **1.601 dòng sự kiện / 367 file riêng biệt vào `gold_test`** (2.376/570 vào `dev`),
+  khớp đúng tỉ lệ 0,6/0,4 của `splits.yaml`; mọi lớp trong 15 lớp có ≥11 file trong
+  `gold_test`. `scripts/select_gold_pilot.py` mới — chọn round-robin theo lớp (seed cố
+  định, tái lập được) thay vì ngẫu nhiên thuần (sẽ để `speech_normal` 210/367 lấn át
+  `door_slam` 11/367) → `data/gold/pilot_v1_candidates.csv`, 30 file phủ đủ 15 lớp.
+  **Chưa có nhãn nào** — đây là danh sách để bắt đầu DATA_PLAN §8.3 bước 1 (gán tay),
+  không phải gold_test hoàn chỉnh.
 - Pha 1–5 của [TRAINING_OPS_PLAN](TRAINING_OPS_PLAN.md) đã có module và đã chạy:
   `ml/runs/{v1,v2,v3}/manifest.json` + `predictions/dev_all.npz` +
   `analysis{,_adaptive}.{json,md}`. `train_sed.py` nay gieo toàn bộ RNG và ghi manifest
@@ -257,16 +267,18 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **649 test đạt** (21/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho
+- **654 test đạt** (21/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho
   Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép ghép
   cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo
   lát cắt, 15 test cho ablation trần cửa sổ + cửa sổ suy từ train + hiệu chuẩn xác suất,
-  11 test cho khe hở năng lượng của `long_event`, rồi 7 test nữa cho cổng hợp đồng +
-  checkpoint resume. Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
+  11 test cho khe hở năng lượng của `long_event`, 7 test cho cổng hợp đồng + checkpoint
+  resume, rồi 5 test nữa cho `select_gold_pilot.py`. Mốc 550 là của B9 (17/09); mốc 394
+  là của snapshot 15:05.
 - Lượt 19–21/09 **có** chạy lại suite trước và sau thay đổi mã: 573 đạt trước khi thêm
   test mới, 580 sau Pha 1 + Pha 3, 601 sau Pha 4, 616 sau Pha 5, 631 sau ablation
-  trần/hiệu chuẩn, 642 sau đo khe hở năng lượng, **649** sau cổng hợp đồng + checkpoint
-  resume. `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết.
+  trần/hiệu chuẩn, 642 sau đo khe hở năng lượng, 649 sau cổng hợp đồng + checkpoint
+  resume, **654** sau chọn pilot gold. `train_sed --zero-shot --workers 2` chạy thật,
+  xác nhận crash pickle đã hết.
   Không tuyên bố đã chạy lại test API/frontend, và **không** chạy lại một lượt train thật
   để kiểm `--resume` — chỉ có test đơn vị.
 - **`slice_index.jsonl` vẫn khớp code hiện tại.** `scaper_generate.py` được sửa lúc
@@ -496,5 +508,5 @@ lại sản phẩm thật và bắt được cả thứ chưa ai nghĩ tới, nh
 | Cổng hợp đồng | ✅ **21/09** — `kiem_cong_hop_dong()` CHẶN cả `FAILED` lẫn `KHONG_RO`; `--force-du-lieu-chua-dat` bỏ qua được, ghi vào `manifest.json` |
 | Checkpoint resume | ✅ **21/09** — `checkpoint_resume.pt` (model/optimizer/scheduler/scaler + RNG 4 nguồn), `--resume`; test đơn vị, chưa kiểm bằng lượt train thật đứt giữa chừng |
 | Hiệu chuẩn | ✅ **19/09** — ECE + reliability diagram đo xong (`ml/evaluation/calibration.py`); vùng dự báo 0,4–0,6 chiếm hơn nửa triệu khung mà tỉ lệ dương thật chỉ 1,7–3%, giải thích triệu chứng θ*≈0,9. Chưa ablation `pos_weight` — cần train lại để xác nhận nguyên nhân |
-| gold_test | vẫn RỖNG; DATA_PLAN D8–D10 là nút thắt, cần người gán mù |
+| gold_test | vẫn RỖNG (chưa có nhãn). **21/09: hạ tầng xong** — 1.601 dòng sự kiện/367 file audioset_strong đã vào `splits.csv` với `split=gold_test`; `pilot_v1_candidates.csv` có 30 clip rải đều 15 lớp. DATA_PLAN §8.3 bước 1 (gán tay pilot) là nút thắt tiếp theo, chỉ người làm được |
 | Publish prep | ✅ Weight/cache/secret đã ignore; JAMS legacy theo dõi có chủ đích; snapshot được audit trước khi push GitHub |
