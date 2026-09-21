@@ -1,0 +1,2543 @@
+{
+  "run": "panns_ft_v3",
+  "split": "dev",
+  "subset": "all",
+  "theta_sao": 0.9,
+  "hop_sec": 0.02,
+  "nguong_ti_le": 0.2,
+  "min_duration_sec": 1.0,
+  "n_clip_long_event": 144,
+  "n_su_kien_xet": 315,
+  "su_kien": [
+    {
+      "clip_id": "dev_000021",
+      "lop": "shout_yell",
+      "onset": 4.975599765777588,
+      "do_dai": 4.603,
+      "phan_manh": true,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000023",
+      "lop": "glass_breaking",
+      "onset": 0.07699999958276749,
+      "do_dai": 1.047,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000023",
+      "lop": "laughter",
+      "onset": 1.1115000247955322,
+      "do_dai": 2.884,
+      "phan_manh": true,
+      "khe_ho_sec": 0.04
+    },
+    {
+      "clip_id": "dev_000023",
+      "lop": "speech_normal",
+      "onset": 4.526400089263916,
+      "do_dai": 4.726,
+      "phan_manh": true,
+      "khe_ho_sec": 0.24
+    },
+    {
+      "clip_id": "dev_000038",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000038",
+      "lop": "door_slam",
+      "onset": 1.9077999591827393,
+      "do_dai": 1.452,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000038",
+      "lop": "speech_normal",
+      "onset": 5.093599796295166,
+      "do_dai": 2.041,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000038",
+      "lop": "applause_cheering",
+      "onset": 7.210700035095215,
+      "do_dai": 2.4,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000075",
+      "lop": "fireworks",
+      "onset": 0.011599999852478504,
+      "do_dai": 9.985,
+      "phan_manh": true,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000075",
+      "lop": "alarm_bell",
+      "onset": 2.5820000171661377,
+      "do_dai": 3.067,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000075",
+      "lop": "laughter",
+      "onset": 7.927199840545654,
+      "do_dai": 1.205,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000077",
+      "lop": "siren",
+      "onset": 0.17139999568462372,
+      "do_dai": 4.979,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000077",
+      "lop": "applause_cheering",
+      "onset": 4.426000118255615,
+      "do_dai": 1.725,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000094",
+      "lop": "fireworks",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000094",
+      "lop": "laughter",
+      "onset": 5.350299835205078,
+      "do_dai": 1.035,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000101",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000101",
+      "lop": "vehicle_crash",
+      "onset": 4.598100185394287,
+      "do_dai": 2.767,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000101",
+      "lop": "scream",
+      "onset": 8.01449966430664,
+      "do_dai": 1.331,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000114",
+      "lop": "shout_yell",
+      "onset": 0.0835999995470047,
+      "do_dai": 9.757,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000123",
+      "lop": "applause_cheering",
+      "onset": 0.6043999791145325,
+      "do_dai": 8.247,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000123",
+      "lop": "vehicle_crash",
+      "onset": 5.973999977111816,
+      "do_dai": 3.794,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000127",
+      "lop": "applause_cheering",
+      "onset": 0.4887000024318695,
+      "do_dai": 2.435,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000127",
+      "lop": "shout_yell",
+      "onset": 3.387200117111206,
+      "do_dai": 4.603,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000127",
+      "lop": "vehicle_crash",
+      "onset": 6.619999885559082,
+      "do_dai": 3.372,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000141",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000149",
+      "lop": "speech_normal",
+      "onset": 1.771299958229065,
+      "do_dai": 7.968,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000149",
+      "lop": "fireworks",
+      "onset": 4.065000057220459,
+      "do_dai": 1.183,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000161",
+      "lop": "siren",
+      "onset": 0.5026999711990356,
+      "do_dai": 4.997,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000161",
+      "lop": "speech_normal",
+      "onset": 5.489699840545654,
+      "do_dai": 1.43,
+      "phan_manh": false,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000163",
+      "lop": "siren",
+      "onset": 0.7455999851226807,
+      "do_dai": 5.128,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000163",
+      "lop": "laughter",
+      "onset": 2.8303000926971436,
+      "do_dai": 2.486,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000163",
+      "lop": "glass_breaking",
+      "onset": 5.8566999435424805,
+      "do_dai": 3.879,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000174",
+      "lop": "speech_normal",
+      "onset": 0.23829999566078186,
+      "do_dai": 2.947,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000174",
+      "lop": "applause_cheering",
+      "onset": 0.6930000185966492,
+      "do_dai": 8.917,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000174",
+      "lop": "applause_cheering",
+      "onset": 3.4890999794006348,
+      "do_dai": 3.451,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000174",
+      "lop": "applause_cheering",
+      "onset": 8.220000267028809,
+      "do_dai": 1.11,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000198",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000198",
+      "lop": "speech_normal",
+      "onset": 0.5547999739646912,
+      "do_dai": 6.198,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000199",
+      "lop": "siren",
+      "onset": 0.4065999984741211,
+      "do_dai": 5.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000199",
+      "lop": "vehicle_crash",
+      "onset": 3.0555999279022217,
+      "do_dai": 6.492,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000223",
+      "lop": "applause_cheering",
+      "onset": 0.817300021648407,
+      "do_dai": 8.396,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000244",
+      "lop": "scream",
+      "onset": 0.30000001192092896,
+      "do_dai": 2.182,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000244",
+      "lop": "running_footsteps",
+      "onset": 3.6577999591827393,
+      "do_dai": 5.809,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000257",
+      "lop": "running_footsteps",
+      "onset": 1.5235999822616577,
+      "do_dai": 7.554,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000260",
+      "lop": "fireworks",
+      "onset": 0.03420000150799751,
+      "do_dai": 6.99,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000260",
+      "lop": "fireworks",
+      "onset": 6.046999931335449,
+      "do_dai": 1.195,
+      "phan_manh": false,
+      "khe_ho_sec": 0.04
+    },
+    {
+      "clip_id": "dev_000260",
+      "lop": "applause_cheering",
+      "onset": 8.437000274658203,
+      "do_dai": 1.099,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000263",
+      "lop": "alarm_bell",
+      "onset": 1.6124000549316406,
+      "do_dai": 5.873,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000270",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000270",
+      "lop": "applause_cheering",
+      "onset": 3.3750998973846436,
+      "do_dai": 4.47,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000286",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000286",
+      "lop": "applause_cheering",
+      "onset": 3.2342000007629395,
+      "do_dai": 6.566,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000287",
+      "lop": "shout_yell",
+      "onset": 0.41359999775886536,
+      "do_dai": 2.137,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000287",
+      "lop": "siren",
+      "onset": 4.266900062561035,
+      "do_dai": 5.128,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000293",
+      "lop": "siren",
+      "onset": 0.8104000091552734,
+      "do_dai": 4.902,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000295",
+      "lop": "speech_normal",
+      "onset": 0.02759999968111515,
+      "do_dai": 9.037,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000295",
+      "lop": "siren",
+      "onset": 4.00570011138916,
+      "do_dai": 4.839,
+      "phan_manh": false,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000317",
+      "lop": "applause_cheering",
+      "onset": 0.054099999368190765,
+      "do_dai": 2.688,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000317",
+      "lop": "fireworks",
+      "onset": 1.322700023651123,
+      "do_dai": 6.99,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000317",
+      "lop": "glass_breaking",
+      "onset": 8.270400047302246,
+      "do_dai": 1.333,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000317",
+      "lop": "gunshot",
+      "onset": 8.49370002746582,
+      "do_dai": 1.001,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000319",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": false,
+      "khe_ho_sec": 0.04
+    },
+    {
+      "clip_id": "dev_000319",
+      "lop": "applause_cheering",
+      "onset": 4.742700099945068,
+      "do_dai": 2.866,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000328",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000328",
+      "lop": "explosion",
+      "onset": 2.058199882507324,
+      "do_dai": 2.628,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000329",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000329",
+      "lop": "explosion",
+      "onset": 0.00430000014603138,
+      "do_dai": 2.202,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000329",
+      "lop": "siren",
+      "onset": 0.13169999420642853,
+      "do_dai": 5.0,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000329",
+      "lop": "fireworks",
+      "onset": 3.8631999492645264,
+      "do_dai": 5.749,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000331",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000335",
+      "lop": "explosion",
+      "onset": 0.030700000002980232,
+      "do_dai": 2.303,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000335",
+      "lop": "alarm_bell",
+      "onset": 2.353100061416626,
+      "do_dai": 4.655,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000335",
+      "lop": "siren",
+      "onset": 5.752999782562256,
+      "do_dai": 3.399,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000346",
+      "lop": "fireworks",
+      "onset": 0.014399999752640724,
+      "do_dai": 9.985,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000346",
+      "lop": "siren",
+      "onset": 0.20970000326633453,
+      "do_dai": 4.862,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000346",
+      "lop": "running_footsteps",
+      "onset": 3.583899974822998,
+      "do_dai": 5.707,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000346",
+      "lop": "alarm_bell",
+      "onset": 7.986199855804443,
+      "do_dai": 1.952,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000356",
+      "lop": "fireworks",
+      "onset": 0.065700002014637,
+      "do_dai": 1.183,
+      "phan_manh": false,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000356",
+      "lop": "applause_cheering",
+      "onset": 0.2475000023841858,
+      "do_dai": 7.231,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000356",
+      "lop": "vehicle_crash",
+      "onset": 1.4139000177383423,
+      "do_dai": 8.326,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000356",
+      "lop": "explosion",
+      "onset": 7.722499847412109,
+      "do_dai": 1.048,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000377",
+      "lop": "running_footsteps",
+      "onset": 0.05770000070333481,
+      "do_dai": 5.806,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000377",
+      "lop": "siren",
+      "onset": 6.47189998626709,
+      "do_dai": 3.181,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000377",
+      "lop": "scream",
+      "onset": 6.710999965667725,
+      "do_dai": 2.297,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000396",
+      "lop": "shout_yell",
+      "onset": 0.7799000144004822,
+      "do_dai": 4.603,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000397",
+      "lop": "vehicle_crash",
+      "onset": 0.37860000133514404,
+      "do_dai": 9.488,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000415",
+      "lop": "fireworks",
+      "onset": 0.01489999983459711,
+      "do_dai": 9.985,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000420",
+      "lop": "alarm_bell",
+      "onset": 0.34150001406669617,
+      "do_dai": 9.504,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000436",
+      "lop": "shout_yell",
+      "onset": 0.042899999767541885,
+      "do_dai": 2.453,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000436",
+      "lop": "fireworks",
+      "onset": 1.2718000411987305,
+      "do_dai": 6.672,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000436",
+      "lop": "applause_cheering",
+      "onset": 5.538000106811523,
+      "do_dai": 4.12,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000438",
+      "lop": "vehicle_crash",
+      "onset": 0.08730000257492065,
+      "do_dai": 1.468,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000438",
+      "lop": "speech_normal",
+      "onset": 0.11840000003576279,
+      "do_dai": 9.795,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000438",
+      "lop": "vehicle_crash",
+      "onset": 3.1421000957489014,
+      "do_dai": 2.715,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000438",
+      "lop": "shout_yell",
+      "onset": 6.02239990234375,
+      "do_dai": 1.015,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000443",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000443",
+      "lop": "applause_cheering",
+      "onset": 3.2799999713897705,
+      "do_dai": 2.866,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000448",
+      "lop": "running_footsteps",
+      "onset": 0.5,
+      "do_dai": 3.24,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000448",
+      "lop": "applause_cheering",
+      "onset": 2.1275999546051025,
+      "do_dai": 7.598,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000448",
+      "lop": "shout_yell",
+      "onset": 4.713900089263916,
+      "do_dai": 2.137,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000448",
+      "lop": "fireworks",
+      "onset": 7.259200096130371,
+      "do_dai": 1.039,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000475",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": false,
+      "khe_ho_sec": 0.08
+    },
+    {
+      "clip_id": "dev_000475",
+      "lop": "vehicle_crash",
+      "onset": 0.4724000096321106,
+      "do_dai": 9.488,
+      "phan_manh": false,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000475",
+      "lop": "siren",
+      "onset": 1.2825000286102295,
+      "do_dai": 5.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000475",
+      "lop": "laughter",
+      "onset": 7.728400230407715,
+      "do_dai": 1.007,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000493",
+      "lop": "shout_yell",
+      "onset": 0.12729999423027039,
+      "do_dai": 9.757,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000529",
+      "lop": "shout_yell",
+      "onset": 4.57420015335083,
+      "do_dai": 4.603,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000534",
+      "lop": "applause_cheering",
+      "onset": 0.0697999969124794,
+      "do_dai": 9.262,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000534",
+      "lop": "fireworks",
+      "onset": 0.5110999941825867,
+      "do_dai": 1.183,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000534",
+      "lop": "fireworks",
+      "onset": 2.6919000148773193,
+      "do_dai": 6.672,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000542",
+      "lop": "door_slam",
+      "onset": 0.6769999861717224,
+      "do_dai": 1.341,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000542",
+      "lop": "applause_cheering",
+      "onset": 2.69320011138916,
+      "do_dai": 4.12,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000542",
+      "lop": "running_footsteps",
+      "onset": 4.733099937438965,
+      "do_dai": 5.192,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000545",
+      "lop": "laughter",
+      "onset": 0.7337999939918518,
+      "do_dai": 1.0,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000545",
+      "lop": "running_footsteps",
+      "onset": 3.240799903869629,
+      "do_dai": 5.754,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000546",
+      "lop": "vehicle_crash",
+      "onset": 0.31040000915527344,
+      "do_dai": 9.488,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000546",
+      "lop": "applause_cheering",
+      "onset": 2.8749001026153564,
+      "do_dai": 1.326,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000559",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000561",
+      "lop": "alarm_bell",
+      "onset": 2.129199981689453,
+      "do_dai": 5.873,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000561",
+      "lop": "fireworks",
+      "onset": 7.824999809265137,
+      "do_dai": 1.195,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000564",
+      "lop": "vehicle_crash",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000564",
+      "lop": "shout_yell",
+      "onset": 5.506700038909912,
+      "do_dai": 2.689,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000577",
+      "lop": "siren",
+      "onset": 1.629699945449829,
+      "do_dai": 4.84,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000577",
+      "lop": "glass_breaking",
+      "onset": 6.982800006866455,
+      "do_dai": 2.789,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000595",
+      "lop": "fireworks",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000595",
+      "lop": "fireworks",
+      "onset": 0.20200000703334808,
+      "do_dai": 4.85,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000595",
+      "lop": "applause_cheering",
+      "onset": 5.3520002365112305,
+      "do_dai": 3.522,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000601",
+      "lop": "alarm_bell",
+      "onset": 0.4634999930858612,
+      "do_dai": 9.502,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000619",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000619",
+      "lop": "siren",
+      "onset": 3.8148999214172363,
+      "do_dai": 5.026,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000625",
+      "lop": "fireworks",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000625",
+      "lop": "vehicle_crash",
+      "onset": 0.9099000096321106,
+      "do_dai": 3.752,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000631",
+      "lop": "fireworks",
+      "onset": 9.999999747378752e-05,
+      "do_dai": 9.985,
+      "phan_manh": true,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000696",
+      "lop": "applause_cheering",
+      "onset": 0.44290000200271606,
+      "do_dai": 7.52,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000696",
+      "lop": "fireworks",
+      "onset": 1.1858999729156494,
+      "do_dai": 1.218,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000696",
+      "lop": "scream",
+      "onset": 7.314000129699707,
+      "do_dai": 2.267,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000699",
+      "lop": "siren",
+      "onset": 1.4951000213623047,
+      "do_dai": 5.0,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000699",
+      "lop": "applause_cheering",
+      "onset": 3.189500093460083,
+      "do_dai": 3.88,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000702",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000702",
+      "lop": "siren",
+      "onset": 2.4927000999450684,
+      "do_dai": 5.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000702",
+      "lop": "door_slam",
+      "onset": 5.921000003814697,
+      "do_dai": 1.4,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000717",
+      "lop": "fireworks",
+      "onset": 0.4359999895095825,
+      "do_dai": 6.672,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000717",
+      "lop": "applause_cheering",
+      "onset": 6.662499904632568,
+      "do_dai": 2.381,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000717",
+      "lop": "applause_cheering",
+      "onset": 8.416600227355957,
+      "do_dai": 1.145,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000723",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000723",
+      "lop": "explosion",
+      "onset": 6.2906999588012695,
+      "do_dai": 3.298,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000724",
+      "lop": "fireworks",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000724",
+      "lop": "siren",
+      "onset": 0.8718000054359436,
+      "do_dai": 3.807,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000724",
+      "lop": "object_drop_dishes",
+      "onset": 5.0447001457214355,
+      "do_dai": 1.528,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000724",
+      "lop": "explosion",
+      "onset": 6.73960018157959,
+      "do_dai": 2.828,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000734",
+      "lop": "shout_yell",
+      "onset": 0.39089998602867126,
+      "do_dai": 4.304,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000735",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000735",
+      "lop": "applause_cheering",
+      "onset": 3.709399938583374,
+      "do_dai": 2.255,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000741",
+      "lop": "running_footsteps",
+      "onset": 3.7799999713897705,
+      "do_dai": 5.639,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000745",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_000745",
+      "lop": "scream",
+      "onset": 0.6391000151634216,
+      "do_dai": 1.417,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000745",
+      "lop": "vehicle_crash",
+      "onset": 3.338099956512451,
+      "do_dai": 2.715,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000750",
+      "lop": "vehicle_crash",
+      "onset": 0.06499999761581421,
+      "do_dai": 9.488,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000750",
+      "lop": "explosion",
+      "onset": 3.493499994277954,
+      "do_dai": 1.426,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000750",
+      "lop": "laughter",
+      "onset": 7.302299976348877,
+      "do_dai": 1.881,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000750",
+      "lop": "applause_cheering",
+      "onset": 8.829400062561035,
+      "do_dai": 1.099,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000808",
+      "lop": "applause_cheering",
+      "onset": 0.7186999917030334,
+      "do_dai": 9.171,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000813",
+      "lop": "running_footsteps",
+      "onset": 2.837100028991699,
+      "do_dai": 5.754,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000813",
+      "lop": "laughter",
+      "onset": 5.413899898529053,
+      "do_dai": 1.072,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000816",
+      "lop": "laughter",
+      "onset": 1.1648999452590942,
+      "do_dai": 1.881,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000816",
+      "lop": "applause_cheering",
+      "onset": 1.6712000370025635,
+      "do_dai": 7.52,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000828",
+      "lop": "fireworks",
+      "onset": 0.0044999998062849045,
+      "do_dai": 9.985,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000828",
+      "lop": "fireworks",
+      "onset": 1.75,
+      "do_dai": 5.749,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000842",
+      "lop": "vehicle_crash",
+      "onset": 1.3562999963760376,
+      "do_dai": 6.492,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000844",
+      "lop": "speech_normal",
+      "onset": 1.0153000354766846,
+      "do_dai": 8.734,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000844",
+      "lop": "gunshot",
+      "onset": 7.593299865722656,
+      "do_dai": 2.179,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000857",
+      "lop": "speech_normal",
+      "onset": 0.17679999768733978,
+      "do_dai": 9.557,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000857",
+      "lop": "alarm_bell",
+      "onset": 0.45879998803138733,
+      "do_dai": 9.502,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000857",
+      "lop": "glass_breaking",
+      "onset": 3.9870998859405518,
+      "do_dai": 2.301,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000857",
+      "lop": "fireworks",
+      "onset": 7.549099922180176,
+      "do_dai": 1.195,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000872",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000872",
+      "lop": "explosion",
+      "onset": 0.42590001225471497,
+      "do_dai": 1.55,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000872",
+      "lop": "explosion",
+      "onset": 1.8375999927520752,
+      "do_dai": 2.442,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000872",
+      "lop": "alarm_bell",
+      "onset": 2.193000078201294,
+      "do_dai": 7.693,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000874",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000874",
+      "lop": "scream",
+      "onset": 3.2669999599456787,
+      "do_dai": 1.359,
+      "phan_manh": false,
+      "khe_ho_sec": 0.16
+    },
+    {
+      "clip_id": "dev_000882",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000882",
+      "lop": "glass_breaking",
+      "onset": 4.732699871063232,
+      "do_dai": 1.339,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000919",
+      "lop": "speech_normal",
+      "onset": 0.20640000700950623,
+      "do_dai": 4.52,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000937",
+      "lop": "speech_normal",
+      "onset": 0.5565000176429749,
+      "do_dai": 9.073,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000937",
+      "lop": "vehicle_crash",
+      "onset": 6.742400169372559,
+      "do_dai": 3.134,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000947",
+      "lop": "fireworks",
+      "onset": 2.647900104522705,
+      "do_dai": 4.876,
+      "phan_manh": true,
+      "khe_ho_sec": 0.12
+    },
+    {
+      "clip_id": "dev_000947",
+      "lop": "vehicle_crash",
+      "onset": 3.476300001144409,
+      "do_dai": 6.492,
+      "phan_manh": true,
+      "khe_ho_sec": 0.14
+    },
+    {
+      "clip_id": "dev_000951",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000951",
+      "lop": "vehicle_crash",
+      "onset": 5.506899833679199,
+      "do_dai": 3.372,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000953",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000981",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000981",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000981",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000981",
+      "lop": "shout_yell",
+      "onset": 1.6359000205993652,
+      "do_dai": 1.389,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000981",
+      "lop": "vehicle_crash",
+      "onset": 8.136500358581543,
+      "do_dai": 1.806,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000987",
+      "lop": "siren",
+      "onset": 0.31369999051094055,
+      "do_dai": 4.556,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000987",
+      "lop": "speech_normal",
+      "onset": 3.6598000526428223,
+      "do_dai": 4.034,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000988",
+      "lop": "speech_normal",
+      "onset": 1.2264000177383423,
+      "do_dai": 8.734,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000995",
+      "lop": "fireworks",
+      "onset": 2.042799949645996,
+      "do_dai": 6.99,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_000995",
+      "lop": "speech_normal",
+      "onset": 5.07919979095459,
+      "do_dai": 2.292,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001007",
+      "lop": "siren",
+      "onset": 5.158100128173828,
+      "do_dai": 4.677,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001007",
+      "lop": "vehicle_crash",
+      "onset": 7.877399921417236,
+      "do_dai": 1.113,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001015",
+      "lop": "applause_cheering",
+      "onset": 0.17339999973773956,
+      "do_dai": 9.791,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001015",
+      "lop": "laughter",
+      "onset": 0.259799987077713,
+      "do_dai": 1.32,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001015",
+      "lop": "vehicle_crash",
+      "onset": 2.4697999954223633,
+      "do_dai": 3.372,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001019",
+      "lop": "shout_yell",
+      "onset": 0.5394999980926514,
+      "do_dai": 1.202,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001019",
+      "lop": "fireworks",
+      "onset": 1.8875000476837158,
+      "do_dai": 4.46,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001019",
+      "lop": "applause_cheering",
+      "onset": 4.586900234222412,
+      "do_dai": 5.132,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001019",
+      "lop": "laughter",
+      "onset": 7.113399982452393,
+      "do_dai": 1.684,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001020",
+      "lop": "shout_yell",
+      "onset": 0.20090000331401825,
+      "do_dai": 8.977,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001021",
+      "lop": "shout_yell",
+      "onset": 0.4544999897480011,
+      "do_dai": 8.977,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001050",
+      "lop": "gunshot",
+      "onset": 0.011800000444054604,
+      "do_dai": 1.67,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001050",
+      "lop": "alarm_bell",
+      "onset": 1.8660999536514282,
+      "do_dai": 6.487,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001050",
+      "lop": "scream",
+      "onset": 6.385900020599365,
+      "do_dai": 2.297,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001057",
+      "lop": "running_footsteps",
+      "onset": 3.5517001152038574,
+      "do_dai": 5.169,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001060",
+      "lop": "applause_cheering",
+      "onset": 0.004800000227987766,
+      "do_dai": 4.752,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001060",
+      "lop": "running_footsteps",
+      "onset": 2.405400037765503,
+      "do_dai": 7.554,
+      "phan_manh": true,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_001060",
+      "lop": "siren",
+      "onset": 5.2505998611450195,
+      "do_dai": 3.661,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001075",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001080",
+      "lop": "explosion",
+      "onset": 0.04619999974966049,
+      "do_dai": 1.806,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001080",
+      "lop": "running_footsteps",
+      "onset": 0.7146999835968018,
+      "do_dai": 7.878,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001101",
+      "lop": "fireworks",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_001101",
+      "lop": "shout_yell",
+      "onset": 0.2639999985694885,
+      "do_dai": 2.118,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001101",
+      "lop": "running_footsteps",
+      "onset": 2.9974000453948975,
+      "do_dai": 5.603,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001104",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001106",
+      "lop": "applause_cheering",
+      "onset": 1.847000002861023,
+      "do_dai": 1.053,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001106",
+      "lop": "fireworks",
+      "onset": 3.288300037384033,
+      "do_dai": 6.672,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001107",
+      "lop": "fireworks",
+      "onset": 0.6377000212669373,
+      "do_dai": 6.672,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001107",
+      "lop": "explosion",
+      "onset": 6.747499942779541,
+      "do_dai": 2.846,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001107",
+      "lop": "explosion",
+      "onset": 8.051300048828125,
+      "do_dai": 1.043,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001140",
+      "lop": "siren",
+      "onset": 0.014600000344216824,
+      "do_dai": 9.159,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001140",
+      "lop": "explosion",
+      "onset": 0.7904999852180481,
+      "do_dai": 1.309,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001140",
+      "lop": "running_footsteps",
+      "onset": 3.811500072479248,
+      "do_dai": 5.754,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001143",
+      "lop": "speech_normal",
+      "onset": 0.9886999726295471,
+      "do_dai": 6.175,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001147",
+      "lop": "fireworks",
+      "onset": 0.01080000028014183,
+      "do_dai": 9.985,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001147",
+      "lop": "alarm_bell",
+      "onset": 0.6186000108718872,
+      "do_dai": 7.176,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001155",
+      "lop": "alarm_bell",
+      "onset": 3.2307000160217285,
+      "do_dai": 6.743,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001155",
+      "lop": "shout_yell",
+      "onset": 3.9800000190734863,
+      "do_dai": 1.515,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001172",
+      "lop": "explosion",
+      "onset": 0.19059999287128448,
+      "do_dai": 2.846,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001172",
+      "lop": "siren",
+      "onset": 0.5475999712944031,
+      "do_dai": 9.159,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001187",
+      "lop": "alarm_bell",
+      "onset": 0.08179999887943268,
+      "do_dai": 3.327,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001187",
+      "lop": "siren",
+      "onset": 0.7394999861717224,
+      "do_dai": 3.275,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001187",
+      "lop": "running_footsteps",
+      "onset": 3.3134000301361084,
+      "do_dai": 5.754,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001187",
+      "lop": "explosion",
+      "onset": 5.655099868774414,
+      "do_dai": 4.254,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001190",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001190",
+      "lop": "applause_cheering",
+      "onset": 7.42549991607666,
+      "do_dai": 1.11,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001197",
+      "lop": "applause_cheering",
+      "onset": 0.32690000534057617,
+      "do_dai": 5.055,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001204",
+      "lop": "applause_cheering",
+      "onset": 0.13019999861717224,
+      "do_dai": 3.454,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001204",
+      "lop": "siren",
+      "onset": 0.4417000114917755,
+      "do_dai": 8.796,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001210",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.4
+    },
+    {
+      "clip_id": "dev_001210",
+      "lop": "alarm_bell",
+      "onset": 0.41119998693466187,
+      "do_dai": 7.043,
+      "phan_manh": true,
+      "khe_ho_sec": 0.4
+    },
+    {
+      "clip_id": "dev_001210",
+      "lop": "fireworks",
+      "onset": 7.9394001960754395,
+      "do_dai": 1.755,
+      "phan_manh": false,
+      "khe_ho_sec": 0.26
+    },
+    {
+      "clip_id": "dev_001213",
+      "lop": "vehicle_crash",
+      "onset": 0.753000020980835,
+      "do_dai": 8.326,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001215",
+      "lop": "applause_cheering",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001215",
+      "lop": "gunshot",
+      "onset": 6.815899848937988,
+      "do_dai": 1.034,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001221",
+      "lop": "siren",
+      "onset": 0.013100000098347664,
+      "do_dai": 9.48,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001221",
+      "lop": "object_drop_dishes",
+      "onset": 7.791600227355957,
+      "do_dai": 2.004,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001226",
+      "lop": "vehicle_crash",
+      "onset": 2.4586000442504883,
+      "do_dai": 6.492,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001231",
+      "lop": "explosion",
+      "onset": 0.1088000014424324,
+      "do_dai": 2.628,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001231",
+      "lop": "speech_normal",
+      "onset": 2.9709999561309814,
+      "do_dai": 6.894,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001234",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": false,
+      "khe_ho_sec": 0.22
+    },
+    {
+      "clip_id": "dev_001234",
+      "lop": "shout_yell",
+      "onset": 2.806999921798706,
+      "do_dai": 1.036,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001234",
+      "lop": "running_footsteps",
+      "onset": 3.911799907684326,
+      "do_dai": 5.845,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001248",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.04
+    },
+    {
+      "clip_id": "dev_001254",
+      "lop": "alarm_bell",
+      "onset": 0.02370000071823597,
+      "do_dai": 9.963,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001254",
+      "lop": "siren",
+      "onset": 0.7197999954223633,
+      "do_dai": 9.159,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001275",
+      "lop": "alarm_bell",
+      "onset": 0.6259999871253967,
+      "do_dai": 3.067,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001275",
+      "lop": "siren",
+      "onset": 3.8891000747680664,
+      "do_dai": 5.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001275",
+      "lop": "shout_yell",
+      "onset": 6.185999870300293,
+      "do_dai": 1.273,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001276",
+      "lop": "speech_normal",
+      "onset": 0.2565000057220459,
+      "do_dai": 9.588,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001276",
+      "lop": "laughter",
+      "onset": 6.052999973297119,
+      "do_dai": 1.034,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001287",
+      "lop": "shout_yell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001287",
+      "lop": "siren",
+      "onset": 0.2581999897956848,
+      "do_dai": 5.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001287",
+      "lop": "shout_yell",
+      "onset": 5.292799949645996,
+      "do_dai": 1.91,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001287",
+      "lop": "door_slam",
+      "onset": 7.909200191497803,
+      "do_dai": 1.803,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001288",
+      "lop": "siren",
+      "onset": 3.9793999195098877,
+      "do_dai": 4.897,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001297",
+      "lop": "speech_normal",
+      "onset": 1.1725000143051147,
+      "do_dai": 6.13,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001304",
+      "lop": "siren",
+      "onset": 0.040699999779462814,
+      "do_dai": 6.659,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001310",
+      "lop": "applause_cheering",
+      "onset": 0.3734999895095825,
+      "do_dai": 9.262,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001310",
+      "lop": "applause_cheering",
+      "onset": 0.7872999906539917,
+      "do_dai": 1.902,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001310",
+      "lop": "speech_normal",
+      "onset": 3.2381999492645264,
+      "do_dai": 2.094,
+      "phan_manh": false,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_001310",
+      "lop": "shout_yell",
+      "onset": 5.691299915313721,
+      "do_dai": 1.654,
+      "phan_manh": false,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_001322",
+      "lop": "fireworks",
+      "onset": 0.013100000098347664,
+      "do_dai": 9.985,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001322",
+      "lop": "laughter",
+      "onset": 3.914799928665161,
+      "do_dai": 1.154,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001334",
+      "lop": "alarm_bell",
+      "onset": 0.03669999912381172,
+      "do_dai": 9.207,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001334",
+      "lop": "applause_cheering",
+      "onset": 0.7024000287055969,
+      "do_dai": 2.728,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001334",
+      "lop": "running_footsteps",
+      "onset": 3.5350000858306885,
+      "do_dai": 5.809,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001338",
+      "lop": "fireworks",
+      "onset": 3.2091000080108643,
+      "do_dai": 4.876,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001341",
+      "lop": "applause_cheering",
+      "onset": 2.075000047683716,
+      "do_dai": 7.363,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001353",
+      "lop": "alarm_bell",
+      "onset": 2.0341999530792236,
+      "do_dai": 1.462,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001353",
+      "lop": "siren",
+      "onset": 5.11460018157959,
+      "do_dai": 4.846,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001359",
+      "lop": "shout_yell",
+      "onset": 0.11990000307559967,
+      "do_dai": 1.444,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001359",
+      "lop": "shout_yell",
+      "onset": 0.20020000636577606,
+      "do_dai": 9.757,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001360",
+      "lop": "applause_cheering",
+      "onset": 0.14470000565052032,
+      "do_dai": 6.889,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001360",
+      "lop": "shout_yell",
+      "onset": 5.559999942779541,
+      "do_dai": 1.751,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001361",
+      "lop": "vehicle_crash",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_001366",
+      "lop": "applause_cheering",
+      "onset": 0.039799999445676804,
+      "do_dai": 4.47,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001366",
+      "lop": "shout_yell",
+      "onset": 0.16439999639987946,
+      "do_dai": 9.757,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001366",
+      "lop": "vehicle_crash",
+      "onset": 5.783199787139893,
+      "do_dai": 2.138,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001380",
+      "lop": "glass_breaking",
+      "onset": 1.982200026512146,
+      "do_dai": 2.57,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001380",
+      "lop": "fireworks",
+      "onset": 2.4670000076293945,
+      "do_dai": 4.46,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001409",
+      "lop": "alarm_bell",
+      "onset": 0.0,
+      "do_dai": 10.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.52
+    },
+    {
+      "clip_id": "dev_001409",
+      "lop": "laughter",
+      "onset": 0.061799999326467514,
+      "do_dai": 1.935,
+      "phan_manh": false,
+      "khe_ho_sec": 0.38
+    },
+    {
+      "clip_id": "dev_001409",
+      "lop": "siren",
+      "onset": 0.7912999987602234,
+      "do_dai": 9.159,
+      "phan_manh": false,
+      "khe_ho_sec": 0.14
+    },
+    {
+      "clip_id": "dev_001409",
+      "lop": "alarm_bell",
+      "onset": 3.2611000537872314,
+      "do_dai": 3.497,
+      "phan_manh": false,
+      "khe_ho_sec": 0.18
+    },
+    {
+      "clip_id": "dev_001409",
+      "lop": "laughter",
+      "onset": 8.170000076293945,
+      "do_dai": 1.289,
+      "phan_manh": false,
+      "khe_ho_sec": 0.02
+    },
+    {
+      "clip_id": "dev_001411",
+      "lop": "running_footsteps",
+      "onset": 3.4600000381469727,
+      "do_dai": 5.639,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001413",
+      "lop": "vehicle_crash",
+      "onset": 3.3687000274658203,
+      "do_dai": 6.492,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001430",
+      "lop": "laughter",
+      "onset": 2.2829999923706055,
+      "do_dai": 1.06,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001430",
+      "lop": "applause_cheering",
+      "onset": 3.79259991645813,
+      "do_dai": 4.0,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001432",
+      "lop": "vehicle_crash",
+      "onset": 0.10930000245571136,
+      "do_dai": 3.794,
+      "phan_manh": false,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001432",
+      "lop": "speech_normal",
+      "onset": 0.9643999934196472,
+      "do_dai": 1.502,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001432",
+      "lop": "siren",
+      "onset": 3.209399938583374,
+      "do_dai": 6.659,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    },
+    {
+      "clip_id": "dev_001432",
+      "lop": "alarm_bell",
+      "onset": 8.229700088500977,
+      "do_dai": 1.722,
+      "phan_manh": true,
+      "khe_ho_sec": 0.0
+    }
+  ],
+  "tom_tat": {
+    "n_vo": 178,
+    "n_nguyen": 137,
+    "vo_trung_vi": 0.0,
+    "vo_p75": 0.0,
+    "nguyen_trung_vi": 0.0,
+    "nguyen_p75": 0.0
+  },
+  "giay": 1.3,
+  "ghi_chu": "dev tổng hợp thiên vị v3; θ* chọn trên chính tập đang chấm."
+}
