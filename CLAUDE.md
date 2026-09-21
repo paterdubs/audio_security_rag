@@ -119,9 +119,10 @@ không phải trạng thái hiện hành.
   `manifest.json`. `checkpoint_resume.pt` ghi đè mỗi epoch (tách khỏi `best.pt` — không đổi
   schema mà `predictions.py`/`eval_sed.py` phụ thuộc); `--resume` khôi phục RNG nên dãy số
   ngẫu nhiên tiếp theo giống hệt như chưa hề dừng.
-- **689 test đạt** (22/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 642.
-  Từ 649: pilot gold lần 1 (30/30, xem "Đang làm" bên dưới), bộ gán mù lần 2
-  (`make_blind_set.py`, đã chạy thật), `agreement.py` (chưa chạy thật), `--pos-weight-max`.
+- **693 test đạt** (22/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 642.
+  Từ 649: pilot gold lần 1 (30/30), bộ gán mù lần 2 (`make_blind_set.py`, đã chạy thật),
+  `agreement.py` (**đã chạy thật 22/09** — vá lỗi đuôi `.wav`, thêm `chi_tiet_bat_dong()`,
+  xem "Đang làm" bên dưới), `--pos-weight-max`.
 
 ### Đang làm / chưa nghiệm thu
 
@@ -167,14 +168,19 @@ không phải trạng thái hiện hành.
    Case đồ chơi mô phỏng (`0yZGysisqY0`, không gán `gunshot`) cùng nguyên tắc ca chuông
    quầy phục vụ (§4.4 15/09). Quy tắc kiểm tra audio thật ở `annotation_guideline.md`
    §0.1. Tổng kết đầy đủ + khuyến nghị cho gán đại trà ở `data/gold/decision_log.md`.
-   ✅ **Hạ tầng bước 2–3 dựng xong 21/09, ĐÃ chạy thật phần dựng bộ mù.**
-   `scripts/make_blind_set.py` đã chạy trên dữ liệu thật → `data/gold/blind_v1_lan2/`
-   (60 WAV: 30 pilot băm tên + xáo thứ tự, cộng 30 clip "mồi" lấy từ 351 file `gold_test`
-   chưa gán, DATA_PLAN §8.4 điều kiện 2+4) + `blind_v1_lan2_mapping.csv` (⚠️ KHÔNG mở lúc
-   gán nhãn). `scripts/agreement.py` đã viết + test, tính tự-nhất-quán event-F1 + lệch
-   onset trung vị THEO TỪNG LỚP và kiểm hai cổng §8.5 (≥0,75 · ≤100ms) — **chưa chạy thật**,
-   chờ người gán lại 30 clip trong `blind_v1_lan2/` sau khoảng nghỉ ≥3 ngày (điều kiện bắt
-   buộc, không nén được) rồi lưu kết quả vào `pilot_v1_lan2.tsv`.
+   ✅ **Bước 2–3 XONG 22/09 — cổng §8.5 VỪA HỤT, chưa đủ điều kiện gán đại trà.**
+   `pilot_v1_lan2.tsv` (60/60 clip gán mù) → `agreement.py` chạy thật lần đầu, phát hiện
+   VÀ vá một lỗi code thật (đuôi `.wav` không khớp giữa `pilot_v1_lan1.tsv` và
+   `mapping.csv`, làm mọi event-F1 ra NaN — xem "Đang làm" bên dưới). Kết quả sau khi vá:
+   **event-F1 tự-nhất-quán 0,7339** (ngưỡng ≥0,75 — hụt 0,0161, KHÔNG ĐẠT), lệch onset
+   trung vị **10,0 ms** (ngưỡng ≤100ms — ĐẠT). **13/30 clip pilot có ca bất đồng** (danh
+   sách đầy đủ ở `agreement.py`'s output, mục "Danh sách ca bất đồng"). Ca đáng chú ý
+   nhất: `as_strong_0yZGysisqY0_12000` (case "đồ chơi mô phỏng" của lần 1, không gán sự
+   kiện) — lần 2 mù lại nghe ra `alarm_bell`+`explosion` (3 Insertion tuyệt đối).
+   **Việc tiếp theo (KHÔNG được bỏ qua theo DATA_PLAN §8.3):** nghe lại lần ba 13 clip bất
+   đồng, chốt, ghi `decision_log.md`, sửa `annotation_guideline.md` theo phát hiện được,
+   rồi cân nhắc một vòng pilot mới trước khi thử lại cổng — **chưa** đủ điều kiện qua
+   checklist §10 để gán đại trà `gold_test`.
    Đây là thứ DUY NHẤT gỡ được confound "dev cùng recipe với train của v3". Không dùng
    test để chọn threshold.
 3. **Ablation `pos_weight`** — `train_sed.py` đã có cờ `--pos-weight-max` (mặc định vẫn
@@ -447,6 +453,37 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-22 (tiếp 2) — Pilot gold lần 2 (mù) XONG, cổng §8.5 VỪA HỤT — vá lỗi thật trong agreement.py
+
+- **60/60 clip gán mù xong** → `data/gold/pilot_v1_lan2.tsv` (96 dòng sự kiện, 51/60 file
+  có sự kiện). 30/30 pilot có kết quả thật (không file pilot nào rơi vào diện "loại"); 6
+  clip **mồi** bị đánh giá `nhạc`/`rác` — cross-check với `blind_v1_lan2_mapping.csv` xác
+  nhận cả 6 đều là mồi (`la_pilot=False`), không phải pilot, nên không có khủng hoảng nhất
+  quán với lần 1. Ghi 25 dòng mới vào `exclusions.csv` (`stage=gold_pilot`,
+  `synthetic_or_game_audio`/`unusable`/`music_no_event`) cho 6 WAV đó — `gold_test` còn
+  **345** file.
+- **`scripts/agreement.py` chạy thật lần đầu → phát hiện một lỗi code thật, không phải
+  phát hiện dữ liệu.** `pilot_v1_lan1.tsv` ghi filename CÓ đuôi `.wav` (đúng quy ước TSV —
+  tên file WAV thật), còn cột `file_id` của `blind_v1_lan2_mapping.csv` KHÔNG có đuôi
+  (đúng quy ước file_id xuyên suốt pipeline). Universe (suy từ mapping) không khớp được
+  khoá nào của `lan1` → `lan1` rỗng tuyệt đối → event-F1 VÀ mọi F1 theo lớp ra **NaN**
+  thay vì một cổng có ý nghĩa. Vá bằng `bo_duoi_wav()` + một test hồi quy TÁI HIỆN ĐÚNG
+  lỗi thật (test cũ dùng id trần ở cả hai phía nên không bắt được mismatch này).
+- **Kết quả sau khi vá:** event-F1 tự-nhất-quán **0,7339** (ngưỡng ≥0,75 — **hụt 0,0161,
+  KHÔNG ĐẠT**); lệch onset trung vị **10,0 ms** (ngưỡng ≤100ms — ĐẠT thoải mái). 4 lớp NaN
+  trong bảng theo-lớp (`fireworks`/`running_footsteps`/`shout_yell`/`vehicle_crash`) khớp
+  ĐÚNG 4 lớp vắng mặt ở lần 1 — xác nhận khớp file_id đúng, không phải trùng hợp.
+- **Bổ sung `chi_tiet_bat_dong()`** — danh sách ca bất đồng theo `clip_id` (DATA_PLAN
+  §8.3 bước 3 / §8.2 B2, khoảng trống đã flag trước khi chạy thật). **13/30 clip pilot có
+  ít nhất 1 ca bất đồng**, 21 cặp lệch/thiếu/thừa/thay thế. Ca đáng chú ý nhất:
+  `as_strong_0yZGysisqY0_12000` — case "đồ chơi mô phỏng" của lần 1 (không gán sự kiện
+  nào) — lần 2 mù lại nghe ra `alarm_bell`+`explosion` thật (3 Insertion tuyệt đối, tức
+  toàn bộ nội dung lần 2 với clip này không khớp gì với lần 1).
+- **Theo đúng DATA_PLAN §8.3: KHÔNG đạt cổng → KHÔNG đi bước 4 (gán đại trà).** Việc tiếp
+  theo: nghe lại lần ba 13 clip bất đồng, chốt, ghi `decision_log.md`, sửa
+  `annotation_guideline.md`, rồi cân nhắc một vòng pilot mới trước khi thử lại.
+- 689 → 693 test đạt (4 test: hồi quy lỗi `.wav` + `chi_tiet_bat_dong()`).
 
 ### 2026-09-22 (tiếp) — Hạ tầng bước 2–3 (bộ gán mù + tự-nhất-quán) và ablation pos_weight
 

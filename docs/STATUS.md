@@ -81,6 +81,26 @@
   nguồn), tách khỏi `best.pt`; `--resume` khôi phục RNG nên dãy số ngẫu nhiên tiếp theo
   giống hệt như chưa hề dừng. Test đơn vị xác nhận, **chưa** kiểm bằng một lượt train thật
   đứt giữa chừng (25 epoch tốn GPU nhiều giờ).
+- 🔴 **22/09 — pilot gold lần 2 (gán mù) XONG, tự-nhất-quán ĐO ĐƯỢC, VỪA HỤT cổng §8.5.**
+  60/60 clip gán xong (30 pilot + 30 mồi) → `data/gold/pilot_v1_lan2.tsv`. Lúc chạy
+  `agreement.py` thật lần đầu phát hiện **một lỗi code thật**: `pilot_v1_lan1.tsv` ghi
+  filename CÓ đuôi `.wav` (quy ước TSV), còn `file_id` của `mapping.csv` KHÔNG có đuôi
+  (quy ước xuyên suốt pipeline) — 0% khớp, mọi event-F1 ra NaN thay vì một cổng thật. Vá
+  bằng `bo_duoi_wav()` + test hồi quy tái hiện đúng lỗi thật (không chỉ test bịa). Kết quả
+  sau khi vá: **event-F1 tự-nhất-quán 0,7339** (ngưỡng ≥0,75 — **hụt 0,0161, KHÔNG ĐẠT**),
+  **lệch onset trung vị 10,0 ms** (ngưỡng ≤100ms — ĐẠT thoải mái). 4 lớp NaN
+  (`fireworks`/`running_footsteps`/`shout_yell`/`vehicle_crash`) khớp đúng 4 lớp vắng mặt
+  ở lần 1 — xác nhận việc khớp file_id đã đúng, không phải trùng hợp.
+  Bổ sung `chi_tiet_bat_dong()` (danh sách ca bất đồng theo clip_id, DATA_PLAN §8.3 bước
+  3/§8.2 B2) — **13/30 clip pilot có ít nhất 1 ca bất đồng**, 21 cặp lệch/thiếu/thừa/thay
+  thế. Đáng chú ý nhất: `as_strong_0yZGysisqY0_12000` (case "đồ chơi mô phỏng" của lần 1,
+  gán KHÔNG có sự kiện) — lần 2 (mù) lại nghe ra `alarm_bell`+`explosion` thật (3 Insertion
+  tuyệt đối). Đây là ca ưu tiên nghe lại lần ba trước tiên.
+  6 clip mồi bị loại (`synthetic_or_game_audio`/`unusable`/`music_no_event`) → thêm 25
+  dòng `exclusions.csv`, `stage=gold_pilot` — tiếp tục mẫu hình cũ, `gold_test` còn 345.
+  **Chưa đạt cổng → theo đúng DATA_PLAN §8.3: KHÔNG đi bước 4 (gán đại trà).** Việc tiếp
+  theo: nghe lại lần ba 13 clip bất đồng, chốt, ghi `decision_log.md`, sửa
+  `annotation_guideline.md`, rồi cân nhắc pilot vòng mới trước khi thử lại cổng.
 - 🔴 **21/09 (tiếp 3) — pilot gold lần 1 XONG (30/30), hạ tầng cho lần 2 + ablation
   `pos_weight` dựng xong trong lúc chờ khoảng nghỉ ≥3 ngày (DATA_PLAN §8.3).**
   `data/gold/pilot_v1_lan1.tsv`: 52 dòng sự kiện, 11/15 lớp có mặt. Phải loại **16 file /
@@ -284,22 +304,29 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **689 test đạt** (21/09, cuối phiên), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30
+- **693 test đạt** (22/09, cuối phiên), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30
   test cho Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép
   ghép cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo
   lát cắt, 15 test cho ablation trần cửa sổ + cửa sổ suy từ train + hiệu chuẩn xác suất,
   11 test cho khe hở năng lượng của `long_event`, 7 test cho cổng hợp đồng + checkpoint
   resume, 5 test cho `select_gold_pilot.py`, 6 test cho việc đọc `exclusions.csv` trước
   round-robin, 15 test cho `make_blind_set.py`, 11 test cho `agreement.py`, 3 test cho
-  `--pos-weight-max`. Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
-- Lượt 19–21/09 **có** chạy lại suite trước và sau thay đổi mã: 573 đạt trước khi thêm
+  `--pos-weight-max`, 4 test cho lỗi đuôi `.wav`/`chi_tiet_bat_dong()` của `agreement.py`
+  (xem bên dưới). Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
+- Lượt 19–22/09 **có** chạy lại suite trước và sau thay đổi mã: 573 đạt trước khi thêm
   test mới, 580 sau Pha 1 + Pha 3, 601 sau Pha 4, 616 sau Pha 5, 631 sau ablation
   trần/hiệu chuẩn, 642 sau đo khe hở năng lượng, 649 sau cổng hợp đồng + checkpoint
   resume, 654 sau chọn pilot gold, 660 sau đọc `exclusions.csv`, 675 sau
-  `make_blind_set.py`, 686 sau `agreement.py`, **689** sau `--pos-weight-max`.
+  `make_blind_set.py`, 686 sau `agreement.py`, 689 sau `--pos-weight-max`, **693** sau vá
+  lỗi đuôi `.wav` + `chi_tiet_bat_dong()`.
   `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết.
   `make_blind_set.py` cũng đã chạy thật trên dữ liệu production (không chỉ test) —
   60 file trong `data/gold/blind_v1_lan2/`, đối soát 30/30 pilot/mồi qua mapping.
+  `agreement.py` **đã chạy thật lần đầu 22/09** — phát hiện và vá một lỗi thật (đuôi
+  `.wav` không khớp giữa `pilot_v1_lan1.tsv` và `file_id` của mapping, làm event-F1 ra
+  NaN thay vì một cổng có nghĩa); kết quả sau khi vá: event-F1 0,7339 (KHÔNG ĐẠT, hụt
+  0,0161), lệch onset trung vị 10,0 ms (ĐẠT). Xem §0 ngày 22/09 và
+  [measurements/agreement_pilot_v1.md](measurements/agreement_pilot_v1.md).
   Không tuyên bố đã chạy lại test API/frontend, và **không** chạy lại một lượt train thật
   để kiểm `--resume` — chỉ có test đơn vị.
 - **`slice_index.jsonl` vẫn khớp code hiện tại.** `scaper_generate.py` được sửa lúc
