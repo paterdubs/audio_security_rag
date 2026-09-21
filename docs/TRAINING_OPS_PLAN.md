@@ -66,11 +66,11 @@ chạy riêng, nhưng chưa được nối thành cổng chặn training tự đ
 | Đã có | Còn thiếu |
 |---|---|
 | `manifest.json` cho v1/v2/v3 (hồi cứu) và tự động cho run mới; vân tay dữ liệu/mã/git/env | Vân tay dữ liệu của v1/v2 là `null` vĩnh viễn — audio legacy đã xoá |
-| Gieo toàn bộ seed Python/NumPy/Torch/CUDA trong `train_sed.py` | Checkpoint vẫn chỉ có weights; chưa lưu optimizer/scheduler/RNG để resume |
+| Gieo toàn bộ seed Python/NumPy/Torch/CUDA trong `train_sed.py`; `checkpoint_resume.pt` lưu đủ optimizer/scheduler/RNG mỗi epoch (21/09) | `--resume` chưa được kiểm bằng một lượt train thật đứt giữa chừng — chỉ có test đơn vị |
 | Dự đoán mức đoạn `predictions/{split}_{subset}.npz` cho cả ba run (1,3–4,6 MB/run) | Chưa lưu cho real dev/gold vì hai tập đó chưa tồn tại |
 | Quét ngưỡng chạy được trên CPU, 5 s/ngưỡng trên 1.440 clip | θ riêng từng lớp đã đo và **làm v1 tệ đi** — F1 tổng là micro-average, xem measurements §5 |
 | Phân loại 6 loại lỗi, F1 theo lát cắt, ma trận nhầm 16×16, θ theo lớp | Chưa có tập độc lập để xác nhận: `gold_test` rỗng, chưa có real dev |
-| `verify_synthetic.py --output`: legacy FAIL, lô B0–B9 PASS train/dev | Cổng chặn tự động trong train mới chỉ CẢNH BÁO, chưa chặn; index vẫn ghi cuối lượt sinh |
+| `verify_synthetic.py --output`: legacy FAIL, lô B0–B9 PASS train/dev | index vẫn ghi cuối lượt sinh — chưa ghi tăng dần |
 
 **Tài sản đang bị bỏ phí.** Dự án đã kỳ công dựng 5 lát cắt ép buộc và 5 chuỗi nhân quả:
 
@@ -306,6 +306,14 @@ file như đã làm với `dcase_util`; nếu không an toàn thì đẩy qua RE
 # Hiệu chuẩn xác suất — ECE + reliability diagram, không train lại, ~5-6s/run
 .venv/Scripts/python.exe -m ml.evaluation.calibration --run panns_ft_v3 --split dev
 
+# long_event — khe hở năng lượng thật bên trong nhãn (CPU, ~1-3s/run)
+.venv/Scripts/python.exe -m ml.evaluation.long_event_gap --run panns_ft_v3 --split dev
+
+# Cổng hợp đồng CHẶN train nếu khác PASSED — dùng cờ dưới đây chỉ khi cố ý bỏ qua
+.venv/Scripts/python.exe -m ml.training.train_sed --force-du-lieu-chua-dat
+# Resume — tiếp tục ml/runs/<name>/checkpoint_resume.pt nếu có, khôi phục RNG đầy đủ
+.venv/Scripts/python.exe -m ml.training.train_sed --name panns_ft_v4 --resume
+
 # Pha 5 — đối chiếu nhiều run (tức thì; --out để ghi .md thay vì in ra màn hình)
 .venv/Scripts/python.exe -m ml.tracking.compare_runs --runs panns_ft_v1 panns_ft_v2 panns_ft_v3
 
@@ -329,7 +337,7 @@ chứng minh verifier từng bắt được lỗi thật.
 | Pha | Thời gian | Bắt buộc | Trạng thái |
 |---|---|---|---|
 | 1 · Vân tay + manifest | 1.5–2 h | ✅ | **xong 19/09** |
-| 2 · Kiểm tra hợp đồng dữ liệu | 2–2.5 h | ✅ ⭐ | **xong** (cổng mới CẢNH BÁO, chưa chặn) |
+| 2 · Kiểm tra hợp đồng dữ liệu | 2–2.5 h | ✅ ⭐ | **xong** (cổng CHẶN thật từ 21/09, `--force-du-lieu-chua-dat` bỏ qua có ghi manifest) |
 | 3 · Lưu dự đoán + quét ngưỡng | 1 h | ✅ | **xong 19/09** |
 | 4 · Phân tích lỗi | 2–3 h | ✅ | **xong 19/09** |
 | 5 · So run + MLflow | 1 h | tuỳ chọn | **xong 19/09** (MLflow vẫn chưa cài) |
@@ -338,7 +346,7 @@ chứng minh verifier từng bắt được lỗi thật.
 
 ## 8. Thứ tự thực thi
 
-1. ✅ **Pha 2** — PASS cho B0–B9; còn phải nâng từ cảnh báo lên cổng chặn thật trong train.
+1. ✅ **Pha 2** — PASS cho B0–B9; cổng nâng từ cảnh báo lên chặn thật trong train xong 21/09.
 2. ✅ **Pha 1 + 3** — xong 19/09. v1/v2 chỉ hồi cứu được một phần (dữ liệu legacy đã xoá).
 3. ✅ **Pha 4** — xong 19/09 trên cả ba run, CPU, ~3 phút/run. Kết quả ở
    [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md).
@@ -370,9 +378,16 @@ chứng minh verifier từng bắt được lỗi thật.
    trần thấp, khe hở năng lượng); nguyên nhân riêng của `long_event` **vẫn chưa xác
    định**, không còn ứng viên thứ tư đang chờ sẵn. Phép đo:
    [measurements/long_event_gap_20260921.md](measurements/long_event_gap_20260921.md).
-7. **Việc tiếp theo:** `gold_test` vẫn rỗng. Mọi số trên trang này đo trên tập tổng hợp
-   dùng chung foreground bank với train. `long_event` cần hướng điều tra mới — nghe trực
-   tiếp clip bị phân mảnh, hoặc so theo trục SNR/reverb thay vì trục độ dài sự kiện.
+7. ✅ **Cổng hợp đồng CHẶN thật + checkpoint resume** — xong 21/09.
+   `kiem_cong_hop_dong()` chặn cả `FAILED` lẫn `KHONG_RO` (cổng cũ chỉ cảnh báo cho cả
+   hai); `--force-du-lieu-chua-dat` bỏ qua được, cờ ghi vào `manifest.json`.
+   `checkpoint_resume.pt` ghi đè mỗi epoch (model/optimizer/scheduler/scaler + RNG bốn
+   nguồn), tách khỏi `best.pt`; `--resume` khôi phục RNG cho dãy số tiếp theo giống hệt
+   như chưa hề dừng. Test đơn vị, **chưa** kiểm bằng một lượt train thật đứt giữa chừng.
+8. **Việc tiếp theo:** `gold_test` vẫn rỗng — vẫn là nút thắt duy nhất chưa gỡ được của
+   confound "dev cùng recipe với train của v3". `long_event` cần hướng điều tra mới —
+   nghe trực tiếp clip bị phân mảnh, hoặc so theo trục SNR/reverb thay vì trục độ dài sự
+   kiện. Ablation `pos_weight` giờ không còn bị hai việc trên chặn nữa, có thể bắt đầu.
 
 ---
 

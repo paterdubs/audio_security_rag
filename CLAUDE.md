@@ -113,7 +113,13 @@ không phải trạng thái hiện hành.
   **bằng nhau tuyệt đối** ở cả hai ngưỡng "im" đã thử (20%: 0,012s cả hai; 40%: 0,046s cả
   hai); ở p90 nhóm KHÔNG phân mảnh còn khe hở lớn hơn — ngược hướng giả thuyết. Không còn
   ứng viên thứ tư nào đang chờ sẵn. Số đo: `docs/measurements/long_event_gap_20260921.md`.
-- **642 test đạt** (21/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 631.
+- **Cổng hợp đồng dữ liệu giờ CHẶN thật, và checkpoint resume có optimizer/scheduler/RNG
+  đầy đủ.** `kiem_cong_hop_dong()` chặn cả `FAILED` lẫn `KHONG_RO` như nhau (trước 19/09
+  cả hai chỉ in cảnh báo) — bỏ qua bằng `--force-du-lieu-chua-dat`, cờ ghi vào
+  `manifest.json`. `checkpoint_resume.pt` ghi đè mỗi epoch (tách khỏi `best.pt` — không đổi
+  schema mà `predictions.py`/`eval_sed.py` phụ thuộc); `--resume` khôi phục RNG nên dãy số
+  ngẫu nhiên tiếp theo giống hệt như chưa hề dừng.
+- **649 test đạt** (21/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 642.
 
 ### Đang làm / chưa nghiệm thu
 
@@ -142,10 +148,9 @@ không phải trạng thái hiện hành.
 2. **Đưa 937 AudioSet-strong WAV vào manifest/split không rò rỉ**, chuẩn bị real dev và
    gold; sau đó pilot gán mù theo DATA_PLAN §8. Đây là thứ DUY NHẤT gỡ được confound
    "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
-3. **Nâng cổng hợp đồng dữ liệu từ cảnh báo lên chặn** trong `train_sed.py` — một lô
-   FAILED vẫn train được hiện tại.
-4. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã
-   đo (xem trên); cần train lại nên chi phí khác hẳn phép đo ECE đã có.
+3. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã
+   đo (xem trên); cần train lại nên chi phí khác hẳn phép đo ECE đã có. Cổng hợp đồng
+   (mục 3 cũ) và checkpoint resume nay đã xong, xem bên dưới.
 
 ---
 
@@ -408,6 +413,20 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-21 (tiếp) — cổng hợp đồng chặn thật, checkpoint resume đầy đủ
+
+- **`kiem_cong_hop_dong()` mới trong `train_sed.py`** — chặn train khi hợp đồng dữ liệu
+  khác `PASSED`, kể cả `KHONG_RO`. Cổng cũ chỉ in cảnh báo cho cả `FAILED` lẫn `KHONG_RO`,
+  y hệt v1/v2 (lô legacy) đã train trót lọt. `--force-du-lieu-chua-dat` bỏ qua được, và cờ
+  đó **ghi vào `manifest.json`** — một cổng có thể tắt im lặng thì không phải cổng.
+- **`luu_checkpoint_resume()`/`nap_checkpoint_resume()` mới** — `checkpoint_resume.pt` ghi
+  đè MỖI epoch (model/optimizer/scheduler/scaler + RNG bốn nguồn), tách khỏi `best.pt` để
+  không đổi schema mà `predictions.py`/`eval_sed.py` đọc. `--resume` tiếp tục từ epoch vừa
+  xong, khôi phục RNG nên dãy số ngẫu nhiên tiếp theo giống hệt như chưa hề dừng — test
+  đơn vị xác nhận bằng cách so hai nhánh (tiếp tục tại chỗ vs reseed rồi nạp lại).
+- Test đơn vị thuần, không chạy train thật (25 epoch tốn GPU nhiều giờ).
+- 642 → **649 test đạt**. File mới: `tests/test_ml_train_sed.py`.
 
 ### 2026-09-21 — `long_event`: ứng viên cuối cùng cũng bị bác bỏ
 

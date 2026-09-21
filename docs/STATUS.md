@@ -73,6 +73,14 @@
   **ba** ứng viên liên tiếp (cửa sổ hẹp, trần thấp, khe hở năng lượng); nguyên nhân riêng
   **vẫn chưa xác định**. Phép đo ở
   [measurements/long_event_gap_20260921.md](measurements/long_event_gap_20260921.md).
+- 🔴 **21/09 (tiếp) — cổng hợp đồng dữ liệu giờ CHẶN thật, checkpoint resume đầy đủ.**
+  `kiem_cong_hop_dong()` chặn train khi hợp đồng khác `PASSED`, kể cả `KHONG_RO` (cổng cũ
+  chỉ cảnh báo cho cả hai — v1/v2 đã train trót lọt trên lô legacy không đạt hợp đồng).
+  `--force-du-lieu-chua-dat` bỏ qua được, cờ **ghi vào `manifest.json`**.
+  `checkpoint_resume.pt` ghi đè mỗi epoch (model/optimizer/scheduler/scaler + RNG bốn
+  nguồn), tách khỏi `best.pt`; `--resume` khôi phục RNG nên dãy số ngẫu nhiên tiếp theo
+  giống hệt như chưa hề dừng. Test đơn vị xác nhận, **chưa** kiểm bằng một lượt train thật
+  đứt giữa chừng (25 epoch tốn GPU nhiều giờ).
 - Pha 1–5 của [TRAINING_OPS_PLAN](TRAINING_OPS_PLAN.md) đã có module và đã chạy:
   `ml/runs/{v1,v2,v3}/manifest.json` + `predictions/dev_all.npz` +
   `analysis{,_adaptive}.{json,md}`. `train_sed.py` nay gieo toàn bộ RNG và ghi manifest
@@ -249,16 +257,18 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **642 test đạt** (21/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho
+- **649 test đạt** (21/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho
   Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép ghép
   cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo
   lát cắt, 15 test cho ablation trần cửa sổ + cửa sổ suy từ train + hiệu chuẩn xác suất,
-  rồi 11 test nữa cho khe hở năng lượng của `long_event`. Mốc 550 là của B9 (17/09); mốc
-  394 là của snapshot 15:05.
+  11 test cho khe hở năng lượng của `long_event`, rồi 7 test nữa cho cổng hợp đồng +
+  checkpoint resume. Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
 - Lượt 19–21/09 **có** chạy lại suite trước và sau thay đổi mã: 573 đạt trước khi thêm
   test mới, 580 sau Pha 1 + Pha 3, 601 sau Pha 4, 616 sau Pha 5, 631 sau ablation
-  trần/hiệu chuẩn, **642** sau đo khe hở năng lượng. `train_sed --zero-shot --workers 2`
-  chạy thật, xác nhận crash pickle đã hết. Không tuyên bố đã chạy lại test API/frontend.
+  trần/hiệu chuẩn, 642 sau đo khe hở năng lượng, **649** sau cổng hợp đồng + checkpoint
+  resume. `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết.
+  Không tuyên bố đã chạy lại test API/frontend, và **không** chạy lại một lượt train thật
+  để kiểm `--resume` — chỉ có test đơn vị.
 - **`slice_index.jsonl` vẫn khớp code hiện tại.** `scaper_generate.py` được sửa lúc
   12:35:54, sau khi clip cuối sinh lúc 12:20:22 — tức dữ liệu sinh bằng code cũ. Đã chạy
   lại `plan_clips` với code mới và so từng clip: **0/7.920 khác biệt**. Tỉ lệ 5 lát cắt
@@ -483,7 +493,8 @@ lại sản phẩm thật và bắt được cả thứ chưa ai nghĩ tới, nh
 | `long_event` | **chưa xong** — biết hỏng vì phân mảnh; đã loại BA ứng viên liên tiếp ("cửa sổ lọc quá hẹp", "trần 51 khung", "khe hở năng lượng thật" — 21/09: hai nhóm vỡ/nguyên khe hở bằng nhau tuyệt đối); nguyên nhân riêng **vẫn chưa xác định**, hết ứng viên đang chờ sẵn |
 | Cửa sổ suy từ train | ✅ **19/09** — `cua_so_loc_tu_train()`; độ lớn rò rỉ đo được = 0 nhưng vì 9/15 lớp đã kẹp trần 51 ở cả hai nguồn, không phải vì train/dev giống nhau |
 | `confusable_with` | ✅ **19/09** — 8 cặp đo được đã khai (đối xứng) + bảng tra §3 `taxonomy.md`; tỉ lệ lượt nhầm đã khai của v3 lên 54,1% |
-| Cổng hợp đồng | `train_sed.py` mới **cảnh báo** khi hợp đồng khác PASSED, chưa **chặn**. Một lô FAILED vẫn train được |
+| Cổng hợp đồng | ✅ **21/09** — `kiem_cong_hop_dong()` CHẶN cả `FAILED` lẫn `KHONG_RO`; `--force-du-lieu-chua-dat` bỏ qua được, ghi vào `manifest.json` |
+| Checkpoint resume | ✅ **21/09** — `checkpoint_resume.pt` (model/optimizer/scheduler/scaler + RNG 4 nguồn), `--resume`; test đơn vị, chưa kiểm bằng lượt train thật đứt giữa chừng |
 | Hiệu chuẩn | ✅ **19/09** — ECE + reliability diagram đo xong (`ml/evaluation/calibration.py`); vùng dự báo 0,4–0,6 chiếm hơn nửa triệu khung mà tỉ lệ dương thật chỉ 1,7–3%, giải thích triệu chứng θ*≈0,9. Chưa ablation `pos_weight` — cần train lại để xác nhận nguyên nhân |
 | gold_test | vẫn RỖNG; DATA_PLAN D8–D10 là nút thắt, cần người gán mù |
 | Publish prep | ✅ Weight/cache/secret đã ignore; JAMS legacy theo dõi có chủ đích; snapshot được audit trước khi push GitHub |
