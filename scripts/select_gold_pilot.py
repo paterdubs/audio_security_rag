@@ -20,6 +20,7 @@ import hashlib
 import json
 import sys
 from collections import defaultdict
+from collections.abc import Iterable
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -28,6 +29,8 @@ from common import REPO_ROOT, enable_utf8_output  # noqa: E402
 
 SPLITS_PATH = REPO_ROOT / "data" / "manifests" / "splits.csv"
 SEGMENTS_PATH = REPO_ROOT / "data" / "raw" / "audioset_strong" / "segments.jsonl"
+RAW_MANIFEST_PATH = REPO_ROOT / "data" / "manifests" / "raw_manifest.csv"
+EXCLUSIONS_PATH = REPO_ROOT / "data" / "manifests" / "exclusions.csv"
 OUT_PATH = REPO_ROOT / "data" / "gold" / "pilot_v1_candidates.csv"
 
 DEFAULT_N = 30
@@ -71,27 +74,64 @@ def chon_pilot(theo_lop: dict[str, list[str]], n: int, seed: str) -> list[str]:
     return ket_qua
 
 
-def doc_gold_theo_lop(splits_path: Path, segments_path: Path) -> dict[str, dict[str, list[str]]]:
-    """{lớp: [file_id]} CHỈ cho các nhóm nguồn đã được `make_splits.py` gán vào
-    `gold_test`, cộng {file_id: path/classes} để ghi báo cáo."""
+def file_id_bi_loai(exclusions_path: Path) -> set[str]:
+    """{file_id} đã bị ghi vào `exclusions.csv` (N3 — mọi file loại bỏ phải ghi lý do).
+
+    File này chỉ được tạo khi có lượt loại đầu tiên — chưa có không phải lỗi.
+    """
+    if not exclusions_path.exists():
+        return set()
+    with exclusions_path.open(encoding="utf-8", newline="") as handle:
+        return {row["file_id"] for row in csv.DictReader(handle)}
+
+
+def segment_bi_loai(raw_manifest_path: Path, loai: set[str]) -> set[str]:
+    """{source_id} (segment WAV) có ÍT NHẤT một dòng sự kiện nằm trong `loai`.
+
+    `audioset_strong` ghi MỘT dòng manifest cho MỖI sự kiện, nhiều dòng trỏ cùng một
+    file .wav (`source_id`). Audio rác thì rác cho cả file, không phải chỉ lớp đã bị
+    ghi exclusion — nên loại một sự kiện phải kéo theo loại CẢ segment.
+    """
+    if not loai:
+        return set()
+    with raw_manifest_path.open(encoding="utf-8", newline="") as handle:
+        return {row["source_id"] for row in csv.DictReader(handle)
+               if row["source_dataset"] == "audioset_strong" and row["file_id"] in loai}
+
+
+def gom_theo_lop(gold_groups: set[str], segments: Iterable[dict],
+                 segment_loai_tru: set[str] = frozenset()) -> dict[str, dict]:
+    """{lớp: [file_id]} CHỈ cho segment thuộc `gold_groups` và KHÔNG nằm trong
+    `segment_loai_tru`, cộng {file_id: path/classes} để ghi báo cáo."""
+    theo_lop: dict[str, list[str]] = defaultdict(list)
+    thong_tin: dict[str, dict] = {}
+    for segment in segments:
+        if f"youtube_{segment['ytid']}" not in gold_groups:
+            continue
+        if segment["file_id"] in segment_loai_tru:
+            continue
+        classes = sorted({e["class_id"] for e in segment["events"]})
+        thong_tin[segment["file_id"]] = {"path": segment["path"], "classes": classes}
+        for class_id in classes:
+            theo_lop[class_id].append(segment["file_id"])
+    return {"theo_lop": dict(theo_lop), "thong_tin": thong_tin}
+
+
+def doc_gold_theo_lop(splits_path: Path, segments_path: Path,
+                      raw_manifest_path: Path = RAW_MANIFEST_PATH,
+                      exclusions_path: Path = EXCLUSIONS_PATH) -> dict[str, dict]:
     gold_groups: set[str] = set()
     with splits_path.open(encoding="utf-8", newline="") as handle:
         for row in csv.DictReader(handle):
             if row["source_dataset"] == "audioset_strong" and row["split"] == "gold_test":
                 gold_groups.add(row["source_group_id"])
 
-    theo_lop: dict[str, list[str]] = defaultdict(list)
-    thong_tin: dict[str, dict] = {}
+    loai = file_id_bi_loai(exclusions_path)
+    segment_loai_tru = segment_bi_loai(raw_manifest_path, loai)
+
     with segments_path.open(encoding="utf-8") as handle:
-        for line in handle:
-            segment = json.loads(line)
-            if f"youtube_{segment['ytid']}" not in gold_groups:
-                continue
-            classes = sorted({e["class_id"] for e in segment["events"]})
-            thong_tin[segment["file_id"]] = {"path": segment["path"], "classes": classes}
-            for class_id in classes:
-                theo_lop[class_id].append(segment["file_id"])
-    return {"theo_lop": dict(theo_lop), "thong_tin": thong_tin}
+        segments = [json.loads(line) for line in handle]
+    return gom_theo_lop(gold_groups, segments, segment_loai_tru)
 
 
 def run(args: argparse.Namespace) -> int:
@@ -102,10 +142,13 @@ def run(args: argparse.Namespace) -> int:
         print(f"❌ chưa có {args.segments}\n   Chạy: scripts/fetch_audioset_strong.py trước.")
         return 1
 
-    du_lieu = doc_gold_theo_lop(args.splits, args.segments)
+    loai = file_id_bi_loai(args.exclusions)
+    n_segment_loai = len(segment_bi_loai(args.raw_manifest, loai)) if loai else 0
+    du_lieu = doc_gold_theo_lop(args.splits, args.segments, args.raw_manifest, args.exclusions)
     theo_lop, thong_tin = du_lieu["theo_lop"], du_lieu["thong_tin"]
     n_file_gold = len(thong_tin)
-    print(f"▶ {n_file_gold} file WAV trong gold_test, {len(theo_lop)} lớp có mặt")
+    print(f"▶ {n_file_gold} file WAV trong gold_test, {len(theo_lop)} lớp có mặt"
+         + (f" ({n_segment_loai} file đã loại vì exclusions.csv)" if n_segment_loai else ""))
 
     chon = chon_pilot(theo_lop, args.n, args.seed)
     print(f"  chọn {len(chon)}/{args.n} file (seed={args.seed!r})")
@@ -131,6 +174,8 @@ def main() -> int:
     parser.add_argument("--seed", default=DEFAULT_SEED)
     parser.add_argument("--splits", type=Path, default=SPLITS_PATH)
     parser.add_argument("--segments", type=Path, default=SEGMENTS_PATH)
+    parser.add_argument("--raw-manifest", type=Path, default=RAW_MANIFEST_PATH)
+    parser.add_argument("--exclusions", type=Path, default=EXCLUSIONS_PATH)
     parser.add_argument("--out", type=Path, default=OUT_PATH)
     return run(parser.parse_args())
 
