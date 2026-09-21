@@ -150,20 +150,20 @@ không phải trạng thái hiện hành.
    loại (cửa sổ hẹp, trần thấp, khe hở năng lượng — xem trên). Hướng còn lại chưa đo: nghe
    trực tiếp vài clip bị phân mảnh để tìm lý do bằng tai, hoặc so `long_event` với các lát
    cắt khác theo trục SNR/reverb thay vì trục độ dài sự kiện.
-2. **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — 28/30 xong.** 13 file đã loại tính đến
-   22/09 (6 "rác/không liên quan" `unusable` + 6 game/phim `synthetic_or_game_audio` + 1
-   nhạc nền `music_no_event`), `select_gold_pilot.py` chọn thay thế mỗi lần nhờ
-   round-robin ổn định theo seed. **Phát hiện mẫu hình 100%:** cả 12 file "unusable"/
-   "synthetic" đều chạm ít nhất một trong 5 lớp `glass_breaking`/`scream`/`explosion`/
-   `gunshot`/`siren` — súng nổ/bom/kính vỡ/tiếng thét THẬT hiếm khi được quay đăng công
-   khai lên YouTube, nên phần lớn nhãn AudioSet cho các lớp này thực ra là game/phim/dàn
-   dựng. Pool chưa cạn (`scream` còn 19/22 file) nhưng các lớp này tốn nhiều lượt nghe
-   hơn hẳn mức trung bình để đủ ≥20 sự kiện/lớp ở cổng §8.5 — cần ghi vào phần Hạn chế
-   của khoá luận. **Case mới: đồ chơi mô phỏng (`0yZGysisqY0`) không gán vào lớp mục
-   tiêu** dù âm thanh giống — cùng nguyên tắc ca chuông quầy phục vụ (§4.4 15/09), ghi ở
-   `data/gold/decision_log.md`. Quy tắc kiểm tra audio thật ở `annotation_guideline.md`
-   §0.1. **Còn thiếu: gán 2 file cuối** (`-glN59TmfME_30000`, `1NWxg_BnJ0A_30000`), rồi
-   mới đủ 30 để làm bước 2
+2. **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — 29/30 xong, còn đúng 1 file.** 14 file
+   đã loại tính đến 22/09 (6 "rác/không liên quan" `unusable` + 6 game/phim
+   `synthetic_or_game_audio` + 2 nhạc nền `music_no_event`), `select_gold_pilot.py` chọn
+   thay thế mỗi lần nhờ round-robin ổn định theo seed. **Phát hiện mẫu hình 100%:** mọi
+   file "unusable"/"synthetic" đều chạm ít nhất một trong 5 lớp `glass_breaking`/`scream`/
+   `explosion`/`gunshot`/`siren` — súng nổ/bom/kính vỡ/tiếng thét THẬT hiếm khi được quay
+   đăng công khai lên YouTube, nên phần lớn nhãn AudioSet cho các lớp này thực ra là
+   game/phim/dàn dựng. Pool chưa cạn (`scream` còn 19/22 file) nhưng các lớp này tốn
+   nhiều lượt nghe hơn hẳn mức trung bình để đủ ≥20 sự kiện/lớp ở cổng §8.5 — cần ghi vào
+   phần Hạn chế của khoá luận. **Case mới: đồ chơi mô phỏng (`0yZGysisqY0`) không gán vào
+   lớp mục tiêu** dù âm thanh giống — cùng nguyên tắc ca chuông quầy phục vụ (§4.4 15/09),
+   ghi ở `data/gold/decision_log.md`. Quy tắc kiểm tra audio thật ở
+   `annotation_guideline.md` §0.1. **Còn thiếu: gán 1 file cuối** (`03ipyzsrLf8_20000`),
+   rồi mới đủ 30 để làm bước 2
    (nghỉ ≥3 ngày, gán lại mù, tính tự-nhất-quán). Đây là thứ DUY NHẤT gỡ được confound
    "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
 3. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã
