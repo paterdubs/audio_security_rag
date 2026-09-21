@@ -123,3 +123,48 @@ biến, false alarm liên tục sẽ khiến người dùng tắt hệ thống.
 `gunshot` phần ❌ Không bao gồm, tương tự đã làm với chuông quầy ở `alarm_bell`.
 
 ---
+
+### 2026-09-22 (tổng kết) · Pilot lần 1 hoàn tất — 30/30, số liệu đầy đủ
+
+**Tình huống:** Pilot lần 1 (DATA_PLAN §8.3 bước 1) đã gán đủ 30 clip. Quá trình phải
+loại và thay thế nhiều lần vì lẫn game/phim/nhạc nền trong nguồn AudioSet-strong.
+
+**Số liệu cuối cùng:**
+
+| Lý do loại | Số file (segment) |
+|---|---|
+| `synthetic_or_game_audio` (game/phim) | 7 |
+| `unusable` (rác/không liên quan, chưa xác định rõ loại) | 6 |
+| `music_no_event` (nhạc nền, không có sự kiện) | 3 |
+| **Tổng loại** | **16** |
+
+**Tổng lượt nghe để có đủ 30 clip hợp lệ: 46 (30 dùng được + 16 loại) → tỉ lệ thất bại
+34,8%.** Tức là cứ 3 clip audioset_strong thuộc diện `gold_test` thì trung bình hỏng hơn
+1 clip — một con số cần báo cáo nguyên văn trong phần Hạn chế của khoá luận, không làm
+tròn nhẹ đi.
+
+**52 dòng sự kiện hợp lệ**, phân bố theo lớp: `speech_normal` 24 · `applause_cheering` 6
+· `alarm_bell` 5 · `siren` 4 · `object_drop_dishes` 3 · `gunshot` 3 · `door_slam` 2 ·
+`scream` 2 · `laughter` 1 · `glass_breaking` 1 · `explosion` 1. **4 lớp vắng mặt hoàn
+toàn trong pilot: `fireworks`, `running_footsteps`, `shout_yell`, `vehicle_crash`** —
+hệ quả của việc `select_gold_pilot.py` chọn thay thế dựa trên nhãn AudioSet gốc (đã biết
+không đáng tin cho các lớp kịch tính), nên vòng thay thế dồn về đúng những lớp hay hỏng
+nhất chứ không giữ đều 15 lớp như lần chọn đầu.
+
+**Quyết định:** Không coi việc thiếu 4 lớp là lỗi cần sửa ngay — mục đích của PILOT là
+kiểm tra `annotation_guideline.md` có đủ rõ không (đo tự-nhất-quán ở bước 2-3), không
+phải phủ đều 15 lớp. Yêu cầu phủ lớp (≥20 sự kiện/lớp) chỉ áp dụng cho `gold_test` đầy đủ
+ở cổng §8.5, không áp dụng cho 30 clip pilot.
+
+**Lý do:** Ba mã lý do tách riêng (`unusable`/`synthetic_or_game_audio`/`music_no_event`)
+cho phép đo được CHÍNH XÁC bức tranh nhiễm của nguồn thay vì một con số "rác" mơ hồ —
+đúng tinh thần N3 và mục đích ban đầu khi tạo mã riêng.
+
+**Áp dụng chung:** Khi gán đại trà (bước 4 của §8.3) trên phần còn lại của `gold_test`
+(367 − 30 hợp lệ − 16 loại = 321 file chưa xét), tiếp tục dùng đúng ba mã lý do này. Tính
+lại tỉ lệ thất bại theo lớp định kỳ — nếu một lớp cụ thể (nghi ngờ nhất: `gunshot`,
+`explosion`, `glass_breaking`, `scream`, `siren`) có tỉ lệ hỏng > 50% khi gán đại trà,
+cần cân nhắc bổ sung nguồn khác (MIVIA, buổi thu thực địa IUH) thay vì tiếp tục rút cạn
+AudioSet-strong cho riêng các lớp đó.
+
+---

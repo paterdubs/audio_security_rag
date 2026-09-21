@@ -150,20 +150,23 @@ không phải trạng thái hiện hành.
    loại (cửa sổ hẹp, trần thấp, khe hở năng lượng — xem trên). Hướng còn lại chưa đo: nghe
    trực tiếp vài clip bị phân mảnh để tìm lý do bằng tai, hoặc so `long_event` với các lát
    cắt khác theo trục SNR/reverb thay vì trục độ dài sự kiện.
-2. **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — 29/30 xong, còn đúng 1 file.** 14 file
-   đã loại tính đến 22/09 (6 "rác/không liên quan" `unusable` + 6 game/phim
-   `synthetic_or_game_audio` + 2 nhạc nền `music_no_event`), `select_gold_pilot.py` chọn
-   thay thế mỗi lần nhờ round-robin ổn định theo seed. **Phát hiện mẫu hình 100%:** mọi
-   file "unusable"/"synthetic" đều chạm ít nhất một trong 5 lớp `glass_breaking`/`scream`/
-   `explosion`/`gunshot`/`siren` — súng nổ/bom/kính vỡ/tiếng thét THẬT hiếm khi được quay
-   đăng công khai lên YouTube, nên phần lớn nhãn AudioSet cho các lớp này thực ra là
-   game/phim/dàn dựng. Pool chưa cạn (`scream` còn 19/22 file) nhưng các lớp này tốn
-   nhiều lượt nghe hơn hẳn mức trung bình để đủ ≥20 sự kiện/lớp ở cổng §8.5 — cần ghi vào
-   phần Hạn chế của khoá luận. **Case mới: đồ chơi mô phỏng (`0yZGysisqY0`) không gán vào
-   lớp mục tiêu** dù âm thanh giống — cùng nguyên tắc ca chuông quầy phục vụ (§4.4 15/09),
-   ghi ở `data/gold/decision_log.md`. Quy tắc kiểm tra audio thật ở
-   `annotation_guideline.md` §0.1. **Còn thiếu: gán 1 file cuối** (`03ipyzsrLf8_20000`),
-   rồi mới đủ 30 để làm bước 2
+2. ✅ **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — XONG 22/09.** 30/30 gán được, sau
+   **16 file loại / 46 lượt nghe = tỉ lệ thất bại 34,8%** (7 game/phim
+   `synthetic_or_game_audio`, 6 rác/không liên quan `unusable`, 3 nhạc nền
+   `music_no_event`). **Mẫu hình 100%: mọi file "unusable"/"synthetic" đều chạm ít nhất
+   một trong 5 lớp `glass_breaking`/`scream`/`explosion`/`gunshot`/`siren`** — súng
+   nổ/bom/kính vỡ/tiếng thét THẬT hiếm khi được quay đăng công khai lên YouTube, nên phần
+   lớn nhãn AudioSet cho các lớp này thực ra là game/phim/dàn dựng. **Cần ghi nguyên văn
+   con số 34,8% vào phần Hạn chế của khoá luận.**
+   52 dòng sự kiện hợp lệ, nhưng **4 lớp vắng mặt hoàn toàn** (`fireworks`,
+   `running_footsteps`, `shout_yell`, `vehicle_crash`) — hệ quả của việc chọn thay thế
+   dồn về đúng các lớp hay hỏng nhất; không phải lỗi, pilot không yêu cầu phủ đều 15 lớp
+   (đó là yêu cầu của `gold_test` đầy đủ ở cổng §8.5, không phải pilot).
+   Case đồ chơi mô phỏng (`0yZGysisqY0`, không gán `gunshot`) cùng nguyên tắc ca chuông
+   quầy phục vụ (§4.4 15/09). Quy tắc kiểm tra audio thật ở `annotation_guideline.md`
+   §0.1. Tổng kết đầy đủ + khuyến nghị cho gán đại trà ở `data/gold/decision_log.md`.
+   **Việc tiếp theo: nghỉ ≥3 ngày rồi gán lại mù 30 clip này (bước 2-3 của §8.3)** —
+   chưa thể bắt đầu ngay, khoảng nghỉ là điều kiện bắt buộc để số đo test–retest có nghĩa.
    (nghỉ ≥3 ngày, gán lại mù, tính tự-nhất-quán). Đây là thứ DUY NHẤT gỡ được confound
    "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
 3. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã
@@ -431,6 +434,33 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-22 — Pilot gold lần 1 HOÀN TẤT: 30/30, tỉ lệ thất bại 34,8% đo được
+
+- **30/30 clip pilot đã gán xong**, `data/gold/pilot_v1_lan1.tsv` — 52 dòng sự kiện hợp
+  lệ, format sạch (đã kiểm: 0 trùng lặp, đủ tab thật, 3 chữ số thập phân, sắp đúng thứ
+  tự, không nhãn lạ).
+- **Phải loại và thay thế 16 lần liên tiếp** mới đủ 30 clip dùng được — tổng 46 lượt
+  nghe, **tỉ lệ thất bại 34,8%**. Ba mã lý do tách riêng trong `exclusions.csv`
+  (`stage=gold_pilot`): `synthetic_or_game_audio` (7 file, game/phim), `unusable` (6
+  file, rác/không liên quan), `music_no_event` (3 file, nhạc nền — mã mới thêm khi phát
+  hiện case này khác hẳn game/rác).
+- **Xác nhận bằng số liệu: 100% file bị loại đều chạm ít nhất một trong 5 lớp
+  `glass_breaking`/`scream`/`explosion`/`gunshot`/`siren`.** Súng nổ/bom/kính vỡ/tiếng
+  thét THẬT hiếm khi được quay đăng công khai lên YouTube — phần lớn nhãn AudioSet cho
+  các lớp này thực ra là game/phim/dàn dựng. **Phải ghi nguyên văn 34,8% vào phần Hạn
+  chế của khoá luận**, và cảnh báo trước cho lần gán đại trà (bước 4 §8.3): các lớp này
+  sẽ tốn nhiều lượt nghe hơn hẳn mức trung bình để đủ ≥20 sự kiện/lớp ở cổng §8.5.
+- **Case mới (khác game/rác):** đồ chơi mô phỏng (`0yZGysisqY0_12000`, âm thanh tương tự
+  `gunshot` nhưng là đồ chơi) — không gán vào lớp mục tiêu dù sóng âm giống, cùng nguyên
+  tắc đã dùng cho ca chuông quầy phục vụ (`decision_log.md` 15/09). Không loại file, xử
+  lý như "không có sự kiện" — file vẫn ở trong `gold_test`.
+- **annotation_guideline.md §0.1 mới** — điều kiện tiên quyết "audio có phải thật
+  không" phải kiểm TRƯỚC khi gán bất kỳ dòng nào, với dấu hiệu nhận biết cụ thể.
+- 4 lớp vắng mặt trong 52 dòng sự kiện (`fireworks`, `running_footsteps`, `shout_yell`,
+  `vehicle_crash`) — không phải lỗi, pilot không yêu cầu phủ đều 15 lớp.
+- **Việc tiếp theo:** nghỉ ≥3 ngày (điều kiện bắt buộc, không nén được) rồi gán lại 30
+  clip này trong điều kiện MÙ (bước 2-3 của §8.3) để tính tự-nhất-quán.
 
 ### 2026-09-21 (tiếp 3) — Pilot gold lần 1: 24/30 gán xong, 6 file rác đã loại
 

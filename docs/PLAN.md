@@ -308,7 +308,7 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 | ☐ | Kiểm định độ chính xác bộ trích `EVENT_LEXICON` | W4 | Điều kiện cần của C2 |
 | ☐ | Xác nhận `aac-metrics` / `psds_eval` cài được trên Windows | W1 | Có gói khó build trên Windows → cân nhắc WSL2 |
 | ☐ | Kiểm tra VRAM thực tế khi train Conformer + BART | W4 | Quyết định batch size |
-| ☑ | Cài `yt-dlp` + `ffmpeg`, chạy `fetch_audioset_strong.py` thật | W2 | Đã tải thật; **21/09: đã vào manifest/split** — `build_manifest.py`/`make_splits.py` cho 1.601 dòng sự kiện/367 file vào `gold_test`. `select_gold_pilot.py` chọn 30 clip pilot rải đều 15 lớp. Chưa gán nhãn — real dev/gold vẫn chưa hoàn chỉnh. |
+| ☑ | Cài `yt-dlp` + `ffmpeg`, chạy `fetch_audioset_strong.py` thật | W2 | Đã tải thật; 21/09: vào manifest/split (`build_manifest.py`/`make_splits.py`, 1.601 dòng sự kiện/367 file `gold_test`). **22/09: pilot lần 1 XONG — 30/30 clip, 52 dòng sự kiện.** Phải loại 16/46 lượt nghe (34,8%) vì lẫn game/phim/nhạc trong nguồn — xem `data/gold/decision_log.md`. real gold vẫn chưa hoàn chỉnh (còn bước 2-4 của §8.3). |
 | ☐ | Đo lại tỉ lệ hụt video AudioSet-strong (dự kiến 15–30%, ghi `unavailable` vào `exclusions.csv`) | W2 | Phải báo cáo tỉ lệ hụt thật trong khoá luận, không dùng số dự kiến |
 | ☐ | Xác nhận ruling chuông quầy thức ăn nhanh trong `data/gold/decision_log.md` (đang ⚠️ CHỜ XÁC NHẬN) | W2 | Ảnh hưởng biên `alarm_bell` |
 | ☑ | Xử lý hàng đợi duyệt | W2 | Hoàn tất 16/09; 1.831 bulk-accept phải nêu là hạn chế, không xem như kiểm định mù |
