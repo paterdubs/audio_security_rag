@@ -119,7 +119,9 @@ không phải trạng thái hiện hành.
   `manifest.json`. `checkpoint_resume.pt` ghi đè mỗi epoch (tách khỏi `best.pt` — không đổi
   schema mà `predictions.py`/`eval_sed.py` phụ thuộc); `--resume` khôi phục RNG nên dãy số
   ngẫu nhiên tiếp theo giống hệt như chưa hề dừng.
-- **649 test đạt** (21/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 642.
+- **689 test đạt** (22/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 642.
+  Từ 649: pilot gold lần 1 (30/30, xem "Đang làm" bên dưới), bộ gán mù lần 2
+  (`make_blind_set.py`, đã chạy thật), `agreement.py` (chưa chạy thật), `--pos-weight-max`.
 
 ### Đang làm / chưa nghiệm thu
 
@@ -165,13 +167,22 @@ không phải trạng thái hiện hành.
    Case đồ chơi mô phỏng (`0yZGysisqY0`, không gán `gunshot`) cùng nguyên tắc ca chuông
    quầy phục vụ (§4.4 15/09). Quy tắc kiểm tra audio thật ở `annotation_guideline.md`
    §0.1. Tổng kết đầy đủ + khuyến nghị cho gán đại trà ở `data/gold/decision_log.md`.
-   **Việc tiếp theo: nghỉ ≥3 ngày rồi gán lại mù 30 clip này (bước 2-3 của §8.3)** —
-   chưa thể bắt đầu ngay, khoảng nghỉ là điều kiện bắt buộc để số đo test–retest có nghĩa.
-   (nghỉ ≥3 ngày, gán lại mù, tính tự-nhất-quán). Đây là thứ DUY NHẤT gỡ được confound
-   "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
-3. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã
-   đo (xem trên); cần train lại nên chi phí khác hẳn phép đo ECE đã có. Cổng hợp đồng
-   (mục 3 cũ) và checkpoint resume nay đã xong, xem bên dưới.
+   ✅ **Hạ tầng bước 2–3 dựng xong 21/09, ĐÃ chạy thật phần dựng bộ mù.**
+   `scripts/make_blind_set.py` đã chạy trên dữ liệu thật → `data/gold/blind_v1_lan2/`
+   (60 WAV: 30 pilot băm tên + xáo thứ tự, cộng 30 clip "mồi" lấy từ 351 file `gold_test`
+   chưa gán, DATA_PLAN §8.4 điều kiện 2+4) + `blind_v1_lan2_mapping.csv` (⚠️ KHÔNG mở lúc
+   gán nhãn). `scripts/agreement.py` đã viết + test, tính tự-nhất-quán event-F1 + lệch
+   onset trung vị THEO TỪNG LỚP và kiểm hai cổng §8.5 (≥0,75 · ≤100ms) — **chưa chạy thật**,
+   chờ người gán lại 30 clip trong `blind_v1_lan2/` sau khoảng nghỉ ≥3 ngày (điều kiện bắt
+   buộc, không nén được) rồi lưu kết quả vào `pilot_v1_lan2.tsv`.
+   Đây là thứ DUY NHẤT gỡ được confound "dev cùng recipe với train của v3". Không dùng
+   test để chọn threshold.
+3. **Ablation `pos_weight`** — `train_sed.py` đã có cờ `--pos-weight-max` (mặc định vẫn
+   30,0, hành vi cũ giữ nguyên) để xác nhận nguyên nhân của lệch hiệu chuẩn đã đo (ECE v3
+   0,3332). **Chưa chạy lượt train nào với cờ này** — cần train lại (nhiều giờ GPU) nên chi
+   phí khác hẳn phép đo ECE đã có. Quét đề xuất: 1.0 (tắt hẳn cân bằng lớp) · 10 · 30 (hiện
+   tại), so cả ECE tổng lẫn event-F1@θ* để phân biệt cải thiện thật với đánh đổi. Cổng hợp
+   đồng (mục 3 cũ) và checkpoint resume đã xong, xem bên dưới.
 
 ---
 
@@ -274,7 +285,9 @@ docker compose down                   # dừng, giữ named volumes; không dùn
 .venv/Scripts/python.exe scripts/scaper_generate.py --split train
 .venv/Scripts/python.exe scripts/scaper_generate.py --split dev
 .venv/Scripts/python.exe scripts/verify_synthetic.py --split train
-# validate_annotations.py, agreement.py, slice_coverage.py: chưa triển khai
+.venv/Scripts/python.exe scripts/make_blind_set.py --help    # bộ gán lại mù pilot lần 2
+.venv/Scripts/python.exe scripts/agreement.py --help          # tự-nhất-quán lần 1 vs lần 2
+# validate_annotations.py, slice_coverage.py: chưa triển khai
 
 # Huấn luyện & đánh giá
 .venv/Scripts/python.exe -m ml.training.train_sed --help      # tự ghi manifest + gieo seed
@@ -434,6 +447,38 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-22 (tiếp) — Hạ tầng bước 2–3 (bộ gán mù + tự-nhất-quán) và ablation pos_weight
+
+- **`scripts/make_blind_set.py` mới, ĐÃ CHẠY THẬT trên dữ liệu production.** Dựng bộ 60
+  clip cho lần gán lại mù: 30 clip pilot (băm tên SHA-256, xáo thứ tự bằng
+  `hash_fraction` salt riêng để khối 30 cũ không đứng liền nhau) cộng **30 clip "mồi"**
+  lấy từ 351 file `gold_test` CHƯA gán, để không lộ thành một khối dễ nhận ra (DATA_PLAN
+  §8.4 điều kiện 2+4 — điều kiện 1 "dự án Label Studio mới" và điều kiện 3 "nghỉ ≥3 ngày"
+  là việc của người, script không lo được). Mồi lấy hash-sort đơn giản, KHÔNG round-robin
+  theo lớp như `chon_pilot` — mục đích là che giấu, không phải phủ lớp; nhãn của mồi ở
+  lần 2 vẫn tận dụng được thẳng cho gán đại trà sau này, không lãng phí công nghe.
+  Kết quả thật: `data/gold/blind_v1_lan2/` (60 WAV, 104 MB) +
+  `data/gold/blind_v1_lan2_mapping.csv` (ten_mu → file_id thật + cờ `la_pilot`; ⚠️
+  **KHÔNG được mở file này trong lúc gán nhãn** — mở ra là lộ ngay đâu là 30 clip cũ).
+- **`scripts/agreement.py` mới — chưa chạy thật, chờ `pilot_v1_lan2.tsv`.** Tính tự-nhất-
+  quán event-F1 (tái dùng `sed_metrics.event_and_segment_f1`, không tự cài F1) và lệch
+  onset trung vị (tái dùng `error_taxonomy.phan_loai`, lấy MỌI cặp có cả hai onset —
+  dung/bien/thay_the, không chỉ `dung`, vì giới hạn ở `dung` sẽ tự động loại mọi cặp lệch
+  quá collar và làm trung vị nhỏ giả tạo). Báo cáo THEO TỪNG LỚP (§8.2 B3) + hai cổng
+  §8.5 (event-F1 ≥ 0,75 · lệch onset trung vị ≤ 100 ms) — hai cổng còn lại (≥20 event/lớp,
+  ≥20 clip/slice) áp cho `gold_test` đầy đủ, KHÔNG áp cho batch pilot, script nói rõ điều
+  này trong báo cáo thay vì để người đọc tự suy. Mọi thông điệp đều nói rõ đây KHÔNG phải
+  kappa liên-người (DATA_PLAN §8.1) — dự án chỉ có một người gán.
+- **`train_sed.py` thêm `--pos-weight-max`** (mặc định vẫn `MAX_POS_WEIGHT=30.0`, hành vi
+  cũ giữ nguyên — không đổi mặc định ngầm). Trả lời câu hỏi còn treo của phép đo hiệu
+  chuẩn 19/09 (ECE v3 0,3332, >500k khung dự báo 0,4–0,6 mà tỉ lệ dương thật chỉ 1,7–3%).
+  `--pos-weight-max 1.0` tắt hẳn cân bằng lớp (mọi lớp có dương đều nhận weight=1.0, vì tỉ
+  lệ âm/dương thật luôn ≥1 với sự kiện thưa). **Chưa chạy lượt train nào với cờ này** — cần
+  quét ít nhất {1.0, 10, 30}, so cả ECE tổng lẫn event-F1@θ* để phân biệt cải thiện thật
+  với đánh đổi (ECE giảm nhưng F1 cũng giảm thì không phải thắng).
+- 660 → 675 (`make_blind_set.py`, 15 test) → 686 (`agreement.py`, 11 test) → **689 test
+  đạt** (`--pos-weight-max`, 3 test).
 
 ### 2026-09-22 — Pilot gold lần 1 HOÀN TẤT: 30/30, tỉ lệ thất bại 34,8% đo được
 

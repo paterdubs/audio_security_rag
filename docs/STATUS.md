@@ -81,6 +81,23 @@
   nguồn), tách khỏi `best.pt`; `--resume` khôi phục RNG nên dãy số ngẫu nhiên tiếp theo
   giống hệt như chưa hề dừng. Test đơn vị xác nhận, **chưa** kiểm bằng một lượt train thật
   đứt giữa chừng (25 epoch tốn GPU nhiều giờ).
+- 🔴 **21/09 (tiếp 3) — pilot gold lần 1 XONG (30/30), hạ tầng cho lần 2 + ablation
+  `pos_weight` dựng xong trong lúc chờ khoảng nghỉ ≥3 ngày (DATA_PLAN §8.3).**
+  `data/gold/pilot_v1_lan1.tsv`: 52 dòng sự kiện, 11/15 lớp có mặt. Phải loại **16 file /
+  46 lượt nghe = 34,8%** mới đủ 30 clip; **100% file bị loại chạm ít nhất một trong 5 lớp**
+  `glass_breaking`/`scream`/`explosion`/`gunshot`/`siren` — audio thật cho các lớp này hiếm
+  trên AudioSet nên nhãn của chúng lẫn nhiều game/phim. Con số này phải vào phần Hạn chế.
+  `annotation_guideline.md` có thêm §0.1 (kiểm audio thật trước khi gán). `gold_test` còn
+  **351** file chưa gán.
+  `scripts/make_blind_set.py` mới — dựng bộ 60 clip cho lần gán lại mù (30 pilot băm tên +
+  xáo thứ tự, cộng 30 clip "mồi" lấy từ 351 file `gold_test` chưa gán để không lộ khối cũ,
+  DATA_PLAN §8.4 điều kiện 2+4; điều kiện 1+3 là việc của người). Đã chạy thật:
+  `data/gold/blind_v1_lan2/` (60 WAV) + `blind_v1_lan2_mapping.csv` (⚠️ không mở lúc gán).
+  `scripts/agreement.py` mới — tự-nhất-quán event-F1 + lệch onset trung vị giữa hai lần,
+  theo TỪNG LỚP (§8.2 B3), kiểm hai cổng của §8.5 (≥0,75 · ≤100ms); **chưa chạy thật**, chờ
+  `pilot_v1_lan2.tsv` sau khi gán lại. `train_sed.py` thêm `--pos-weight-max` (mặc định vẫn
+  30,0) để ablation trần `pos_weight` — trả lời câu hỏi còn treo của phép đo hiệu chuẩn
+  19/09 (ECE v3 0,3332); chưa chạy lượt train nào với cờ này.
 - 🔴 **21/09 (tiếp 2) — 937 WAV AudioSet-strong vào manifest/split, chọn xong pilot gold.**
   `build_manifest.py --source audioset_strong` (adapter có sẵn, chỉ chưa ai chạy) →
   **3.977 dòng sự kiện**, 0 trùng lặp với nguồn khác. `make_splits.py` →
@@ -267,18 +284,22 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **654 test đạt** (21/09), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30 test cho
-  Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép ghép
-  cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo
+- **689 test đạt** (21/09, cuối phiên), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30
+  test cho Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép
+  ghép cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo
   lát cắt, 15 test cho ablation trần cửa sổ + cửa sổ suy từ train + hiệu chuẩn xác suất,
   11 test cho khe hở năng lượng của `long_event`, 7 test cho cổng hợp đồng + checkpoint
-  resume, rồi 5 test nữa cho `select_gold_pilot.py`. Mốc 550 là của B9 (17/09); mốc 394
-  là của snapshot 15:05.
+  resume, 5 test cho `select_gold_pilot.py`, 6 test cho việc đọc `exclusions.csv` trước
+  round-robin, 15 test cho `make_blind_set.py`, 11 test cho `agreement.py`, 3 test cho
+  `--pos-weight-max`. Mốc 550 là của B9 (17/09); mốc 394 là của snapshot 15:05.
 - Lượt 19–21/09 **có** chạy lại suite trước và sau thay đổi mã: 573 đạt trước khi thêm
   test mới, 580 sau Pha 1 + Pha 3, 601 sau Pha 4, 616 sau Pha 5, 631 sau ablation
   trần/hiệu chuẩn, 642 sau đo khe hở năng lượng, 649 sau cổng hợp đồng + checkpoint
-  resume, **654** sau chọn pilot gold. `train_sed --zero-shot --workers 2` chạy thật,
-  xác nhận crash pickle đã hết.
+  resume, 654 sau chọn pilot gold, 660 sau đọc `exclusions.csv`, 675 sau
+  `make_blind_set.py`, 686 sau `agreement.py`, **689** sau `--pos-weight-max`.
+  `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết.
+  `make_blind_set.py` cũng đã chạy thật trên dữ liệu production (không chỉ test) —
+  60 file trong `data/gold/blind_v1_lan2/`, đối soát 30/30 pilot/mồi qua mapping.
   Không tuyên bố đã chạy lại test API/frontend, và **không** chạy lại một lượt train thật
   để kiểm `--resume` — chỉ có test đơn vị.
 - **`slice_index.jsonl` vẫn khớp code hiện tại.** `scaper_generate.py` được sửa lúc
