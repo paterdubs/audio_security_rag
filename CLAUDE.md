@@ -107,7 +107,13 @@ không phải trạng thái hiện hành.
   phải vì train/dev giống nhau. **ECE đo lần đầu**: vùng dự báo 0,4–0,6 mang hơn nửa
   triệu khung mà tỉ lệ dương thật chỉ 1,7–3% — giải thích triệu chứng θ*≈0,9, chưa kết
   luận nguyên nhân. Số đo: `docs/measurements/{max_median_ceiling,adaptive_window_leak,calibration}_20260919.md`.
-- **631 test đạt** (19/09 tối, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 616.
+- **`long_event` đã loại BA ứng viên liên tiếp — nguyên nhân riêng vẫn chưa xác định.**
+  Ứng viên cuối "khe hở năng lượng thật bên trong nhãn" cũng bị bác bỏ (21/09): so nhóm sự
+  kiện bị phân mảnh (n=178) với nhóm không (n=137) trong cùng lát cắt, khe hở trung bình
+  **bằng nhau tuyệt đối** ở cả hai ngưỡng "im" đã thử (20%: 0,012s cả hai; 40%: 0,046s cả
+  hai); ở p90 nhóm KHÔNG phân mảnh còn khe hở lớn hơn — ngược hướng giả thuyết. Không còn
+  ứng viên thứ tư nào đang chờ sẵn. Số đo: `docs/measurements/long_event_gap_20260921.md`.
+- **642 test đạt** (21/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 631.
 
 ### Đang làm / chưa nghiệm thu
 
@@ -129,10 +135,10 @@ không phải trạng thái hiện hành.
 
 ### Việc tiếp theo
 
-1. **Nguyên nhân riêng của `long_event` vẫn chưa tìm ra.** Đã loại hai ứng viên: "cửa sổ
-   lọc 7 khung quá hẹp" và "trần 51 khung chặn cửa sổ theo lớp" (cả hai xem trên). Ứng
-   viên còn lại, chưa kiểm: Scaper có thể đang sinh khe hở năng lượng thật bên trong sự
-   kiện dài — cần nghe trực tiếp một mẫu clip `long_event` bị phân mảnh để xác nhận.
+1. **`long_event`: hết ứng viên đã biết, cần hướng điều tra mới.** Ba giả thuyết đều bị
+   loại (cửa sổ hẹp, trần thấp, khe hở năng lượng — xem trên). Hướng còn lại chưa đo: nghe
+   trực tiếp vài clip bị phân mảnh để tìm lý do bằng tai, hoặc so `long_event` với các lát
+   cắt khác theo trục SNR/reverb thay vì trục độ dài sự kiện.
 2. **Đưa 937 AudioSet-strong WAV vào manifest/split không rò rỉ**, chuẩn bị real dev và
    gold; sau đó pilot gán mù theo DATA_PLAN §8. Đây là thứ DUY NHẤT gỡ được confound
    "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
@@ -402,6 +408,18 @@ Ghi thêm ở **cuối**, không sửa mục cũ. Mỗi mục 1–3 dòng, khôn
   khoảng trống, mô phỏng nhãn và seed theo clip. Lô mới 7.920 train + 1.440 dev PASS hợp đồng.
 - Precompute waveform PANNs cho cả train/dev; `panns_ft_v3` hoàn tất 25 epoch: mAP 0,8123,
   segment-F1 0,2748, event-F1 0,1077. Không kết luận nguyên nhân trước khi có threshold sweep.
+
+### 2026-09-21 — `long_event`: ứng viên cuối cùng cũng bị bác bỏ
+
+- **`ml/evaluation/long_event_gap.py` mới** — kiểm ứng viên cuối "Scaper sinh khe hở năng
+  lượng thật bên trong sự kiện dài". So nhóm sự kiện bị phân mảnh (n=178) với nhóm không
+  (n=137), CÙNG lát cắt `long_event`, chỉ xét sự kiện ≥1s (315/559 sự kiện). Khe hở trung
+  bình **bằng nhau tuyệt đối** ở cả hai nhóm (0,012s ở ngưỡng "im" 20%, 0,046s ở 40%); p90
+  nhóm KHÔNG phân mảnh còn cao hơn — ngược hướng giả thuyết. Đã kiểm độ nhạy ngưỡng, kết
+  luận không đổi ở cả hai mức.
+- **`long_event` giờ đã loại BA ứng viên liên tiếp** (cửa sổ hẹp, trần thấp, khe hở năng
+  lượng). Nguyên nhân riêng vẫn chưa xác định — không còn ứng viên thứ tư nào chờ sẵn.
+- 631 → **642 test đạt**. Số đo: `docs/measurements/long_event_gap_20260921.md`.
 
 ### 2026-09-19 (tối, tiếp) — trần cửa sổ bị bác bỏ, rò rỉ đo bằng 0, hiệu chuẩn xác suất
 

@@ -362,9 +362,17 @@ chứng minh verifier từng bắt được lỗi thật.
    [measurements/max_median_ceiling_20260919.md](measurements/max_median_ceiling_20260919.md) ·
    [measurements/adaptive_window_leak_20260919.md](measurements/adaptive_window_leak_20260919.md) ·
    [measurements/calibration_20260919.md](measurements/calibration_20260919.md).
-6. **Việc tiếp theo:** `gold_test` vẫn rỗng. Mọi số trên trang này đo trên tập tổng hợp
-   dùng chung foreground bank với train. Ứng viên còn lại cho `long_event`: khe hở năng
-   lượng thật do Scaper sinh bên trong sự kiện dài, chưa kiểm.
+6. ✅ **`long_event` — kiểm ứng viên cuối** — xong 21/09. `ml/evaluation/long_event_gap.py`
+   so khe hở năng lượng trong nhãn giữa nhóm sự kiện bị phân mảnh (n=178) và nhóm không
+   (n=137), cùng lát cắt, chỉ xét sự kiện ≥1s. Khe hở trung bình **bằng nhau tuyệt đối**
+   ở cả hai ngưỡng "im" đã thử (20%: 0,012s; 40%: 0,046s); p90 nhóm KHÔNG phân mảnh còn
+   cao hơn — ngược hướng giả thuyết. **Ba ứng viên liên tiếp đều bị loại** (cửa sổ hẹp,
+   trần thấp, khe hở năng lượng); nguyên nhân riêng của `long_event` **vẫn chưa xác
+   định**, không còn ứng viên thứ tư đang chờ sẵn. Phép đo:
+   [measurements/long_event_gap_20260921.md](measurements/long_event_gap_20260921.md).
+7. **Việc tiếp theo:** `gold_test` vẫn rỗng. Mọi số trên trang này đo trên tập tổng hợp
+   dùng chung foreground bank với train. `long_event` cần hướng điều tra mới — nghe trực
+   tiếp clip bị phân mảnh, hoặc so theo trục SNR/reverb thay vì trục độ dài sự kiện.
 
 ---
 
