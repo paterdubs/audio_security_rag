@@ -69,6 +69,7 @@ ONTOLOGY_PATH = REPO_ROOT / "ml" / "configs" / "ontology_map.yaml"
 # Clip không thuộc lát cắt khó nào. 357/1.440 clip dev rơi vào đây và chúng là MỐC ĐỐI
 # CHIẾU: không có cột này thì năm lát cắt khó không so được với cái gì.
 LAT_CAT_SACH = "sach"
+NHANH_KHAC = "khac"       # nửa còn lại của bảng 2×2 trong `nhom_cat_cheo`
 LAT_CAT = ("overlap", "low_snr", "reverb", "long_event", "causal_chain", LAT_CAT_SACH)
 
 NHAN_LOAI = {
@@ -120,6 +121,37 @@ def nhom_theo_lat_cat(lat_cat: dict[str, list[str]],
     for clip_id in trong_du_doan:
         for ten in lat_cat.get(clip_id, [LAT_CAT_SACH]):
             nhom[ten].append(clip_id)
+    return nhom
+
+
+def nhom_cat_cheo(lat_cat: dict[str, list[str]],
+                  clip_ids: Iterable[str],
+                  truc: str,
+                  doi_chieu: Iterable[str]) -> dict[str, list[str]]:
+    """Bảng 2×2 {truc, khac} × {có, không} cho từng lát cắt đối chiếu.
+
+    `nhom_theo_lat_cat` gom theo MỘT tên lát cắt, mà các lát cắt CHỒNG NHAU: trên
+    `data/synthetic/dev`, 144 clip `long_event` thì 52 clip cũng là `reverb`, 45 cũng là
+    `low_snr`. Hàng `long_event` của bảng lát cắt vì thế KHÔNG tách được "long_event tự nó
+    khó" khỏi "clip long_event tình cờ trùng lát cắt khó khác" — cả ba giả thuyết
+    long_event trước đây đều đo trên cái hàng lẫn lộn đó. Bốn ô dưới đây tách ra được:
+    chỉ khi chênh lệch truc-vs-khac còn giữ nguyên ở CẢ hai cột (có/không đối chiếu) thì
+    `truc` mới thật sự là biến giải thích.
+
+    Chỉ nhận clip có trong dự đoán (cùng bẫy mẫu số với `nhom_theo_lat_cat`); clip thiếu
+    trong slice_index coi như `sach`, tức thuộc nhánh "khac" và "không".
+    """
+    trong_du_doan = list(clip_ids)
+    nhom: dict[str, list[str]] = {}
+    for ten in doi_chieu:
+        for ben in (truc, NHANH_KHAC):
+            for dau in ("+", "-"):
+                nhom[f"{ben}{dau}{ten}"] = []
+        for clip_id in trong_du_doan:
+            slices = set(lat_cat.get(clip_id) or [LAT_CAT_SACH])
+            ben = truc if truc in slices else NHANH_KHAC
+            dau = "+" if ten in slices else "-"
+            nhom[f"{ben}{dau}{ten}"].append(clip_id)
     return nhom
 
 

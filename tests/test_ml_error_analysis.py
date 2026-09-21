@@ -410,3 +410,48 @@ def test_ten_bao_cao_nguon_train_khac_ten_nguon_dev():
     assert ea.ten_bao_cao(True, nguon_cua_so="train") == "analysis_adaptive_train"
     assert ea.ten_bao_cao(True, nguon_cua_so="dev") == "analysis_adaptive"
     assert ea.ten_bao_cao(True) == ea.ten_bao_cao(True, nguon_cua_so="dev")
+
+
+# ── Cắt chéo hai lát cắt ─────────────────────────────────────────────────────
+#
+# `nhom_theo_lat_cat` gom theo MỘT tên lát cắt, mà các lát cắt CHỒNG NHAU: trên
+# data/synthetic/dev, 144 clip `long_event` thì 52 clip đồng thời là `reverb`, 45 là
+# `low_snr`, 47 là `overlap`. Nghĩa là hàng `long_event` của bảng lát cắt KHÔNG phân biệt
+# được "long_event tự nó khó" với "clip long_event tình cờ trùng lát cắt khó khác" —
+# đúng thứ ba giả thuyết trước về long_event đều không kiểm được. Cần 2×2 thật.
+
+
+def test_nhom_cat_cheo_tao_du_bon_o_cua_bang_2x2():
+    lat_cat = {"a": ["long_event", "low_snr"], "b": ["long_event"],
+               "c": ["low_snr"], "d": ["sach"]}
+    nhom = ea.nhom_cat_cheo(lat_cat, ["a", "b", "c", "d"], "long_event", ["low_snr"])
+    assert nhom == {
+        "long_event+low_snr": ["a"],
+        "long_event-low_snr": ["b"],
+        "khac+low_snr": ["c"],
+        "khac-low_snr": ["d"],
+    }
+
+
+def test_nhom_cat_cheo_nhieu_truc_doi_chieu_cung_luc():
+    lat_cat = {"a": ["long_event", "reverb"], "b": ["low_snr"]}
+    nhom = ea.nhom_cat_cheo(lat_cat, ["a", "b"], "long_event", ["low_snr", "reverb"])
+    assert nhom["long_event+reverb"] == ["a"]
+    assert nhom["long_event-low_snr"] == ["a"]
+    assert nhom["khac+low_snr"] == ["b"]
+    assert nhom["khac-reverb"] == ["b"]
+
+
+def test_nhom_cat_cheo_bo_qua_clip_ngoai_du_doan():
+    """Cùng cái bẫy mẫu số của `nhom_theo_lat_cat`: slice_index.jsonl là của TOÀN split,
+    file dự đoán có thể chỉ chứa một subset — lấy nhầm clip ngoài subset vào ô 2×2 làm
+    mọi tỉ lệ sai mà không có lỗi nào bắn ra."""
+    lat_cat = {"a": ["long_event"], "b": ["long_event"]}
+    nhom = ea.nhom_cat_cheo(lat_cat, ["a"], "long_event", ["low_snr"])
+    assert nhom["long_event-low_snr"] == ["a"]
+
+
+def test_nhom_cat_cheo_clip_thieu_trong_slice_index_coi_la_sach():
+    lat_cat: dict[str, list[str]] = {}
+    nhom = ea.nhom_cat_cheo(lat_cat, ["x"], "long_event", ["low_snr"])
+    assert nhom["khac-low_snr"] == ["x"]

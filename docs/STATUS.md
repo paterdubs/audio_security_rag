@@ -73,6 +73,17 @@
   **ba** ứng viên liên tiếp (cửa sổ hẹp, trần thấp, khe hở năng lượng); nguyên nhân riêng
   **vẫn chưa xác định**. Phép đo ở
   [measurements/long_event_gap_20260921.md](measurements/long_event_gap_20260921.md).
+- 🔴 **21/09 (tiếp) — ứng viên THỨ TƯ của `long_event` cũng bị bác bỏ; đổi lại, biết chắc
+  độ dài là biến khó ĐỘC LẬP.** `ml/evaluation/long_event_crosscut.py` dựng bảng 2×2
+  {`long_event`, `khac`} × {có, không} cho bốn lát cắt đối chiếu, đo tỉ lệ sự kiện bị phân
+  mảnh (v3 @θ\*=0,90, dev/all, 16 s, không GPU). Chênh lệch `long_event` − `khac` **không
+  tan đi ở cột nào**: 0,11–0,20 tuyệt đối ở cả tám cột; tỉ lệ vỡ của `long_event` đứng
+  0,29–0,35 bất kể `low_snr`/`reverb`/`overlap`, của `khac` đứng 0,13–0,18. `long_event`
+  SẠCH `reverb` còn vỡ nhiều hơn `long_event` CÓ `reverb` (0,33 vs 0,29, ngược chiều), y hệt
+  với `overlap`. Vậy giả thuyết "xấu vì trùng lát cắt khó khác" **bị bác bỏ**, và lát cắt
+  `long_event` đo đúng thứ nó định đo. Cỡ mẫu nhỏ (45–52 clip/ô) nên chỉ kết luận có/không
+  có tương quan, không kết luận độ lớn. Phép đo ở
+  [measurements/long_event_crosscut_20260921.md](measurements/long_event_crosscut_20260921.md).
 - 🔴 **21/09 (tiếp) — cổng hợp đồng dữ liệu giờ CHẶN thật, checkpoint resume đầy đủ.**
   `kiem_cong_hop_dong()` chặn train khi hợp đồng khác `PASSED`, kể cả `KHONG_RO` (cổng cũ
   chỉ cảnh báo cho cả hai — v1/v2 đã train trót lọt trên lô legacy không đạt hợp đồng).
@@ -325,7 +336,8 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **693 test đạt** (22/09, cuối phiên), chạy đầy đủ `pytest tests/ -q` sau khi thêm 30
+- **700 test đạt** (21/09, cuối phiên; 693 → 700 sau `nhom_cat_cheo` + `long_event_crosscut`),
+  chạy đầy đủ `pytest tests/` sau khi thêm 30
   test cho Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép
   ghép cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo
   lát cắt, 15 test cho ablation trần cửa sổ + cửa sổ suy từ train + hiệu chuẩn xác suất,
@@ -338,7 +350,7 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
   test mới, 580 sau Pha 1 + Pha 3, 601 sau Pha 4, 616 sau Pha 5, 631 sau ablation
   trần/hiệu chuẩn, 642 sau đo khe hở năng lượng, 649 sau cổng hợp đồng + checkpoint
   resume, 654 sau chọn pilot gold, 660 sau đọc `exclusions.csv`, 675 sau
-  `make_blind_set.py`, 686 sau `agreement.py`, 689 sau `--pos-weight-max`, **693** sau vá
+  `make_blind_set.py`, 686 sau `agreement.py`, 689 sau `--pos-weight-max`, **693** sau vá · **700** sau bảng 2×2 cắt chéo `long_event` (21/09)
   lỗi đuôi `.wav` + `chi_tiet_bat_dong()`.
   `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết.
   `make_blind_set.py` cũng đã chạy thật trên dữ liệu production (không chỉ test) —
@@ -571,7 +583,7 @@ lại sản phẩm thật và bắt được cả thứ chưa ai nghĩ tới, nh
 | A/B | ✅ **đã chạy cùng giao thức** (§3). Kết luận có điều kiện: v3 tốt nhất trên dev, nhưng dev cùng recipe với train của v3 — confound còn nguyên |
 | Ops Pha 4 | ✅ **xong 19/09** — 6 loại lỗi (cả mức toàn tập lẫn **theo từng lát cắt**), ma trận nhầm 16×16, θ theo từng lớp; CPU ~100–170 s/run. Số đo: [measurements/error_analysis_20260919.md](measurements/error_analysis_20260919.md) |
 | Ops Pha 5 | ✅ **xong 19/09** — `ml/tracking/compare_runs.py`; chạy trên ba run thì dữ liệu và mã nguồn đều `KHONG_RO`, tức chưa so sạch được run nào với run nào |
-| `long_event` | **chưa xong** — biết hỏng vì phân mảnh; đã loại BA ứng viên liên tiếp ("cửa sổ lọc quá hẹp", "trần 51 khung", "khe hở năng lượng thật" — 21/09: hai nhóm vỡ/nguyên khe hở bằng nhau tuyệt đối); nguyên nhân riêng **vẫn chưa xác định**, hết ứng viên đang chờ sẵn |
+| `long_event` | **chưa xong** — biết hỏng vì phân mảnh; đã loại BỐN ứng viên liên tiếp ("cửa sổ lọc quá hẹp", "trần 51 khung", "khe hở năng lượng thật", "trùng lát cắt khó khác" — 21/09 bảng 2×2: chênh lệch vỡ 0,11–0,20 còn nguyên ở cả tám cột); nguyên nhân riêng **vẫn chưa xác định**, nhưng đã biết chắc **độ dài là biến độc lập**, không phải hệ quả của lát cắt trùng |
 | Cửa sổ suy từ train | ✅ **19/09** — `cua_so_loc_tu_train()`; độ lớn rò rỉ đo được = 0 nhưng vì 9/15 lớp đã kẹp trần 51 ở cả hai nguồn, không phải vì train/dev giống nhau |
 | `confusable_with` | ✅ **19/09** — 8 cặp đo được đã khai (đối xứng) + bảng tra §3 `taxonomy.md`; tỉ lệ lượt nhầm đã khai của v3 lên 54,1% |
 | Cổng hợp đồng | ✅ **21/09** — `kiem_cong_hop_dong()` CHẶN cả `FAILED` lẫn `KHONG_RO`; `--force-du-lieu-chua-dat` bỏ qua được, ghi vào `manifest.json` |

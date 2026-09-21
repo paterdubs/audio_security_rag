@@ -106,20 +106,22 @@ không phải trạng thái hiện hành.
   rỉ) khớp cửa sổ suy từ dev tới 6 chữ số — vì 9/15 lớp đã kẹp trần ở cả hai nguồn, không
   phải vì train/dev giống nhau. **ECE đo lần đầu**: vùng dự báo 0,4–0,6 mang hơn nửa
   triệu khung mà tỉ lệ dương thật chỉ 1,7–3% — giải thích triệu chứng θ*≈0,9, chưa kết
-  luận nguyên nhân. Số đo: `docs/measurements/{max_median_ceiling,adaptive_window_leak,calibration}_20260919.md`.
-- **`long_event` đã loại BA ứng viên liên tiếp — nguyên nhân riêng vẫn chưa xác định.**
-  Ứng viên cuối "khe hở năng lượng thật bên trong nhãn" cũng bị bác bỏ (21/09): so nhóm sự
-  kiện bị phân mảnh (n=178) với nhóm không (n=137) trong cùng lát cắt, khe hở trung bình
-  **bằng nhau tuyệt đối** ở cả hai ngưỡng "im" đã thử (20%: 0,012s cả hai; 40%: 0,046s cả
-  hai); ở p90 nhóm KHÔNG phân mảnh còn khe hở lớn hơn — ngược hướng giả thuyết. Không còn
-  ứng viên thứ tư nào đang chờ sẵn. Số đo: `docs/measurements/long_event_gap_20260921.md`.
+  luận- **`long_event` đã loại BỐN ứng viên liên tiếp — nhưng độ dài đã được xác nhận là biến
+  khó ĐỘC LẬP.** Ứng viên thứ tư "xấu vì trùng lát cắt khó khác" bị bác bỏ 21/09 bằng bảng
+  2×2 (`ml/evaluation/long_event_crosscut.py`, v3 @θ*=0,90, dev/all): chênh lệch tỉ lệ phân
+  mảnh `long_event` − `khac` là 0,11–0,20 và **không tan đi ở cột nào**; `long_event` vỡ
+  0,29–0,35 bất kể `low_snr`/`reverb`/`overlap`, `khac` vỡ 0,13–0,18. `long_event` SẠCH
+  `reverb` còn vỡ nhiều hơn `long_event` CÓ `reverb` (0,33 vs 0,29 — ngược chiều). Cỡ mẫu
+  nhỏ (45–52 clip/ô). Ba ứng viên trước: cửa sổ hẹp, trần thấp, khe hở năng lượng thật
+  (21/09, khe hở hai nhóm bằng nhau tuyệt đối 0,012s/0,046s; p90 nhóm KHÔNG vỡ còn cao hơn).
+  Số đo: `docs/measurements/long_event_{gap,crosscut}_20260921.md`.
 - **Cổng hợp đồng dữ liệu giờ CHẶN thật, và checkpoint resume có optimizer/scheduler/RNG
   đầy đủ.** `kiem_cong_hop_dong()` chặn cả `FAILED` lẫn `KHONG_RO` như nhau (trước 19/09
   cả hai chỉ in cảnh báo) — bỏ qua bằng `--force-du-lieu-chua-dat`, cờ ghi vào
   `manifest.json`. `checkpoint_resume.pt` ghi đè mỗi epoch (tách khỏi `best.pt` — không đổi
   schema mà `predictions.py`/`eval_sed.py` phụ thuộc); `--resume` khôi phục RNG nên dãy số
   ngẫu nhiên tiếp theo giống hệt như chưa hề dừng.
-- **693 test đạt** (22/09, chạy đầy đủ `pytest tests/ -q`). Mốc trước thay đổi là 642.
+- **700 test đạt** (21/09, `pytest tests/` exit 0). Mốc trước thay đổi là 693.
   Từ 649: pilot gold lần 1 (30/30), bộ gán mù lần 2 (`make_blind_set.py`, đã chạy thật),
   `agreement.py` (**đã chạy thật 22/09** — vá lỗi đuôi `.wav`, thêm `chi_tiet_bat_dong()`,
   xem "Đang làm" bên dưới), `--pos-weight-max`.
@@ -149,10 +151,13 @@ không phải trạng thái hiện hành.
 
 ### Việc tiếp theo
 
-1. **`long_event`: hết ứng viên đã biết, cần hướng điều tra mới.** Ba giả thuyết đều bị
-   loại (cửa sổ hẹp, trần thấp, khe hở năng lượng — xem trên). Hướng còn lại chưa đo: nghe
-   trực tiếp vài clip bị phân mảnh để tìm lý do bằng tai, hoặc so `long_event` với các lát
-   cắt khác theo trục SNR/reverb thay vì trục độ dài sự kiện.
+1. **`long_event`: còn ba hướng, không còn hướng rẻ.** Bốn giả thuyết đã bị loại (cửa sổ
+   hẹp, trần thấp, khe hở năng lượng, trùng lát cắt khó — xem trên), và phép đo cuối đã
+   thu hẹp phạm vi: thủ phạm phải gắn với chính độ dài sự kiện. Hướng còn lại: (a) nghe
+   trực tiếp clip vỡ nhiều nhất — cần tai người; (b) trường tiếp nhận thời gian của CNN14
+   ngắn hơn sự kiện 4s — kiểm bằng ablation `--time-pool-blocks`, tốn GPU; (c) BCE theo
+   khung không phạt phân mảnh — phải đổi loss rồi train lại, không phép đo nào trên dự
+   đoán đã lưu phát hiện được.
 2. ✅ **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — XONG 22/09.** 30/30 gán được, sau
    **16 file loại / 46 lượt nghe = tỉ lệ thất bại 34,8%** (7 game/phim
    `synthetic_or_game_audio`, 6 rác/không liên quan `unusable`, 3 nhạc nền
