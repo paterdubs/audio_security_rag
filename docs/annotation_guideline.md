@@ -125,6 +125,14 @@ Ba event, ba dòng trong TSV, biên thời gian độc lập nhau.
 
 **Khi một sự kiện bị che lấp hoàn toàn** bởi sự kiện to hơn và bạn không còn nghe thấy nó nữa: **không gán**. Chỉ gán cái nghe được — mô hình cũng chỉ có chừng đó thông tin.
 
+> ⚠️ **Bẫy thường gặp (phát hiện từ pilot lần 2, 22/09): `speech_normal` bị bỏ sót khi có
+> `applause_cheering`.** Test–retest cho thấy xu hướng mặc định coi giọng nói KẾT THÚC ngay
+> khi tiếng vỗ tay bắt đầu, dù giọng nói (đám đông, MC) vẫn tồn tại NỀN suốt bên dưới —
+> đúng quy tắc "gán tất cả các lớp cùng xảy ra" ở trên nhưng dễ quên áp dụng khi một lớp to
+> hơn hẳn. Khi gán `applause_cheering` (hoặc bất kỳ sự kiện to nào), chủ động nghe lại xem
+> còn giọng nói nền hay không trước khi coi `speech_normal` đã kết thúc, thay vì mặc định
+> tuần tự. Xem `decision_log.md` 22/09 cho ví dụ cụ thể.
+
 ---
 
 ## 5. Định dạng nhãn
