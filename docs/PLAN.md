@@ -97,7 +97,7 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 | ☐ | `scripts/check_leakage.py` + đưa vào CI | 🤖 | Chia theo `source_id`, không theo clip |
 | ☐ | **Precompute đặc trưng BEATs → `.npy`** cho toàn bộ train/dev | 🤖 | Chưa làm. Hiện chỉ có waveform PANNs 32 kHz train/dev cho baseline; không gọi nhầm là feature BEATs. |
 | ☐ | Dựng Label Studio + import test set + **pilot 30 clip** | 👥 | |
-| ☐ | Pilot 30 clip, **nghỉ ≥3 ngày rồi gán lại mù** → tính tự-nhất-quán → **sửa guideline** → mới gán đại trà | 👤 | Bỏ bước này = sai lầm tốn kém nhất |
+| ◐ | Pilot 30 clip, **nghỉ ≥3 ngày rồi gán lại mù** → tính tự-nhất-quán → **sửa guideline** → mới gán đại trà | 👤 | **22/09: lần 1+2+nghe lại lần ba đều XONG** — cổng tự-nhất-quán §8.5 **CHƯA ĐẠT** (event-F1 0,7339 < 0,75); guideline đã sửa theo phát hiện (mẫu hình speech nền dưới applause). Cần một vòng pilot mới trước khi gán đại trà — xem `decision_log.md` |
 | ☐ | 🔴 **Bắt đầu gán nhãn test set** (chạy song song suốt W2–W3) | 👤 | ~1 giờ audio; 20% sẽ gán lại lần hai sau ≥7 ngày |
 
 ### Nghiệm thu W2
@@ -132,6 +132,7 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 ### Nghiệm thu W3
 - [ ] 4 gold set hoàn chỉnh, validate xanh
 - [ ] **Test–retest event-F1 ≥ 0.75, onset lệch trung vị ≤ 100 ms**; mỗi event class ≥ 20 event trong test; mỗi slice ≥ 20 clip
+  — **đo lần đầu 22/09 trên pilot 30 clip: event-F1 0,7339 (chưa đạt), onset lệch 10,0 ms (đạt)**; xem `docs/measurements/agreement_pilot_v1.md`
 - [ ] SED baseline có Event-F1 + PSDS + bảng per-class + bảng theo slice
 - [ ] Toàn bộ số liệu log trên MLflow, tái lập được
 
@@ -308,7 +309,7 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 | ☐ | Kiểm định độ chính xác bộ trích `EVENT_LEXICON` | W4 | Điều kiện cần của C2 |
 | ☐ | Xác nhận `aac-metrics` / `psds_eval` cài được trên Windows | W1 | Có gói khó build trên Windows → cân nhắc WSL2 |
 | ☐ | Kiểm tra VRAM thực tế khi train Conformer + BART | W4 | Quyết định batch size |
-| ☑ | Cài `yt-dlp` + `ffmpeg`, chạy `fetch_audioset_strong.py` thật | W2 | Đã tải thật; 21/09: vào manifest/split (`build_manifest.py`/`make_splits.py`, 1.601 dòng sự kiện/367 file `gold_test`). **22/09: pilot lần 1 XONG — 30/30 clip, 52 dòng sự kiện.** Phải loại 16/46 lượt nghe (34,8%) vì lẫn game/phim/nhạc trong nguồn — xem `data/gold/decision_log.md`. real gold vẫn chưa hoàn chỉnh (còn bước 2-4 của §8.3). |
+| ☑ | Cài `yt-dlp` + `ffmpeg`, chạy `fetch_audioset_strong.py` thật | W2 | Đã tải thật; 21/09: vào manifest/split (`build_manifest.py`/`make_splits.py`, 1.601 dòng sự kiện/367 file `gold_test`). **22/09: pilot lần 1 XONG — 30/30 clip, 52 dòng sự kiện.** Phải loại 16/46 lượt nghe (34,8%) vì lẫn game/phim/nhạc trong nguồn — xem `data/gold/decision_log.md`. **22/09 (tiếp): lần 2 (mù) + nghe lại lần ba cũng XONG** — cổng §8.5 **chưa đạt** (event-F1 0,7339 < 0,75). real gold vẫn chưa hoàn chỉnh — cần một vòng pilot mới với guideline đã sửa trước khi qua bước 4 của §8.3. |
 | ☐ | Đo lại tỉ lệ hụt video AudioSet-strong (dự kiến 15–30%, ghi `unavailable` vào `exclusions.csv`) | W2 | Phải báo cáo tỉ lệ hụt thật trong khoá luận, không dùng số dự kiến |
 | ☐ | Xác nhận ruling chuông quầy thức ăn nhanh trong `data/gold/decision_log.md` (đang ⚠️ CHỜ XÁC NHẬN) | W2 | Ảnh hưởng biên `alarm_bell` |
 | ☑ | Xử lý hàng đợi duyệt | W2 | Hoàn tất 16/09; 1.831 bulk-accept phải nêu là hạn chế, không xem như kiểm định mù |
@@ -317,7 +318,7 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 | ☑ | Sửa eval_sed để load đúng time_pool_blocks/config checkpoint | Trước eval v2/v3 lại | `doc_time_pool_blocks` đọc checkpoint → history → mặc định kèm CẢNH BÁO; có 3 test. v1 không ghi ở đâu cả nên vẫn rơi về mặc định 5 — đo gián tiếp ủng hộ nhưng không chứng minh. |
 | ☑ | Nâng cổng hợp đồng dữ liệu từ CẢNH BÁO lên CHẶN trong `train_sed.py` | Trước train mới | **21/09 xong** — `kiem_cong_hop_dong()` chặn cả `FAILED` lẫn `KHONG_RO`; `--force-du-lieu-chua-dat` bỏ qua được, ghi vào `manifest.json`. |
 | ☑ | Sửa `PrecomputedSedDataset` pickle nguyên memmap sang worker DataLoader | Trước train mới | Đo: pickle dev **921,8 MB → 0,159 MB**. v1/v2/v3 đều train ở `--workers 2` nên đều đã trả giá này; triệu chứng là crash không đều. |
-| ◐ | Đo hiệu chuẩn xác suất + ablation `pos_weight` | W3 | **19/09 tối: ECE + reliability diagram xong** (`ml/evaluation/calibration.py`) — vùng dự báo 0,4–0,6 mang hơn nửa triệu khung mà tỉ lệ dương thật chỉ 1,7–3%, giải thích triệu chứng θ*≈0,90–0,96. `pos_weight` là ứng viên nguyên nhân nhưng ablation nó cần train lại — **chưa làm**. |
+| ◐ | Đo hiệu chuẩn xác suất + ablation `pos_weight` | W3 | **19/09 tối: ECE + reliability diagram xong** (`ml/evaluation/calibration.py`) — vùng dự báo 0,4–0,6 mang hơn nửa triệu khung mà tỉ lệ dương thật chỉ 1,7–3%, giải thích triệu chứng θ*≈0,90–0,96. `pos_weight` là ứng viên nguyên nhân. **21/09: `--pos-weight-max` đã thêm vào `train_sed.py`** (mặc định vẫn 30,0) — hạ tầng sẵn sàng nhưng **chưa chạy lượt train ablation nào**. |
 | ◐ | Bảo vệ checkpoint/raw lớn khỏi Git và thiết lập DVC | W1–W2 | Weight/checkpoint/cache/secret đã ignore; JAMS legacy theo dõi có chủ đích. DVC pipeline/remote vẫn chưa có. |
 
 ---
@@ -333,4 +334,4 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 
 ---
 
-*Cập nhật lần cuối: 2026-09-19 · W1; số liệu/chứng cứ hiện hành: [STATUS.md](STATUS.md).*
+*Cập nhật lần cuối: 2026-09-22 · W1–W2; số liệu/chứng cứ hiện hành: [STATUS.md](STATUS.md).*

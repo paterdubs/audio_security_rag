@@ -384,10 +384,23 @@ chứng minh verifier từng bắt được lỗi thật.
    `checkpoint_resume.pt` ghi đè mỗi epoch (model/optimizer/scheduler/scaler + RNG bốn
    nguồn), tách khỏi `best.pt`; `--resume` khôi phục RNG cho dãy số tiếp theo giống hệt
    như chưa hề dừng. Test đơn vị, **chưa** kiểm bằng một lượt train thật đứt giữa chừng.
-8. **Việc tiếp theo:** `gold_test` vẫn rỗng — vẫn là nút thắt duy nhất chưa gỡ được của
-   confound "dev cùng recipe với train của v3". `long_event` cần hướng điều tra mới —
-   nghe trực tiếp clip bị phân mảnh, hoặc so theo trục SNR/reverb thay vì trục độ dài sự
-   kiện. Ablation `pos_weight` giờ không còn bị hai việc trên chặn nữa, có thể bắt đầu.
+8. **Việc tiếp theo (chốt 21/09):** `gold_test` vẫn rỗng — vẫn là nút thắt duy nhất chưa
+   gỡ được của confound "dev cùng recipe với train của v3". `long_event` cần hướng điều
+   tra mới — nghe trực tiếp clip bị phân mảnh, hoặc so theo trục SNR/reverb thay vì trục
+   độ dài sự kiện. Ablation `pos_weight` giờ không còn bị hai việc trên chặn nữa, có thể
+   bắt đầu.
+9. ✅ **Hạ tầng ablation `pos_weight` + bộ gán mù lần 2 — xong 21–22/09.**
+   `train_sed.py` thêm `--pos-weight-max` (mặc định vẫn 30,0, hành vi cũ không đổi) —
+   **chưa chạy lượt train nào với cờ này**, vẫn còn nguyên là việc phải làm để xác nhận
+   giả thuyết ECE. Song song: `scripts/make_blind_set.py` (đã chạy thật) và
+   `scripts/agreement.py` dựng xong cho pilot gold lần 2 — không thuộc phạm vi
+   TRAINING_OPS_PLAN (đây là quy trình dữ liệu DATA_PLAN §8), ghi ở đây chỉ để nói rõ
+   **`gold_test` KHÔNG còn rỗng nữa** nhưng cũng **CHƯA sẵn sàng dùng**: 30 clip pilot đã
+   gán và nghe lại lần ba đủ 3 lượt (`data/gold/pilot_v1_lan1.tsv`,
+   `pilot_v1_lan2.tsv`, `decision_log.md`), nhưng cổng tự-nhất-quán §8.5 **chưa đạt**
+   (event-F1 0,7339 < 0,75) — cần một vòng pilot mới trước khi 30 clip này (hoặc phần mở
+   rộng của `gold_test`) dùng được cho đánh giá thật. Không có thay đổi nào ở đây ảnh
+   hưởng tới các con số v1/v2/v3 đã có — chúng vẫn đo trên `data/synthetic/dev`.
 
 ---
 
