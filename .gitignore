@@ -11,6 +11,12 @@ data/banks/
 !data/annotations/
 !data/gold/
 
+# NGOẠI LỆ trong data/gold/: bản sao AUDIO THẬT (make_blind_set.py copy từ
+# AudioSet-strong để gán lại mù) không được redistribute — DATA_PLAN §9 cấm phát hành lại
+# audio AudioSet, chỉ script tái tạo được phép commit. mapping.csv (metadata nhỏ, không
+# phải audio) vẫn theo dõi bình thường vì nó KHÔNG nằm trong thư mục này.
+data/gold/blind_v1_lan2/
+
 .venv/
 .venv-services/
 __pycache__/

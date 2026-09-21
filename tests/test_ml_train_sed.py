@@ -20,9 +20,11 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
 from ml.training.train_sed import (  # noqa: E402
+    MAX_POS_WEIGHT,
     kiem_cong_hop_dong,
     luu_checkpoint_resume,
     nap_checkpoint_resume,
+    positive_weights,
 )
 
 # ── Cổng hợp đồng dữ liệu ────────────────────────────────────────────────────
@@ -136,3 +138,55 @@ def test_nap_checkpoint_resume_khoi_phuc_dung_day_so_ngau_nhien_tiep_theo(tmp_pa
     assert thuc_te_python == ky_vong_python
     assert thuc_te_numpy == ky_vong_numpy
     assert torch.equal(thuc_te_torch, ky_vong_torch)
+
+
+# ── pos_weight — ablation, trần giờ đổi được qua tham số ────────────────────
+
+
+class _FakeDataset:
+    """Chỉ lộ đúng phần positive_weights() cần: len(), events_of(i), .duration. Không
+    dựng PrecomputedSedDataset thật vì nó đòi feature đã precompute trên đĩa."""
+
+    def __init__(self, events_per_clip: list[list[tuple[int, float, float]]], duration: float = 10.0):
+        self._events = events_per_clip
+        self.duration = duration
+
+    def __len__(self):
+        return len(self._events)
+
+    def events_of(self, position: int):
+        return self._events[position]
+
+
+def test_positive_weights_mac_dinh_dung_MAX_POS_WEIGHT():
+    """Không truyền max_pos_weight → hành vi CŨ giữ nguyên (trần 30.0) — đổi mặc định
+    ngầm sẽ âm thầm đổi kết quả của mọi lệnh gọi cũ chưa cập nhật, kể cả trong test khác."""
+    # lớp 0 gần như không bao giờ dương → tỉ lệ âm/dương rất lớn, chắc chắn vượt trần
+    dataset = _FakeDataset([[(0, 0.0, 0.001)], [], [], [], []], duration=10.0)
+    trong_so = positive_weights(dataset, n_classes=1)
+    assert trong_so[0].item() == pytest.approx(MAX_POS_WEIGHT)
+
+
+def test_positive_weights_max_bang_1_tat_han_can_bang_lop():
+    """max_pos_weight=1.0 → mọi lớp có dương đều nhận weight=1.0, tức tắt hẳn cân bằng
+    lớp (BCE không còn upweight lớp hiếm) — đây là mốc quan trọng nhất của ablation:
+    nếu ECE giảm mạnh ở mốc này so với 30.0, giả thuyết 'pos_weight gây méo hiệu chuẩn'
+    được xác nhận."""
+    dataset = _FakeDataset([[(0, 0.0, 0.001)], [(1, 0.0, 5.0)]], duration=10.0)
+    trong_so = positive_weights(dataset, n_classes=2, max_pos_weight=1.0)
+    assert trong_so[0].item() == pytest.approx(1.0)
+    assert trong_so[1].item() == pytest.approx(1.0)
+
+
+def test_positive_weights_tran_giua_cap_dung_ti_le_vuot_tran():
+    """Trần 10.0 nhỏ hơn tỉ lệ âm/dương thật của lớp hiếm → bị cắt xuống đúng 10.0, còn
+    lớp có tỉ lệ tự nhiên dưới trần thì giữ nguyên tỉ lệ thật, không bị cắt oan."""
+    # lớp 0: dương 1s / tổng 20s → tỉ lệ (19/1)=19, vượt trần 10 → phải bị cắt còn 10
+    # lớp 1: dương 8s / tổng 20s → tỉ lệ (12/8)=1.5, dưới trần 10 → giữ nguyên 1.5
+    dataset = _FakeDataset([
+        [(0, 0.0, 1.0), (1, 0.0, 8.0)],
+        [],
+    ], duration=10.0)
+    trong_so = positive_weights(dataset, n_classes=2, max_pos_weight=10.0)
+    assert trong_so[0].item() == pytest.approx(10.0)
+    assert trong_so[1].item() == pytest.approx(1.5)

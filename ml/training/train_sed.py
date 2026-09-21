@@ -57,9 +57,14 @@ FEATURES_DIR = REPO_ROOT / "data" / "features"
 RUNS_DIR = REPO_ROOT / "ml" / "runs"
 CHECKPOINT_PATH = REPO_ROOT / "data" / "reference" / "Cnn14_DecisionLevelMax.pth"
 
-# Trần cho pos_weight. Lớp hiếm nhất (vehicle_crash, 33 clip bank) có tỉ lệ khung dương
-# cực thấp; để pos_weight tự do sẽ ra hệ số hàng nghìn, biến loss thành gần như chỉ còn
-# một lớp đó và mọi lớp khác bị bỏ rơi.
+# Trần MẶC ĐỊNH cho pos_weight. Lớp hiếm nhất (vehicle_crash, 33 clip bank) có tỉ lệ
+# khung dương cực thấp; để pos_weight tự do sẽ ra hệ số hàng nghìn, biến loss thành gần
+# như chỉ còn một lớp đó và mọi lớp khác bị bỏ rơi.
+#
+# Đổi được qua `--pos-weight-max` cho ablation (calibration_20260919.md: ECE v3 0,3332,
+# >500k khung dự báo 0,4–0,6 mà tỉ lệ dương thật chỉ 1,7–3% — nghi ngờ pos_weight=30 là
+# một phần nguyên nhân, chưa xác nhận). `--pos-weight-max 1.0` tắt hẳn cân bằng lớp: mọi
+# lớp có dương đều nhận weight=1.0 vì tỉ lệ âm/dương thật luôn ≥1 với sự kiện thưa.
 MAX_POS_WEIGHT = 30.0
 
 
@@ -151,8 +156,9 @@ def detect_frame_count(model: nn.Module, device: torch.device, n_samples: int) -
     return int(output["frame_logits"].shape[1])
 
 
-def positive_weights(dataset: PrecomputedSedDataset, n_classes: int) -> torch.Tensor:
-    """pos_weight theo lớp = (số khung âm)/(số khung dương), chặn trần."""
+def positive_weights(dataset: PrecomputedSedDataset, n_classes: int,
+                     max_pos_weight: float = MAX_POS_WEIGHT) -> torch.Tensor:
+    """pos_weight theo lớp = (số khung âm)/(số khung dương), chặn trần `max_pos_weight`."""
     positive = np.zeros(n_classes, dtype=np.float64)
     total = 0.0
     for position in range(len(dataset)):
@@ -162,7 +168,7 @@ def positive_weights(dataset: PrecomputedSedDataset, n_classes: int) -> torch.Te
             positive[class_idx] += max(0.0, offset - onset)
     negative = np.maximum(total - positive, 1e-6)
     weights = np.where(positive > 0, negative / np.maximum(positive, 1e-6), 1.0)
-    return torch.tensor(np.minimum(weights, MAX_POS_WEIGHT), dtype=torch.float32)
+    return torch.tensor(np.minimum(weights, max_pos_weight), dtype=torch.float32)
 
 
 def median_sizes_for(dataset: PrecomputedSedDataset, n_classes: int, n_frames: int,
@@ -293,7 +299,7 @@ def run(args: argparse.Namespace) -> int:
             json.dumps(scores.__dict__, ensure_ascii=False, indent=2), encoding="utf-8")
         return 0
 
-    pos_weight = positive_weights(train_set, n_classes).to(device)
+    pos_weight = positive_weights(train_set, n_classes, args.pos_weight_max).to(device)
     frame_loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     clip_loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     # Learning rate PHÂN TẦNG: backbone đã pretrain trên AudioSet 2M clip, head thì ngẫu
@@ -422,6 +428,9 @@ def main() -> int:
     parser.add_argument("--duration", type=float, default=10.0)
     parser.add_argument("--threshold", type=float, default=0.5)
     parser.add_argument("--clip-loss-weight", type=float, default=0.5)
+    parser.add_argument("--pos-weight-max", type=float, default=MAX_POS_WEIGHT,
+                        help="trần pos_weight theo lớp cho ablation hiệu chuẩn; "
+                             "1.0 tắt hẳn cân bằng lớp, mặc định giữ hành vi cũ (30.0)")
     parser.add_argument("--full-eval-every", type=int, default=5)
     parser.add_argument("--mixup-alpha", type=float, default=0.0,
                         help="0 = tắt. DCASE thường dùng 0.2")
