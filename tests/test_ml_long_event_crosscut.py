@@ -16,7 +16,10 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-from ml.evaluation.long_event_crosscut import ti_le_phan_manh  # noqa: E402
+from ml.evaluation.long_event_crosscut import (  # noqa: E402
+    ti_le_cap_nham,
+    ti_le_phan_manh,
+)
 
 
 def sk(lop: str, on: float, off: float) -> dict:
@@ -47,3 +50,38 @@ def test_ti_le_phan_manh_bo_qua_clip_ngoai_danh_sach():
     kq = ti_le_phan_manh(tham_chieu, du_bao, ["b"])
     assert kq["n_ref"] == 1
     assert kq["n_vo"] == 0
+
+
+# ── Ma trận nhầm theo từng ô ─────────────────────────────────────────────────
+#
+# `ma_tran_nham()` nhận KetQuaPhanLoai của TOÀN tập; chưa ai gọi nó trên một tập con clip.
+# Lấy nhầm clip ngoài ô vào ma trận là đúng cái bẫy mẫu số đã gặp ở `nhom_theo_lat_cat` —
+# cặp nhầm của ô khác sẽ hiện lên như cặp nhầm của ô này mà không có lỗi nào bắn ra.
+
+
+def test_cap_nham_theo_o_chi_dem_clip_trong_o():
+    tham_chieu = {"a": [sk("siren", 0.0, 1.0)], "b": [sk("gunshot", 0.0, 1.0)]}
+    du_bao = {"a": [sk("alarm_bell", 0.0, 1.0)], "b": [sk("fireworks", 0.0, 1.0)]}
+    lop = ["siren", "alarm_bell", "gunshot", "fireworks"]
+    cap = ti_le_cap_nham(tham_chieu, du_bao, ["a"], lop)
+    assert [(c["ref_lop"], c["pred_lop"], c["n"]) for c in cap] == [("siren", "alarm_bell", 1)]
+
+
+def test_ti_le_cap_nham_sap_giam_dan_theo_so_luot():
+    tham_chieu = {"a": [sk("siren", 0.0, 1.0)], "b": [sk("siren", 0.0, 1.0)],
+                  "c": [sk("gunshot", 0.0, 1.0)]}
+    du_bao = {"a": [sk("alarm_bell", 0.0, 1.0)], "b": [sk("alarm_bell", 0.0, 1.0)],
+              "c": [sk("fireworks", 0.0, 1.0)]}
+    lop = ["siren", "alarm_bell", "gunshot", "fireworks"]
+    cap = ti_le_cap_nham(tham_chieu, du_bao, ["a", "b", "c"], lop)
+    assert [c["n"] for c in cap] == [2, 1]
+    assert cap[0]["ref_lop"] == "siren"
+
+
+def test_ti_le_cap_nham_bo_duong_cheo_va_o_rong():
+    """Đường chéo của `ma_tran_nham` gồm CẢ `dung` LẪN `bien` — giữ nó lại sẽ làm cặp
+    'nhầm' đậm nhất luôn là cặp lớp-với-chính-nó, che mất cặp nhầm thật."""
+    tham_chieu = {"a": [sk("siren", 0.0, 1.0)]}
+    du_bao = {"a": [sk("siren", 0.0, 1.0)]}
+    assert ti_le_cap_nham(tham_chieu, du_bao, ["a"], ["siren", "alarm_bell"]) == []
+    assert ti_le_cap_nham({}, {}, [], ["siren"]) == []

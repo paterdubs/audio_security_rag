@@ -401,6 +401,440 @@
       "gop": 113
     }
   ],
-  "giay": 16.2,
+  "cap_nham": {
+    "long_event+low_snr": [
+      {
+        "ref_lop": "alarm_bell",
+        "pred_lop": "glass_breaking",
+        "n": 1
+      },
+      {
+        "ref_lop": "applause_cheering",
+        "pred_lop": "alarm_bell",
+        "n": 1
+      },
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "alarm_bell",
+        "n": 1
+      },
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 1
+      },
+      {
+        "ref_lop": "explosion",
+        "pred_lop": "door_slam",
+        "n": 1
+      }
+    ],
+    "long_event-low_snr": [
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 3
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "fireworks",
+        "n": 3
+      },
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "shout_yell",
+        "n": 3
+      },
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "speech_normal",
+        "n": 3
+      },
+      {
+        "ref_lop": "alarm_bell",
+        "pred_lop": "applause_cheering",
+        "n": 2
+      }
+    ],
+    "khac+low_snr": [
+      {
+        "ref_lop": "fireworks",
+        "pred_lop": "running_footsteps",
+        "n": 10
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "glass_breaking",
+        "n": 10
+      },
+      {
+        "ref_lop": "laughter",
+        "pred_lop": "applause_cheering",
+        "n": 6
+      },
+      {
+        "ref_lop": "laughter",
+        "pred_lop": "shout_yell",
+        "n": 6
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "door_slam",
+        "n": 6
+      }
+    ],
+    "khac-low_snr": [
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "door_slam",
+        "n": 21
+      },
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 16
+      },
+      {
+        "ref_lop": "gunshot",
+        "pred_lop": "running_footsteps",
+        "n": 15
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "glass_breaking",
+        "n": 15
+      },
+      {
+        "ref_lop": "fireworks",
+        "pred_lop": "running_footsteps",
+        "n": 14
+      }
+    ],
+    "long_event+reverb": [
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "speech_normal",
+        "n": 3
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "fireworks",
+        "n": 2
+      },
+      {
+        "ref_lop": "running_footsteps",
+        "pred_lop": "fireworks",
+        "n": 2
+      },
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "fireworks",
+        "n": 2
+      },
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "shout_yell",
+        "n": 2
+      }
+    ],
+    "long_event-reverb": [
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 4
+      },
+      {
+        "ref_lop": "applause_cheering",
+        "pred_lop": "alarm_bell",
+        "n": 2
+      },
+      {
+        "ref_lop": "fireworks",
+        "pred_lop": "running_footsteps",
+        "n": 2
+      },
+      {
+        "ref_lop": "laughter",
+        "pred_lop": "applause_cheering",
+        "n": 2
+      },
+      {
+        "ref_lop": "alarm_bell",
+        "pred_lop": "applause_cheering",
+        "n": 1
+      }
+    ],
+    "khac+reverb": [
+      {
+        "ref_lop": "fireworks",
+        "pred_lop": "running_footsteps",
+        "n": 10
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "door_slam",
+        "n": 10
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "glass_breaking",
+        "n": 10
+      },
+      {
+        "ref_lop": "gunshot",
+        "pred_lop": "door_slam",
+        "n": 9
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "gunshot",
+        "n": 8
+      }
+    ],
+    "khac-reverb": [
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 17
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "door_slam",
+        "n": 17
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "glass_breaking",
+        "n": 15
+      },
+      {
+        "ref_lop": "fireworks",
+        "pred_lop": "running_footsteps",
+        "n": 14
+      },
+      {
+        "ref_lop": "gunshot",
+        "pred_lop": "running_footsteps",
+        "n": 14
+      }
+    ],
+    "long_event+overlap": [
+      {
+        "ref_lop": "applause_cheering",
+        "pred_lop": "alarm_bell",
+        "n": 2
+      },
+      {
+        "ref_lop": "applause_cheering",
+        "pred_lop": "gunshot",
+        "n": 1
+      },
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "alarm_bell",
+        "n": 1
+      },
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "gunshot",
+        "n": 1
+      },
+      {
+        "ref_lop": "explosion",
+        "pred_lop": "siren",
+        "n": 1
+      }
+    ],
+    "long_event-overlap": [
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 4
+      },
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "shout_yell",
+        "n": 3
+      },
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "speech_normal",
+        "n": 3
+      },
+      {
+        "ref_lop": "alarm_bell",
+        "pred_lop": "applause_cheering",
+        "n": 2
+      },
+      {
+        "ref_lop": "fireworks",
+        "pred_lop": "alarm_bell",
+        "n": 2
+      }
+    ],
+    "khac+overlap": [
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "door_slam",
+        "n": 10
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "glass_breaking",
+        "n": 10
+      },
+      {
+        "ref_lop": "fireworks",
+        "pred_lop": "running_footsteps",
+        "n": 7
+      },
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 6
+      },
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "door_slam",
+        "n": 6
+      }
+    ],
+    "khac-overlap": [
+      {
+        "ref_lop": "fireworks",
+        "pred_lop": "running_footsteps",
+        "n": 17
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "door_slam",
+        "n": 17
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "glass_breaking",
+        "n": 15
+      },
+      {
+        "ref_lop": "gunshot",
+        "pred_lop": "running_footsteps",
+        "n": 13
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "running_footsteps",
+        "n": 13
+      }
+    ],
+    "long_event+causal_chain": [
+      {
+        "ref_lop": "alarm_bell",
+        "pred_lop": "glass_breaking",
+        "n": 1
+      },
+      {
+        "ref_lop": "alarm_bell",
+        "pred_lop": "siren",
+        "n": 1
+      },
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 1
+      },
+      {
+        "ref_lop": "glass_breaking",
+        "pred_lop": "door_slam",
+        "n": 1
+      },
+      {
+        "ref_lop": "gunshot",
+        "pred_lop": "applause_cheering",
+        "n": 1
+      }
+    ],
+    "long_event-causal_chain": [
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "speech_normal",
+        "n": 4
+      },
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 3
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "fireworks",
+        "n": 3
+      },
+      {
+        "ref_lop": "vehicle_crash",
+        "pred_lop": "shout_yell",
+        "n": 3
+      },
+      {
+        "ref_lop": "alarm_bell",
+        "pred_lop": "applause_cheering",
+        "n": 2
+      }
+    ],
+    "khac+causal_chain": [
+      {
+        "ref_lop": "running_footsteps",
+        "pred_lop": "gunshot",
+        "n": 8
+      },
+      {
+        "ref_lop": "door_slam",
+        "pred_lop": "running_footsteps",
+        "n": 6
+      },
+      {
+        "ref_lop": "running_footsteps",
+        "pred_lop": "explosion",
+        "n": 6
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "glass_breaking",
+        "n": 5
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "running_footsteps",
+        "n": 5
+      }
+    ],
+    "khac-causal_chain": [
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "door_slam",
+        "n": 25
+      },
+      {
+        "ref_lop": "fireworks",
+        "pred_lop": "running_footsteps",
+        "n": 20
+      },
+      {
+        "ref_lop": "object_drop_dishes",
+        "pred_lop": "glass_breaking",
+        "n": 20
+      },
+      {
+        "ref_lop": "gunshot",
+        "pred_lop": "running_footsteps",
+        "n": 17
+      },
+      {
+        "ref_lop": "speech_normal",
+        "pred_lop": "shout_yell",
+        "n": 16
+      }
+    ]
+  },
+  "giay": 22.8,
   "ghi_chu": "dev tổng hợp thiên vị v3; theta* chọn trên chính tập đang chấm; cỡ mẫu nhỏ."
 }

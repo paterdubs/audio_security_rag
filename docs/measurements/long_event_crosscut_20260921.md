@@ -90,8 +90,10 @@ cắt `long_event` đo đúng thứ nó định đo, chứ không phải một c
 Phụ chú về F1 sự kiện (cùng chiều, không mâu thuẫn): `long_event+low_snr` 0,1916 ·
 `long_event-low_snr` 0,3028 · `khac+low_snr` 0,3611 · `khac-low_snr` 0,4424. `low_snr` là
 lát cắt duy nhất làm F1 của `long_event` sụt rõ thêm — nhưng nó không làm **tỉ lệ vỡ** tăng
-tương ứng (0,35 vs 0,31), nên cái nó làm hỏng là chuyện khác (Deletion/Substitution), không
-phải phân mảnh.
+tương ứng (0,35 vs 0,31), nên cái nó làm hỏng là chuyện khác, không phải phân mảnh.
+**Đã mổ riêng ngày 21/09** — xem [low_snr_co_che_20260921.md](low_snr_co_che_20260921.md):
+Deletion trên sự kiện thường, **lệch biên** trên sự kiện dài; Substitution là thành phần nhỏ
+nhất ở mọi ô (câu "Deletion/Substitution" ở bản đầu của trang này là sai ở nửa sau).
 
 ## 4. Ứng viên còn lại
 

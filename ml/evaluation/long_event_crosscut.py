@@ -45,9 +45,13 @@ from ml.evaluation.error_analysis import (  # noqa: E402
     so,
     viet_dan,
 )
+from ml.evaluation.error_taxonomy import ma_tran_nham, phan_loai  # noqa: E402
 from ml.evaluation.long_event_gap import danh_dau_phan_manh  # noqa: E402
 from ml.evaluation.predictions import doc  # noqa: E402
-from ml.evaluation.sed_metrics import DEFAULT_MEDIAN_FILTER_FRAMES  # noqa: E402
+from ml.evaluation.sed_metrics import (  # noqa: E402
+    DEFAULT_MEDIAN_FILTER_FRAMES,
+    ONSET_COLLAR_SEC,
+)
 
 RUNS_DIR = REPO_ROOT / "ml" / "runs"
 DATA_DIR = REPO_ROOT / "data" / "synthetic"
@@ -55,6 +59,7 @@ DATA_DIR = REPO_ROOT / "data" / "synthetic"
 TRUC_MAC_DINH = "long_event"
 DOI_CHIEU_MAC_DINH = ("low_snr", "reverb", "overlap", "causal_chain")
 NHANH_KHAC = "khac"
+TOP_CAP_NHAM = 5          # số cặp nhầm đậm nhất giữ lại cho mỗi ô
 
 
 # ── Đo ───────────────────────────────────────────────────────────────────────
@@ -78,6 +83,34 @@ def ti_le_phan_manh(tham_chieu: dict[str, list[dict]],
         n_vo += sum(1 for x in co if x)
     return {"n_clip": len(clip_ids), "n_ref": n_ref, "n_vo": n_vo,
             "ti_le": (n_vo / n_ref) if n_ref else None}
+
+
+def ti_le_cap_nham(tham_chieu: dict[str, list[dict]],
+                   du_bao: dict[str, list[dict]],
+                   clip_ids: Sequence[str],
+                   class_ids: list[str]) -> list[dict]:
+    """Cặp (lớp thật -> lớp đoán) ngoài đường chéo, chỉ trong một ô, sắp giảm dần.
+
+    `ma_tran_nham()` vốn nhận `KetQuaPhanLoai` của TOÀN tập; ở đây phân loại lại trên đúng
+    tập con clip của ô, không lọc sau — lọc sau là đúng cái bẫy mẫu số của
+    `nhom_theo_lat_cat`, cặp nhầm của ô khác sẽ hiện lên như cặp nhầm của ô này.
+
+    Bỏ đường chéo: nó gồm CẢ `dung` LẪN `bien` (xem cảnh báo ở `ma_tran_nham`), giữ lại thì
+    cặp "nhầm" đậm nhất luôn là cặp lớp-với-chính-nó, che mất cặp nhầm thật. Bỏ luôn hàng/
+    cột ∅ vì thiếu/thừa đã được đếm riêng ở `dem["thieu"]`/`dem["thua"]`.
+    """
+    clip_ids = list(clip_ids)
+    if not clip_ids:
+        return []
+    con = {c: tham_chieu.get(c) or [] for c in clip_ids}
+    con_du_bao = {c: du_bao.get(c) or [] for c in clip_ids}
+    kq = phan_loai(con, con_du_bao, ONSET_COLLAR_SEC)
+    mt = ma_tran_nham(kq, class_ids)
+    rong = len(class_ids)
+    cap = [{"ref_lop": class_ids[i], "pred_lop": class_ids[j], "n": int(mt[i, j])}
+           for i in range(rong) for j in range(rong)
+           if i != j and mt[i, j] > 0]
+    return sorted(cap, key=lambda c: (-c["n"], c["ref_lop"], c["pred_lop"]))
 
 
 def bang_2x2(tham_chieu, du_bao, nhom: dict[str, list[str]]) -> dict[str, dict]:
@@ -137,14 +170,33 @@ def dong_bao_cao(payload: dict) -> Iterator[str]:
         yield (f"| {ten} | {'—' if c['co'] is None else so(c['co'])} "
                f"| {'—' if c['khong'] is None else so(c['khong'])} |")
     yield ""
-    yield "## F1 sự kiện theo từng ô"
+    yield "## F1 sự kiện và sáu loại lỗi theo từng ô"
     yield ""
-    yield "| ô | clip | sự kiện | event-F1 | segment-F1 |"
-    yield "|---|---:|---:|---:|---:|"
+    yield ("Tỉ lệ lấy trên số sự kiện THAM CHIẾU của chính ô đó, nên `thua` vượt 1,0 được — "
+           "một sự kiện thật có thể hứng nhiều dự báo thừa. `bien` là phép CHIA NHỎ LẠI rổ "
+           "Deletion+Insertion của sed_eval, không phải loại lỗi thứ bảy song song.")
+    yield ""
+    yield "| ô | clip | sự kiện | event-F1 | đúng | biên | thay thế | thiếu | thừa |"
+    yield "|---|---:|---:|---:|---:|---:|---:|---:|---:|"
     for h in payload["lat_cat"]:
-        f1 = "—" if h["n_clip"] == 0 else so(h["event_f1"])
-        sf1 = "—" if h["n_clip"] == 0 else so(h["segment_f1"])
-        yield f"| `{h['lat_cat']}` | {h['n_clip']} | {h['n_ref']} | {f1} | {sf1} |"
+        if h["n_clip"] == 0 or not h["n_ref"]:
+            yield f"| `{h['lat_cat']}` | {h['n_clip']} | {h['n_ref']} | — | — | — | — | — | — |"
+            continue
+        d = h["dem"]
+        ti = [so(d[k] / h["n_ref"]) for k in ("dung", "bien", "thay_the", "thieu", "thua")]
+        yield (f"| `{h['lat_cat']}` | {h['n_clip']} | {h['n_ref']} | {so(h['event_f1'])} "
+               f"| {' | '.join(ti)} |")
+    yield ""
+    yield "## Cặp nhầm đậm nhất theo từng ô"
+    yield ""
+    yield ("Ngoài đường chéo (đường chéo gồm cả `dung` lẫn `bien`), tối đa "
+           f"{TOP_CAP_NHAM} cặp mỗi ô.")
+    yield ""
+    yield "| ô | cặp nhầm (thật → đoán) |"
+    yield "|---|---|"
+    for ten, cap in payload["cap_nham"].items():
+        mo_ta = " · ".join(f"{c['ref_lop']}→{c['pred_lop']} ({c['n']})" for c in cap) or "—"
+        yield f"| `{ten}` | {mo_ta} |"
     yield ""
 
 
@@ -186,6 +238,9 @@ def run(args: argparse.Namespace) -> int:
 
     lat_cat_hang = bang_lat_cat(tham_chieu, du_bao_sao, du_doan.class_ids,
                                 du_doan.duration, nhom)
+    cap_nham = {ten: ti_le_cap_nham(tham_chieu, du_bao_sao, clip_ids,
+                                    du_doan.class_ids)[:TOP_CAP_NHAM]
+                for ten, clip_ids in nhom.items()}
 
     payload = {
         "run": args.run, "split": args.split, "subset": args.subset,
@@ -194,6 +249,7 @@ def run(args: argparse.Namespace) -> int:
         "phan_manh": phan_manh,
         "chenh_lech": {ten: chenh_lech(phan_manh, args.truc, ten) for ten in doi_chieu},
         "lat_cat": lat_cat_hang,
+        "cap_nham": cap_nham,
         "giay": round(time.time() - bat_dau, 1),
         "ghi_chu": "dev tổng hợp thiên vị v3; theta* chọn trên chính tập đang chấm; cỡ mẫu nhỏ.",
     }
