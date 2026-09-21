@@ -150,16 +150,19 @@ không phải trạng thái hiện hành.
    loại (cửa sổ hẹp, trần thấp, khe hở năng lượng — xem trên). Hướng còn lại chưa đo: nghe
    trực tiếp vài clip bị phân mảnh để tìm lý do bằng tai, hoặc so `long_event` với các lát
    cắt khác theo trục SNR/reverb thay vì trục độ dài sự kiện.
-2. **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — 24/30 xong.** 6 file bị đánh "rác/không
-   liên quan" đã ghi vào `exclusions.csv` (stage `gold_pilot`) và loại khỏi `gold_test`;
-   `select_gold_pilot.py` đã chọn 6 file thay thế (giữ nguyên 24 file cũ nhờ round-robin
-   ổn định theo seed). **22/09: phát hiện thêm rủi ro mới** — 1 trong 6 file thay thế
-   (`0QlQLIvLpNI`) là hiệu ứng âm thanh GAME, không phải ghi âm thật, dù AudioSet gán
-   đúng `glass_breaking` theo định nghĩa của họ. Đã thêm quy tắc tường minh vào
-   `annotation_guideline.md` §0.1 + mã loại riêng `synthetic_or_game_audio` (khác
-   `unusable`, để đếm riêng tỉ lệ nhiễm game/phim trong nguồn AudioSet-strong) —
-   **rủi ro có thể lặp lại ở các file khác, không phải ca đơn lẻ.** **Còn thiếu: gán 6
-   file thay thế** (đã đổi 1/6 lần nữa), rồi mới đủ 30 để làm bước 2
+2. **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — 25/30 xong.** 12 file đã loại tính đến
+   22/09 (6 "rác/không liên quan" `reason_code=unusable` + 6 game/phim
+   `reason_code=synthetic_or_game_audio`), `select_gold_pilot.py` chọn thay thế mỗi lần
+   nhờ round-robin ổn định theo seed. **Phát hiện mẫu hình 100%, không còn là nghi ngờ:**
+   cả 12 file bị loại đều chạm ít nhất một trong 5 lớp `glass_breaking`/`scream`/
+   `explosion`/`gunshot`/`siren` — súng nổ/bom/kính vỡ/tiếng thét THẬT hiếm khi được quay
+   đăng công khai lên YouTube, nên phần lớn nhãn AudioSet cho các lớp này thực ra là
+   game/phim/dàn dựng. Vòng thay thế thứ 2 (6 file, đều chạm nhóm lớp này) tỉ lệ hỏng
+   **6/6 = 100%**. Pool chưa cạn (`scream` còn 19/22 file) nhưng các lớp này sẽ tốn nhiều
+   lượt nghe hơn hẳn mức trung bình để đủ ≥20 sự kiện/lớp ở cổng §8.5 — cần ghi vào phần
+   Hạn chế của khoá luận. Quy tắc kiểm tra ở `annotation_guideline.md` §0.1, phân tích
+   đầy đủ ở `data/gold/decision_log.md`. **Còn thiếu: gán 5 file thay thế mới nhất**, rồi
+   mới đủ 30 để làm bước 2
    (nghỉ ≥3 ngày, gán lại mù, tính tự-nhất-quán). Đây là thứ DUY NHẤT gỡ được confound
    "dev cùng recipe với train của v3". Không dùng test để chọn threshold.
 3. **Ablation `pos_weight`** — chỉ làm nếu cần xác nhận nguyên nhân của lệch hiệu chuẩn đã

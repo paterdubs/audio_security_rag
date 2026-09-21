@@ -65,3 +65,34 @@ mô hình cần học để hoạt động đúng trong triển khai thực tế
 `annotation_guideline.md` §0.1 — áp dụng ngay từ pilot, trước khi đóng băng guideline.
 
 ---
+
+### 2026-09-22 (cập nhật) · game/phim tập trung ở nhóm lớp bạo lực — đo được, không còn là nghi ngờ
+
+**Tình huống:** Sau khi loại `0QlQLIvLpNI_170000`, `select_gold_pilot.py` chọn 6 file
+thay thế (vòng 2), cả 6 đều mang ít nhất một trong các lớp `glass_breaking` / `scream` /
+`explosion` / `gunshot`. Người gán nghe hết cả 6 — **6/6 (100%) là game/phim**, không có
+file nào là audio thật.
+
+Tính gộp cả hai vòng: **12/12 file bị loại (6 "rác" vòng 1 + 6 game vòng 2) đều chạm ít
+nhất một trong 5 lớp {glass_breaking, scream, explosion, gunshot, siren}.** Không một file
+nào bị loại mà chỉ thuộc các lớp "đời thường" (`applause_cheering`, `door_slam`,
+`laughter`, `object_drop_dishes`, `running_footsteps`, `alarm_bell`, `vehicle_crash`,
+`fireworks`).
+
+**Quyết định:** Xác nhận đây là **mẫu hình cấu trúc của nguồn**, không phải trùng hợp:
+súng nổ / bom / kính vỡ / tiếng thét **thật** hiếm khi được quay và đăng công khai lên
+YouTube (nguy hiểm, bất hợp pháp, hoặc hiếm xảy ra trước ống kính), nên phần lớn nội dung
+AudioSet gán các nhãn "kịch tính" này thực ra đến từ game/phim/dàn dựng. Tiếp tục xử lý
+theo cơ chế đã có (loại + `select_gold_pilot.py` chọn thay thế) — pool chưa cạn (lớp tệ
+nhất `scream` còn 19/22 file tính đến 22/09), nhưng cần lường trước: **các lớp bạo lực sẽ
+tốn nhiều lượt nghe hơn hẳn mức trung bình** để đủ ≥20 sự kiện mỗi lớp ở cổng §8.5.
+
+**Lý do:** Con số 12/12 = 100% không thể coi là nhiễu thống kê ở cỡ mẫu này. Đây là phát
+hiện thật về nguồn dữ liệu, cần ghi vào phần Hạn chế/Phương pháp của khoá luận — không chỉ
+ảnh hưởng riêng pilot mà còn cảnh báo trước cho lần gán đại trà (bước 4 của §8.3).
+
+**Áp dụng chung:** khi gặp file thuộc `glass_breaking`/`scream`/`explosion`/`gunshot`/
+`siren`, tăng cảnh giác với khả năng là game/phim — không có nghĩa loại thẳng mà không
+nghe, nhưng chuẩn bị tinh thần tỉ lệ hỏng cao hơn các lớp khác nhiều lần.
+
+---
