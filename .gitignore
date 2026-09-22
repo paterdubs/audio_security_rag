@@ -2,7 +2,14 @@
 data/raw/
 data/interim/
 data/features/
-data/synthetic/
+# Dùng `/*` chứ KHÔNG phải `/`: git không chui vào thư mục đã bị loại, nên luật ngoại lệ
+# `!...` bên dưới sẽ vô hiệu nếu viết `data/synthetic/`.
+data/synthetic/*
+# NGOẠI LỆ: gói JAMS + slice_index của lô B0–B9. Đây là CÔNG THỨC tái tạo chính xác bộ
+# dữ liệu mà mọi số đo đã commit dựa trên (DATA_PLAN §9 cho phép công bố .jams). Audio
+# 4,5 GB đã xoá 22/09 khi dọn dự án; không có gói này thì sinh lại sẽ ra bộ dữ liệu KHÁC
+# và mọi kết quả đã đo mất tính so sánh. 15 MB — rẻ hơn nhiều so với mất khả năng tái lập.
+!data/synthetic/jams_b0_b9.zip
 data/banks/
 
 # Manifest, exclusions, báo cáo phủ: NHỎ và là bản ghi quyết định → PHẢI theo dõi.
