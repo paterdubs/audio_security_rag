@@ -389,6 +389,35 @@ chứng minh verifier từng bắt được lỗi thật.
    tra mới — nghe trực tiếp clip bị phân mảnh, hoặc so theo trục SNR/reverb thay vì trục
    độ dài sự kiện. Ablation `pos_weight` giờ không còn bị hai việc trên chặn nữa, có thể
    bắt đầu.
+10. ✅ **Ablation `pos_weight` CHẠY XONG — 22/09, giả thuyết được xác nhận.** Ba lượt
+    `panns_ft_pw1`/`pw10`/`pw30` chạy tuần tự qua đêm không người trông bằng
+    `scripts/chay_ablation_pos_weight.py` (chờ train → đánh giá → train lượt sau → ... →
+    `compare_runs` → sinh báo cáo; mọi bước bỏ qua được nếu đã có kết quả; watchdog
+    `--resume` nếu train chết). Cùng cấu hình `v3`, chỉ đổi `--pos-weight-max`; hợp đồng
+    dữ liệu `PASSED`, manifest ghi **lúc train**.
+
+    | run | pos_weight | ECE | θ* | F1@θ* | F1@0,5 |
+    |---|---:|---:|---:|---:|---:|
+    | `pw30` | 30 | 0,3308 | 0,90 | 0,4018 | 0,0855 |
+    | `pw10` | 10 | 0,2033 | 0,80 | 0,4192 | 0,2340 |
+    | `pw1` | 1 | **0,0231** | **0,35** | **0,4333** | **0,4160** |
+
+    Ba kết luận: (a) `pw30` tái hiện `v3` trong 0,7% → giả thuyết không phải rút lại, và
+    đây là **bằng chứng đầu tiên về khả năng tái lập của pipeline**; (b) quan hệ **đơn điệu
+    tuyệt đối** ở cả bốn cột, không có ngưỡng lật nên không cần quét thêm mức trung gian;
+    (c) **không có đánh đổi** — trần 30 làm hỏng cả hiệu chuẩn lẫn F1, trái giả định ban đầu.
+
+    `compare_runs` nay khai `mã: khac` thay vì `KHONG_RO` (đã hết, chỉ còn khi kéo `v3` vào
+    so). Băm cây mã khác nhau vì code ĐO thay đổi giữa các lượt; `ml/training/` và
+    `ml/models/` **giống hệt**, mọi `analysis.json` do cùng một phiên bản `error_analysis.py`
+    sinh ra. Phép so hợp lệ nhưng **chưa "sạch tuyệt đối"** theo nghĩa băm mã trùng nhau.
+
+    **Quyết định:** giữ nguyên hằng `MAX_POS_WEIGHT = 30,0`; v4 truyền tường minh
+    `--pos-weight-max 1.0`. Số đo: `docs/measurements/pos_weight_ket_luan_20260922.md`.
+
+    ⚠️ **`--resume` vẫn chưa được kiểm bằng thực tế** — cả ba lượt chạy trót lọt nên nhánh
+    watchdog không lần nào được thực thi.
+
 9. ✅ **Hạ tầng ablation `pos_weight` + bộ gán mù lần 2 — xong 21–22/09.**
    `train_sed.py` thêm `--pos-weight-max` (mặc định vẫn 30,0, hành vi cũ không đổi) —
    **chưa chạy lượt train nào với cờ này**, vẫn còn nguyên là việc phải làm để xác nhận

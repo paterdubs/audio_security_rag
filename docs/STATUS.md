@@ -73,6 +73,40 @@
   **ba** ứng viên liên tiếp (cửa sổ hẹp, trần thấp, khe hở năng lượng); nguyên nhân riêng
   **vẫn chưa xác định**. Phép đo ở
   [measurements/long_event_gap_20260921.md](measurements/long_event_gap_20260921.md).
+- 🟢 **22/09 — ablation `pos_weight` XONG, giả thuyết ĐƯỢC XÁC NHẬN.** Ba lượt
+  `pw1`/`pw10`/`pw30` chạy qua đêm không người trông
+  (`scripts/chay_ablation_pos_weight.py`), cùng cấu hình `v3` chỉ đổi `--pos-weight-max`,
+  hợp đồng dữ liệu `PASSED`, manifest ghi lúc train:
+
+  | run | pos_weight | ECE tổng | θ\* | event-F1 @θ\* | event-F1 @0,5 |
+  |---|---:|---:|---:|---:|---:|
+  | `panns_ft_pw30` | 30 | 0,3308 | 0,90 | 0,4018 | 0,0855 |
+  | `panns_ft_pw10` | 10 | 0,2033 | 0,80 | 0,4192 | 0,2340 |
+  | `panns_ft_pw1` | 1 | **0,0231** | **0,35** | **0,4333** | **0,4160** |
+
+  Đơn điệu tuyệt đối ở cả bốn cột và **không có đánh đổi** ở bất kỳ mức nào — trần 30 làm
+  hỏng CẢ hiệu chuẩn LẪN F1, trái với giả định ban đầu rằng nó mua recall bằng giá hiệu
+  chuẩn. `pw30` tái hiện `v3` trong 0,7% (ECE 0,3308 vs 0,3332, θ\* trùng khít 0,90), nên
+  kết luận không phải rút lại — và đó là **bằng chứng đầu tiên về khả năng tái lập của
+  pipeline** (`v3` train 18/09, manifest hồi cứu, vẫn được run mới lặp lại trong 1%).
+  Ý nghĩa thực tế ở cột cuối: tại ngưỡng mặc định 0,5, trần 30 cho F1 **0,0855** — gần như
+  vô dụng nếu không biết trước phải cắt ở 0,90 — còn trần 1,0 cho **0,4160**, gấp gần 5 lần.
+  Quyết định kèm theo: **không đổi hằng `MAX_POS_WEIGHT = 30,0`** (đổi mặc định làm v1–v3
+  không tái lập được bằng lệnh mặc định); v4 trở đi truyền tường minh `--pos-weight-max 1.0`.
+  Điều kiện phải nói kèm: `compare_runs` khai `mã: khac` giữa ba lượt — băm cây mã khác nhau
+  vì code ĐO thay đổi giữa các lượt, nhưng `ml/training/` và `ml/models/` **giống hệt**, và
+  cả ba `analysis.json` do cùng một phiên bản `error_analysis.py` sinh ra. `KHONG_RO` đã hết,
+  chỉ còn xuất hiện khi kéo `v3` vào so. Phép đo ở
+  [measurements/pos_weight_ket_luan_20260922.md](measurements/pos_weight_ket_luan_20260922.md),
+  số thô ở [measurements/pos_weight_ablation_20260921.md](measurements/pos_weight_ablation_20260921.md).
+- 🔴 **21/09 (tiếp) — `low_snr` hỏng bằng HAI cơ chế khác nhau tuỳ độ dài sự kiện.**
+  Bảng 6 loại lỗi theo ô 2×2, tái hiện trên **cả `v2` lẫn `v3`**: nhánh sự kiện thường →
+  **Deletion** (`thieu` hứng 51–60% phần `dung` mất đi, `thua` không tăng); nhánh
+  `long_event` → **lệch biên** (`bien` hứng 61–72%, `thieu` gần như đứng yên). Substitution
+  là thành phần nhỏ nhất ở mọi ô, và **cấu trúc ma trận nhầm không đổi** → `low_snr` không
+  sinh cặp nhầm mới, không khai thêm vào `confusable_with`. Hai cơ chế cần hai cách sửa
+  khác nhau. Phép đo ở
+  [measurements/low_snr_co_che_20260921.md](measurements/low_snr_co_che_20260921.md).
 - 🔴 **21/09 (tiếp) — ứng viên THỨ TƯ của `long_event` cũng bị bác bỏ; đổi lại, biết chắc
   độ dài là biến khó ĐỘC LẬP.** `ml/evaluation/long_event_crosscut.py` dựng bảng 2×2
   {`long_event`, `khac`} × {có, không} cho bốn lát cắt đối chiếu, đo tỉ lệ sự kiện bị phân
@@ -336,7 +370,7 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **700 test đạt** (21/09, cuối phiên; 693 → 700 sau `nhom_cat_cheo` + `long_event_crosscut`),
+- **710 test đạt** (22/09; 700 → 703 sau `ti_le_cap_nham`, → 710 sau runner ablation),
   chạy đầy đủ `pytest tests/` sau khi thêm 30
   test cho Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép
   ghép cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo
@@ -350,8 +384,9 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
   test mới, 580 sau Pha 1 + Pha 3, 601 sau Pha 4, 616 sau Pha 5, 631 sau ablation
   trần/hiệu chuẩn, 642 sau đo khe hở năng lượng, 649 sau cổng hợp đồng + checkpoint
   resume, 654 sau chọn pilot gold, 660 sau đọc `exclusions.csv`, 675 sau
-  `make_blind_set.py`, 686 sau `agreement.py`, 689 sau `--pos-weight-max`, **693** sau vá · **700** sau bảng 2×2 cắt chéo `long_event` (21/09)
-  lỗi đuôi `.wav` + `chi_tiet_bat_dong()`.
+  `make_blind_set.py`, 686 sau `agreement.py`, 689 sau `--pos-weight-max`, **693** sau vá
+  lỗi đuôi `.wav` + `chi_tiet_bat_dong()`, **700** sau bảng 2×2 cắt chéo `long_event`,
+  **703** sau `ti_le_cap_nham`, **710** sau runner ablation qua đêm (22/09).
   `train_sed --zero-shot --workers 2` chạy thật, xác nhận crash pickle đã hết.
   `make_blind_set.py` cũng đã chạy thật trên dữ liệu production (không chỉ test) —
   60 file trong `data/gold/blind_v1_lan2/`, đối soát 30/30 pilot/mồi qua mapping.

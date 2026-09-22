@@ -115,13 +115,38 @@ không phải trạng thái hiện hành.
   nhỏ (45–52 clip/ô). Ba ứng viên trước: cửa sổ hẹp, trần thấp, khe hở năng lượng thật
   (21/09, khe hở hai nhóm bằng nhau tuyệt đối 0,012s/0,046s; p90 nhóm KHÔNG vỡ còn cao hơn).
   Số đo: `docs/measurements/long_event_{gap,crosscut}_20260921.md`.
+- **`pos_weight` ĐƯỢC XÁC NHẬN là nguyên nhân của lệch hiệu chuẩn** (22/09, ablation ba
+  mức chạy qua đêm bằng `scripts/chay_ablation_pos_weight.py`). Cùng cấu hình v3, chỉ đổi
+  `--pos-weight-max`; hợp đồng `PASSED`, manifest ghi lúc train:
+
+  | run | pos_weight | ECE | θ* | F1 @θ* | **F1 @0,5** |
+  |---|---:|---:|---:|---:|---:|
+  | `pw30` | 30 | 0,3308 | 0,90 | 0,4018 | 0,0855 |
+  | `pw10` | 10 | 0,2033 | 0,80 | 0,4192 | 0,2340 |
+  | `pw1` | 1 | **0,0231** | **0,35** | **0,4333** | **0,4160** |
+
+  Đơn điệu tuyệt đối ở cả bốn cột, **không có đánh đổi** — trần 30 làm hỏng CẢ hiệu chuẩn
+  LẪN F1. `pw30` tái hiện `v3` trong vòng 0,7% (ECE 0,3308 vs 0,3332, θ* trùng khít), nên
+  giả thuyết không phải rút lại — và đó cũng là **bằng chứng đầu tiên về khả năng tái lập
+  của pipeline**. Ý nghĩa thực tế nằm ở cột cuối: ở ngưỡng mặc định 0,5, trần 30 cho F1
+  0,0855 (gần như vô dụng) còn trần 1,0 cho 0,4160 — **gần 5 lần**.
+  **Quyết định: KHÔNG đổi hằng `MAX_POS_WEIGHT = 30.0`** (đổi mặc định làm v1–v3 không tái
+  lập được bằng lệnh mặc định); v4 trở đi truyền tường minh `--pos-weight-max 1.0`.
+  Số đo: `docs/measurements/pos_weight_ket_luan_20260922.md`.
+- **`low_snr` hỏng bằng hai cơ chế khác nhau tuỳ độ dài sự kiện** (21/09, tái hiện trên cả
+  v2 lẫn v3): trên sự kiện thường là **Deletion** (`thieu` hứng 51–60% phần `dung` mất đi,
+  `thua` không tăng), trên sự kiện dài là **lệch biên** (`bien` hứng 61–72%, `thieu` gần
+  như đứng yên). Substitution nhỏ nhất ở mọi ô và **cấu trúc ma trận nhầm không đổi** → 
+  `low_snr` không sinh cặp nhầm mới, không khai thêm `confusable_with`. Hai cơ chế cần hai
+  cách sửa khác nhau: Deletion là bài toán ngưỡng/dữ liệu, lệch biên là bài toán hậu xử
+  lý/độ phân giải thời gian. Số đo: `docs/measurements/low_snr_co_che_20260921.md`.
 - **Cổng hợp đồng dữ liệu giờ CHẶN thật, và checkpoint resume có optimizer/scheduler/RNG
   đầy đủ.** `kiem_cong_hop_dong()` chặn cả `FAILED` lẫn `KHONG_RO` như nhau (trước 19/09
   cả hai chỉ in cảnh báo) — bỏ qua bằng `--force-du-lieu-chua-dat`, cờ ghi vào
   `manifest.json`. `checkpoint_resume.pt` ghi đè mỗi epoch (tách khỏi `best.pt` — không đổi
   schema mà `predictions.py`/`eval_sed.py` phụ thuộc); `--resume` khôi phục RNG nên dãy số
   ngẫu nhiên tiếp theo giống hệt như chưa hề dừng.
-- **700 test đạt** (21/09, `pytest tests/` exit 0). Mốc trước thay đổi là 693.
+- **710 test đạt** (22/09, `pytest tests/` exit 0). Mốc trước thay đổi là 703.
   Từ 649: pilot gold lần 1 (30/30), bộ gán mù lần 2 (`make_blind_set.py`, đã chạy thật),
   `agreement.py` (**đã chạy thật 22/09** — vá lỗi đuôi `.wav`, thêm `chi_tiet_bat_dong()`,
   xem "Đang làm" bên dưới), `--pos-weight-max`.
@@ -151,14 +176,21 @@ không phải trạng thái hiện hành.
 
 ### Việc tiếp theo
 
-1. **`long_event`: còn ba hướng, không còn hướng rẻ.** Bốn giả thuyết đã bị loại (cửa sổ
+1. **Chốt cấu hình v4 và train nó.** Ablation đã xong: `--pos-weight-max 1.0` thắng ở mọi
+   chiều. Việc còn lại là quyết định v4 gồm những gì ngoài `pos_weight` (có gộp luôn
+   `--time-pool-blocks` khác không, hay giữ một biến một lượt), rồi train + đánh giá đầy
+   đủ. Đây là run đầu tiên có đủ điều kiện làm mốc báo cáo trong luận văn.
+2. **`long_event`: còn ba hướng, không còn hướng rẻ.** Bốn giả thuyết đã bị loại (cửa sổ
    hẹp, trần thấp, khe hở năng lượng, trùng lát cắt khó — xem trên), và phép đo cuối đã
    thu hẹp phạm vi: thủ phạm phải gắn với chính độ dài sự kiện. Hướng còn lại: (a) nghe
    trực tiếp clip vỡ nhiều nhất — cần tai người; (b) trường tiếp nhận thời gian của CNN14
-   ngắn hơn sự kiện 4s — kiểm bằng ablation `--time-pool-blocks`, tốn GPU; (c) BCE theo
-   khung không phạt phân mảnh — phải đổi loss rồi train lại, không phép đo nào trên dự
-   đoán đã lưu phát hiện được.
-2. ✅ **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — XONG 22/09.** 30/30 gán được, sau
+   ngắn hơn sự kiện 4s — kiểm bằng ablation `--time-pool-blocks`, tốn GPU, và giờ **nối
+   thẳng với phát hiện `low_snr`/lệch biên**: cả hai đều nói về khả năng chốt biên trên
+   đoạn dài; (c) BCE theo khung không phạt phân mảnh — phải đổi loss rồi train lại.
+3. **`--resume` vẫn CHƯA được kiểm bằng thực tế.** Runner qua đêm 21→22/09 có watchdog gọi
+   `--resume` khi train chết, nhưng cả ba lượt chạy trót lọt nên nhánh đó không lần nào
+   được thực thi. Món nợ còn nguyên.
+4. ✅ **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — XONG 22/09.** 30/30 gán được, sau
    **16 file loại / 46 lượt nghe = tỉ lệ thất bại 34,8%** (7 game/phim
    `synthetic_or_game_audio`, 6 rác/không liên quan `unusable`, 3 nhạc nền
    `music_no_event`). **Mẫu hình 100%: mọi file "unusable"/"synthetic" đều chạm ít nhất
@@ -197,12 +229,12 @@ không phải trạng thái hiện hành.
    checklist §10.
    Đây là thứ DUY NHẤT gỡ được confound "dev cùng recipe với train của v3". Không dùng
    test để chọn threshold.
-3. **Ablation `pos_weight`** — `train_sed.py` đã có cờ `--pos-weight-max` (mặc định vẫn
-   30,0, hành vi cũ giữ nguyên) để xác nhận nguyên nhân của lệch hiệu chuẩn đã đo (ECE v3
-   0,3332). **Chưa chạy lượt train nào với cờ này** — cần train lại (nhiều giờ GPU) nên chi
-   phí khác hẳn phép đo ECE đã có. Quét đề xuất: 1.0 (tắt hẳn cân bằng lớp) · 10 · 30 (hiện
-   tại), so cả ECE tổng lẫn event-F1@θ* để phân biệt cải thiện thật với đánh đổi. Cổng hợp
-   đồng (mục 3 cũ) và checkpoint resume đã xong, xem bên dưới.
+3. ✅ **Ablation `pos_weight` — XONG 22/09, giả thuyết được XÁC NHẬN.** Ba lượt
+   `pw1`/`pw10`/`pw30` chạy qua đêm bằng `scripts/chay_ablation_pos_weight.py`, cùng cấu
+   hình v3 chỉ đổi một biến. Quan hệ đơn điệu tuyệt đối, không đánh đổi; `pw30` tái hiện
+   `v3` trong 0,7%. Chi tiết ở §0 và `docs/measurements/pos_weight_ket_luan_20260922.md`.
+   Hằng `MAX_POS_WEIGHT` **giữ nguyên 30,0** có chủ đích; v4 truyền tường minh
+   `--pos-weight-max 1.0`.
 
 ---
 

@@ -1,0 +1,1167 @@
+{
+  "run": "panns_ft_pw1",
+  "split": "dev",
+  "subset": "all",
+  "n_clip": 1440,
+  "n_bins": 10,
+  "ece_tong": 0.023101148072914506,
+  "theo_lop": [
+    {
+      "class_id": "applause_cheering",
+      "n_khung_duong": 161705,
+      "ece": 0.05586950047210831,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1229532,
+          "trung_binh_du_bao": 0.053940512239933014,
+          "ti_le_duong": 0.014911364763975143
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 84169,
+          "trung_binh_du_bao": 0.12595334649085999,
+          "ti_le_duong": 0.22876593470573425
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 11778,
+          "trung_binh_du_bao": 0.2441515028476715,
+          "ti_le_duong": 0.8028527498245239
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 7490,
+          "trung_binh_du_bao": 0.34547853469848633,
+          "ti_le_duong": 0.9116154909133911
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 6111,
+          "trung_binh_du_bao": 0.4503158926963806,
+          "ti_le_duong": 0.9548355340957642
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 5766,
+          "trung_binh_du_bao": 0.5484781861305237,
+          "ti_le_duong": 0.9765868782997131
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 6575,
+          "trung_binh_du_bao": 0.6503090262413025,
+          "ti_le_duong": 0.9857034087181091
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 8159,
+          "trung_binh_du_bao": 0.7510781288146973,
+          "ti_le_duong": 0.9922784566879272
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 12335,
+          "trung_binh_du_bao": 0.8561872243881226,
+          "ti_le_duong": 0.9960275888442993
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 69525,
+          "trung_binh_du_bao": 0.976370096206665,
+          "ti_le_duong": 0.9996835589408875
+        }
+      ]
+    },
+    {
+      "class_id": "siren",
+      "n_khung_duong": 132356,
+      "ece": 0.04472747647293133,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1284976,
+          "trung_binh_du_bao": 0.04735993593931198,
+          "ti_le_duong": 0.010355057194828987
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 44334,
+          "trung_binh_du_bao": 0.12645173072814941,
+          "ti_le_duong": 0.23074841499328613
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 7241,
+          "trung_binh_du_bao": 0.2451259195804596,
+          "ti_le_duong": 0.7838696241378784
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 4305,
+          "trung_binh_du_bao": 0.34536823630332947,
+          "ti_le_duong": 0.8710801601409912
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 3432,
+          "trung_binh_du_bao": 0.4459584057331085,
+          "ti_le_duong": 0.9155011773109436
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 3080,
+          "trung_binh_du_bao": 0.5501711964607239,
+          "ti_le_duong": 0.9214285612106323
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 3424,
+          "trung_binh_du_bao": 0.6502161026000977,
+          "ti_le_duong": 0.9255257248878479
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 3809,
+          "trung_binh_du_bao": 0.7543739080429077,
+          "ti_le_duong": 0.9593068957328796
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 5956,
+          "trung_binh_du_bao": 0.8567888736724854,
+          "ti_le_duong": 0.9783411622047424
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 80883,
+          "trung_binh_du_bao": 0.9870144128799438,
+          "ti_le_duong": 0.9985287189483643
+        }
+      ]
+    },
+    {
+      "class_id": "fireworks",
+      "n_khung_duong": 116322,
+      "ece": 0.04081077464614538,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1191833,
+          "trung_binh_du_bao": 0.05166132003068924,
+          "ti_le_duong": 0.016607193276286125
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 147383,
+          "trung_binh_du_bao": 0.13138949871063232,
+          "ti_le_duong": 0.12249716371297836
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 24809,
+          "trung_binh_du_bao": 0.24163571000099182,
+          "ti_le_duong": 0.4087226390838623
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 10871,
+          "trung_binh_du_bao": 0.34638068079948425,
+          "ti_le_duong": 0.5953454375267029
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 7593,
+          "trung_binh_du_bao": 0.4476442337036133,
+          "ti_le_duong": 0.7259317636489868
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 6852,
+          "trung_binh_du_bao": 0.5478760600090027,
+          "ti_le_duong": 0.828663170337677
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 6500,
+          "trung_binh_du_bao": 0.64961838722229,
+          "ti_le_duong": 0.9039999842643738
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 6996,
+          "trung_binh_du_bao": 0.7487180829048157,
+          "ti_le_duong": 0.9451115131378174
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 9066,
+          "trung_binh_du_bao": 0.8537700176239014,
+          "ti_le_duong": 0.9702184200286865
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 29537,
+          "trung_binh_du_bao": 0.9690854549407959,
+          "ti_le_duong": 0.9949893355369568
+        }
+      ]
+    },
+    {
+      "class_id": "alarm_bell",
+      "n_khung_duong": 83152,
+      "ece": 0.03135488395807519,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1321353,
+          "trung_binh_du_bao": 0.03782033920288086,
+          "ti_le_duong": 0.008078083395957947
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 44944,
+          "trung_binh_du_bao": 0.1293511539697647,
+          "ti_le_duong": 0.14090868830680847
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 7554,
+          "trung_binh_du_bao": 0.24317143857479095,
+          "ti_le_duong": 0.4474450647830963
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 3665,
+          "trung_binh_du_bao": 0.34623777866363525,
+          "ti_le_duong": 0.6270122528076172
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 2873,
+          "trung_binh_du_bao": 0.4487224817276001,
+          "ti_le_duong": 0.7633135914802551
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 2662,
+          "trung_binh_du_bao": 0.5502885580062866,
+          "ti_le_duong": 0.785499632358551
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 2611,
+          "trung_binh_du_bao": 0.6496509909629822,
+          "ti_le_duong": 0.8207583427429199
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 3395,
+          "trung_binh_du_bao": 0.7522380352020264,
+          "ti_le_duong": 0.875994086265564
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 4860,
+          "trung_binh_du_bao": 0.8529573082923889,
+          "ti_le_duong": 0.9030864238739014
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 47523,
+          "trung_binh_du_bao": 0.9856513738632202,
+          "ti_le_duong": 0.9821981191635132
+        }
+      ]
+    },
+    {
+      "class_id": "shout_yell",
+      "n_khung_duong": 75623,
+      "ece": 0.026715770271303434,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1337350,
+          "trung_binh_du_bao": 0.042723510414361954,
+          "ti_le_duong": 0.022580476477742195
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 56905,
+          "trung_binh_du_bao": 0.13196836411952972,
+          "ti_le_duong": 0.170213520526886
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 11811,
+          "trung_binh_du_bao": 0.24261268973350525,
+          "ti_le_duong": 0.48945897817611694
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 6554,
+          "trung_binh_du_bao": 0.3461747467517853,
+          "ti_le_duong": 0.6386939287185669
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 4776,
+          "trung_binh_du_bao": 0.44767865538597107,
+          "ti_le_duong": 0.7577470541000366
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 3730,
+          "trung_binh_du_bao": 0.5493330359458923,
+          "ti_le_duong": 0.8016085624694824
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 3738,
+          "trung_binh_du_bao": 0.6490262150764465,
+          "ti_le_duong": 0.863028347492218
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 3872,
+          "trung_binh_du_bao": 0.7522699236869812,
+          "ti_le_duong": 0.9052169322967529
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 4528,
+          "trung_binh_du_bao": 0.8498741984367371,
+          "ti_le_duong": 0.9567137956619263
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 8176,
+          "trung_binh_du_bao": 0.9584043622016907,
+          "ti_le_duong": 0.9907044768333435
+        }
+      ]
+    },
+    {
+      "class_id": "speech_normal",
+      "n_khung_duong": 52272,
+      "ece": 0.02428242775591369,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1381430,
+          "trung_binh_du_bao": 0.030079267919063568,
+          "ti_le_duong": 0.013048073276877403
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 28196,
+          "trung_binh_du_bao": 0.13405679166316986,
+          "ti_le_duong": 0.3016740083694458
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 7384,
+          "trung_binh_du_bao": 0.2444124072790146,
+          "ti_le_duong": 0.5735373497009277
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 4121,
+          "trung_binh_du_bao": 0.34697654843330383,
+          "ti_le_duong": 0.7027420401573181
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 2632,
+          "trung_binh_du_bao": 0.4477858245372772,
+          "ti_le_duong": 0.7921732664108276
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 2338,
+          "trung_binh_du_bao": 0.5478051900863647,
+          "ti_le_duong": 0.8229255676269531
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 2288,
+          "trung_binh_du_bao": 0.6503445506095886,
+          "ti_le_duong": 0.9064685106277466
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 2249,
+          "trung_binh_du_bao": 0.7529079914093018,
+          "ti_le_duong": 0.904401957988739
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 2921,
+          "trung_binh_du_bao": 0.8539718389511108,
+          "ti_le_duong": 0.9428278207778931
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 7881,
+          "trung_binh_du_bao": 0.9672849774360657,
+          "ti_le_duong": 0.9819819927215576
+        }
+      ]
+    },
+    {
+      "class_id": "vehicle_crash",
+      "n_khung_duong": 60556,
+      "ece": 0.021778035494989172,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1351935,
+          "trung_binh_du_bao": 0.04666116461157799,
+          "ti_le_duong": 0.02703680284321308
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 68527,
+          "trung_binh_du_bao": 0.1282086819410324,
+          "ti_le_duong": 0.14138951897621155
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 8569,
+          "trung_binh_du_bao": 0.23798982799053192,
+          "ti_le_duong": 0.43785738945007324
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 2681,
+          "trung_binh_du_bao": 0.34343063831329346,
+          "ti_le_duong": 0.6814621686935425
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 1496,
+          "trung_binh_du_bao": 0.44565457105636597,
+          "ti_le_duong": 0.7453208565711975
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 1232,
+          "trung_binh_du_bao": 0.5490405559539795,
+          "ti_le_duong": 0.8303571343421936
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 1072,
+          "trung_binh_du_bao": 0.6487654447555542,
+          "ti_le_duong": 0.8871268630027771
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 976,
+          "trung_binh_du_bao": 0.7503402233123779,
+          "ti_le_duong": 0.9180327653884888
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 1112,
+          "trung_binh_du_bao": 0.8526409268379211,
+          "ti_le_duong": 0.9325539469718933
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 3840,
+          "trung_binh_du_bao": 0.9765004515647888,
+          "ti_le_duong": 0.9671875238418579
+        }
+      ]
+    },
+    {
+      "class_id": "explosion",
+      "n_khung_duong": 39000,
+      "ece": 0.01999851585620488,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1388805,
+          "trung_binh_du_bao": 0.02895425073802471,
+          "ti_le_duong": 0.011716547422111034
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 29667,
+          "trung_binh_du_bao": 0.13220496475696564,
+          "ti_le_duong": 0.17993056774139404
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 5560,
+          "trung_binh_du_bao": 0.2429792881011963,
+          "ti_le_duong": 0.4329136610031128
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 2680,
+          "trung_binh_du_bao": 0.3461688160896301,
+          "ti_le_duong": 0.6026119589805603
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 1872,
+          "trung_binh_du_bao": 0.44790101051330566,
+          "ti_le_duong": 0.7083333134651184
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 1600,
+          "trung_binh_du_bao": 0.5488012433052063,
+          "ti_le_duong": 0.8224999904632568
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 1352,
+          "trung_binh_du_bao": 0.6511418223381042,
+          "ti_le_duong": 0.8668639063835144
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 1568,
+          "trung_binh_du_bao": 0.7525609731674194,
+          "ti_le_duong": 0.9132652878761292
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 2072,
+          "trung_binh_du_bao": 0.8507763743400574,
+          "ti_le_duong": 0.9266409277915955
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 6264,
+          "trung_binh_du_bao": 0.9739152789115906,
+          "ti_le_duong": 0.9901021718978882
+        }
+      ]
+    },
+    {
+      "class_id": "scream",
+      "n_khung_duong": 43758,
+      "ece": 0.01988151739101764,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1384257,
+          "trung_binh_du_bao": 0.0219052042812109,
+          "ti_le_duong": 0.005872464273124933
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 20109,
+          "trung_binh_du_bao": 0.1336142122745514,
+          "ti_le_duong": 0.1751454621553421
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 4928,
+          "trung_binh_du_bao": 0.24412477016448975,
+          "ti_le_duong": 0.5030438303947449
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 2929,
+          "trung_binh_du_bao": 0.34702569246292114,
+          "ti_le_duong": 0.6497098207473755
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 2513,
+          "trung_binh_du_bao": 0.4487161934375763,
+          "ti_le_duong": 0.7791483998298645
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 2368,
+          "trung_binh_du_bao": 0.552359938621521,
+          "ti_le_duong": 0.8429054021835327
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 2568,
+          "trung_binh_du_bao": 0.6479279398918152,
+          "ti_le_duong": 0.9334112405776978
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 2800,
+          "trung_binh_du_bao": 0.751231849193573,
+          "ti_le_duong": 0.9453571438789368
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 3576,
+          "trung_binh_du_bao": 0.8536073565483093,
+          "ti_le_duong": 0.9658836722373962
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 15392,
+          "trung_binh_du_bao": 0.9747040271759033,
+          "ti_le_duong": 0.9922686815261841
+        }
+      ]
+    },
+    {
+      "class_id": "running_footsteps",
+      "n_khung_duong": 27247,
+      "ece": 0.019612126191090744,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1332968,
+          "trung_binh_du_bao": 0.01871342770755291,
+          "ti_le_duong": 0.004224407486617565
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 56361,
+          "trung_binh_du_bao": 0.1403624713420868,
+          "ti_le_duong": 0.06043186038732529
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 21544,
+          "trung_binh_du_bao": 0.24315957725048065,
+          "ti_le_duong": 0.1330764889717102
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 9985,
+          "trung_binh_du_bao": 0.34472155570983887,
+          "ti_le_duong": 0.23925888538360596
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 5761,
+          "trung_binh_du_bao": 0.44613882899284363,
+          "ti_le_duong": 0.3607012629508972
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 4473,
+          "trung_binh_du_bao": 0.547752857208252,
+          "ti_le_duong": 0.5307400226593018
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 3161,
+          "trung_binh_du_bao": 0.647674560546875,
+          "ti_le_duong": 0.688389778137207
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 2801,
+          "trung_binh_du_bao": 0.7473732829093933,
+          "ti_le_duong": 0.7868618369102478
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 2346,
+          "trung_binh_du_bao": 0.8507884740829468,
+          "ti_le_duong": 0.9036658406257629
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 2040,
+          "trung_binh_du_bao": 0.9348058104515076,
+          "ti_le_duong": 0.9813725352287292
+        }
+      ]
+    },
+    {
+      "class_id": "glass_breaking",
+      "n_khung_duong": 35895,
+      "ece": 0.016886992547820202,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1385231,
+          "trung_binh_du_bao": 0.02226562239229679,
+          "ti_le_duong": 0.00685156462714076
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 22045,
+          "trung_binh_du_bao": 0.13554853200912476,
+          "ti_le_duong": 0.13916988670825958
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 6946,
+          "trung_binh_du_bao": 0.24556227028369904,
+          "ti_le_duong": 0.30362799763679504
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 4921,
+          "trung_binh_du_bao": 0.346425324678421,
+          "ti_le_duong": 0.5015240907669067
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 3264,
+          "trung_binh_du_bao": 0.4480477273464203,
+          "ti_le_duong": 0.591911792755127
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 2592,
+          "trung_binh_du_bao": 0.5527268648147583,
+          "ti_le_duong": 0.6832561492919922
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 2624,
+          "trung_binh_du_bao": 0.6493068933486938,
+          "ti_le_duong": 0.8029725551605225
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 2737,
+          "trung_binh_du_bao": 0.7535439133644104,
+          "ti_le_duong": 0.8586043119430542
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 3192,
+          "trung_binh_du_bao": 0.8514878749847412,
+          "ti_le_duong": 0.9047619104385376
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 7888,
+          "trung_binh_du_bao": 0.9681245684623718,
+          "ti_le_duong": 0.9775608777999878
+        }
+      ]
+    },
+    {
+      "class_id": "laughter",
+      "n_khung_duong": 30785,
+      "ece": 0.014565051939102075,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1399850,
+          "trung_binh_du_bao": 0.020065046846866608,
+          "ti_le_duong": 0.007296496070921421
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 18337,
+          "trung_binh_du_bao": 0.13431310653686523,
+          "ti_le_duong": 0.16387630999088287
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 4378,
+          "trung_binh_du_bao": 0.24190334975719452,
+          "ti_le_duong": 0.35838282108306885
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 2241,
+          "trung_binh_du_bao": 0.34564700722694397,
+          "ti_le_duong": 0.5515394806861877
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 1841,
+          "trung_binh_du_bao": 0.4468001425266266,
+          "ti_le_duong": 0.6539924144744873
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 1808,
+          "trung_binh_du_bao": 0.5478558540344238,
+          "ti_le_duong": 0.7538716793060303
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 1712,
+          "trung_binh_du_bao": 0.6521863341331482,
+          "ti_le_duong": 0.8399532437324524
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 1760,
+          "trung_binh_du_bao": 0.7513649463653564,
+          "ti_le_duong": 0.894318163394928
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 2608,
+          "trung_binh_du_bao": 0.8537208437919617,
+          "ti_le_duong": 0.9152607321739197
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 6905,
+          "trung_binh_du_bao": 0.9667383432388306,
+          "ti_le_duong": 0.9840695261955261
+        }
+      ]
+    },
+    {
+      "class_id": "door_slam",
+      "n_khung_duong": 17054,
+      "ece": 0.012427129231653058,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1389607,
+          "trung_binh_du_bao": 0.015732256695628166,
+          "ti_le_duong": 0.005225218366831541
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 30094,
+          "trung_binh_du_bao": 0.13808876276016235,
+          "ti_le_duong": 0.07699209451675415
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 9121,
+          "trung_binh_du_bao": 0.2427086979150772,
+          "ti_le_duong": 0.1602894365787506
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 4513,
+          "trung_binh_du_bao": 0.34628111124038696,
+          "ti_le_duong": 0.2947041988372803
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 2417,
+          "trung_binh_du_bao": 0.44405150413513184,
+          "ti_le_duong": 0.3839470446109772
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 1880,
+          "trung_binh_du_bao": 0.5470349788665771,
+          "ti_le_duong": 0.4159574508666992
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 1368,
+          "trung_binh_du_bao": 0.6502364277839661,
+          "ti_le_duong": 0.6476607918739319
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 1128,
+          "trung_binh_du_bao": 0.7514198422431946,
+          "ti_le_duong": 0.8102836608886719
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 920,
+          "trung_binh_du_bao": 0.846297562122345,
+          "ti_le_duong": 0.865217387676239
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 392,
+          "trung_binh_du_bao": 0.938456654548645,
+          "ti_le_duong": 0.9642857313156128
+        }
+      ]
+    },
+    {
+      "class_id": "gunshot",
+      "n_khung_duong": 16635,
+      "ece": 0.011772468091469824,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1392295,
+          "trung_binh_du_bao": 0.01479247584939003,
+          "ti_le_duong": 0.004626892972737551
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 30391,
+          "trung_binh_du_bao": 0.13592422008514404,
+          "ti_le_duong": 0.07064591348171234
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 7386,
+          "trung_binh_du_bao": 0.24035786092281342,
+          "ti_le_duong": 0.1724884957075119
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 3232,
+          "trung_binh_du_bao": 0.3434019088745117,
+          "ti_le_duong": 0.2973391115665436
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 1816,
+          "trung_binh_du_bao": 0.4474247992038727,
+          "ti_le_duong": 0.4609030783176422
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 1344,
+          "trung_binh_du_bao": 0.5459478497505188,
+          "ti_le_duong": 0.5870535969734192
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 1016,
+          "trung_binh_du_bao": 0.6492910385131836,
+          "ti_le_duong": 0.6505905389785767
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 1016,
+          "trung_binh_du_bao": 0.7537217140197754,
+          "ti_le_duong": 0.7933070659637451
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 1096,
+          "trung_binh_du_bao": 0.851405680179596,
+          "ti_le_duong": 0.8850364685058594
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 1848,
+          "trung_binh_du_bao": 0.9586926698684692,
+          "ti_le_duong": 0.9458874464035034
+        }
+      ]
+    },
+    {
+      "class_id": "object_drop_dishes",
+      "n_khung_duong": 13563,
+      "ece": 0.010050872876973378,
+      "reliability": [
+        {
+          "bin_duoi": 0.0,
+          "bin_tren": 0.1,
+          "so_luong": 1404607,
+          "trung_binh_du_bao": 0.013798939064145088,
+          "ti_le_duong": 0.004601287189871073
+        },
+        {
+          "bin_duoi": 0.1,
+          "bin_tren": 0.2,
+          "so_luong": 24228,
+          "trung_binh_du_bao": 0.13501442968845367,
+          "ti_le_duong": 0.09645864367485046
+        },
+        {
+          "bin_duoi": 0.2,
+          "bin_tren": 0.30000000000000004,
+          "so_luong": 5170,
+          "trung_binh_du_bao": 0.2430673986673355,
+          "ti_le_duong": 0.2249516397714615
+        },
+        {
+          "bin_duoi": 0.30000000000000004,
+          "bin_tren": 0.4,
+          "so_luong": 2489,
+          "trung_binh_du_bao": 0.345132052898407,
+          "ti_le_duong": 0.3149859309196472
+        },
+        {
+          "bin_duoi": 0.4,
+          "bin_tren": 0.5,
+          "so_luong": 1329,
+          "trung_binh_du_bao": 0.44859784841537476,
+          "ti_le_duong": 0.38976675271987915
+        },
+        {
+          "bin_duoi": 0.5,
+          "bin_tren": 0.6000000000000001,
+          "so_luong": 960,
+          "trung_binh_du_bao": 0.5484985113143921,
+          "ti_le_duong": 0.453125
+        },
+        {
+          "bin_duoi": 0.6000000000000001,
+          "bin_tren": 0.7000000000000001,
+          "so_luong": 768,
+          "trung_binh_du_bao": 0.6481984257698059,
+          "ti_le_duong": 0.5611979365348816
+        },
+        {
+          "bin_duoi": 0.7000000000000001,
+          "bin_tren": 0.8,
+          "so_luong": 464,
+          "trung_binh_du_bao": 0.7504966855049133,
+          "ti_le_duong": 0.6465517282485962
+        },
+        {
+          "bin_duoi": 0.8,
+          "bin_tren": 0.9,
+          "so_luong": 537,
+          "trung_binh_du_bao": 0.8508769273757935,
+          "ti_le_duong": 0.7299813628196716
+        },
+        {
+          "bin_duoi": 0.9,
+          "bin_tren": 1.0,
+          "so_luong": 888,
+          "trung_binh_du_bao": 0.9640871286392212,
+          "ti_le_duong": 0.8333333134651184
+        }
+      ]
+    }
+  ],
+  "giay": 3.2,
+  "ghi_chu": "ECE của lớp có ít khung dương không đáng tin; trang này đo triệu chứng, không kết luận nguyên nhân."
+}
