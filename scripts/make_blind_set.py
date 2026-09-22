@@ -13,6 +13,13 @@ là che giấu, không phải phủ đều lớp; phủ lớp là việc của b
 
 ⚠️ `--mapping-out` ghi bảng ten_mu → file_id thật + cờ la_pilot. KHÔNG mở file này trong
 lúc gán nhãn — mở ra là lộ luôn đâu là 30 clip cũ, hỏng số đo tự-nhất-quán.
+
+⚠️ Vòng SAU lần đầu (ví dụ vòng 3): `--pilot` trỏ tới file pilot MỚI (không phải
+`pilot_v1_candidates.csv`), và bắt buộc truyền `--tru-them` gồm cột `file_id` của MỌI
+clip đã nghe ở các vòng trước (pilot cũ + mồi cũ) — nếu không, mồi của vòng mới có thể
+trùng đúng clip vòng cũ mà người gán đã nghe rồi, và điều kiện mù §8.4 hỏng dù tên đã
+băm lại. `chon_moi()` chỉ tự loại pilot của CHÍNH vòng đang chạy, không biết gì về các
+vòng trước nếu không được báo qua `--tru-them`.
 """
 
 from __future__ import annotations
@@ -115,7 +122,9 @@ def run(args: argparse.Namespace) -> int:
         return 1
 
     pilot_ids = doc_pilot_ids(args.pilot)
-    du_lieu = doc_gold_theo_lop(args.splits, args.segments, args.raw_manifest, args.exclusions)
+    tru_them = getattr(args, "tru_them", None)
+    du_lieu = doc_gold_theo_lop(args.splits, args.segments, args.raw_manifest,
+                                args.exclusions, tru_them)
     pool_thong_tin = du_lieu["thong_tin"]
 
     moi_ids = chon_moi(pool_thong_tin, set(pilot_ids), args.n_moi, args.seed)
@@ -152,6 +161,9 @@ def main() -> int:
     parser.add_argument("--segments", type=Path, default=SEGMENTS_PATH)
     parser.add_argument("--raw-manifest", type=Path, default=RAW_MANIFEST_PATH)
     parser.add_argument("--exclusions", type=Path, default=EXCLUSIONS_PATH)
+    parser.add_argument("--tru-them", type=Path, default=None, dest="tru_them",
+                        help="CSV cột file_id của MỌI clip đã nghe ở các vòng trước "
+                             "(pilot cũ + mồi cũ) — bắt buộc từ vòng thứ hai trở đi")
     parser.add_argument("--out-dir", type=Path, default=OUT_DIR)
     parser.add_argument("--mapping-out", type=Path, default=MAPPING_PATH)
     return run(parser.parse_args())

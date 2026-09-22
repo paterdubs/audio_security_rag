@@ -208,3 +208,72 @@ def test_run_tao_du_60_clip_va_mapping(tmp_path, monkeypatch):
         rows = list(csv.DictReader(handle))
     assert len(rows) == 60
     assert sum(1 for r in rows if r["la_pilot"] == "True") == 30
+
+
+def test_run_tru_them_loai_moi_da_dung_o_vong_truoc(tmp_path):
+    """Vòng pilot SAU lần đầu: nếu quên --tru-them, mồi có thể trùng đúng clip vòng
+    trước mà người gán đã nghe — điều kiện mù §8.4 hỏng dù tên file đã băm lại. Ca này
+    dựng pool chỉ đủ 30 pilot mới + 30 clip 'đã dùng ở vòng trước' + 10 mồi thật sự mới,
+    rồi kiểm KHÔNG có mồi nào trùng danh sách đã dùng."""
+    repo = tmp_path
+    (repo / "data" / "raw" / "audioset_strong" / "audio").mkdir(parents=True)
+    (repo / "data" / "manifests").mkdir(parents=True)
+    (repo / "data" / "gold").mkdir(parents=True)
+
+    pilot_ids = [f"as_strong_p{i}_10000" for i in range(30)]
+    da_dung_truoc = [f"as_strong_cu{i}_10000" for i in range(30)]
+    moi_that = [f"as_strong_moi{i}_10000" for i in range(10)]
+    pool_ids = pilot_ids + da_dung_truoc + moi_that
+
+    for fid in pool_ids:
+        (repo / "data" / "raw" / "audioset_strong" / "audio" / f"{fid}.wav").write_bytes(b"x")
+
+    segments_path = repo / "data" / "raw" / "audioset_strong" / "segments.jsonl"
+    with segments_path.open("w", encoding="utf-8") as handle:
+        import json
+        for fid in pool_ids:
+            handle.write(json.dumps({
+                "file_id": fid, "path": f"data/raw/audioset_strong/audio/{fid}.wav",
+                "ytid": fid, "events": [{"class_id": "speech_normal", "onset": 0.0, "offset": 1.0}],
+            }) + "\n")
+
+    splits_path = repo / "data" / "manifests" / "splits.csv"
+    with splits_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["file_id", "source_dataset", "source_group_id", "split"])
+        for fid in pool_ids:
+            writer.writerow([fid, "audioset_strong", f"youtube_{fid}", "gold_test"])
+
+    pilot_path = repo / "data" / "gold" / "pilot_v3_candidates.csv"
+    with pilot_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["file_id", "path", "classes_tham_khao"])
+        for fid in pilot_ids:
+            writer.writerow([fid, f"data/raw/audioset_strong/audio/{fid}.wav", "speech_normal"])
+
+    tru_them_path = repo / "data" / "gold" / "da_dung_truoc.csv"
+    with tru_them_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["file_id"])
+        for fid in da_dung_truoc:
+            writer.writerow([fid])
+
+    out_dir = repo / "data" / "gold" / "blind_v3_lan2"
+    mapping_out = repo / "data" / "gold" / "blind_v3_lan2_mapping.csv"
+
+    import argparse
+    args = argparse.Namespace(
+        pilot=pilot_path, n_moi=10, seed="test-seed-v3",
+        splits=splits_path, segments=segments_path,
+        raw_manifest=repo / "data" / "manifests" / "raw_manifest.csv",
+        exclusions=repo / "data" / "manifests" / "exclusions.csv",
+        tru_them=tru_them_path,
+        out_dir=out_dir, mapping_out=mapping_out, repo_root=repo,
+    )
+    ma = run(args)
+    assert ma == 0
+    with mapping_out.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    moi_da_chon = {r["file_id"] for r in rows if r["la_pilot"] == "False"}
+    assert moi_da_chon == set(moi_that)
+    assert moi_da_chon.isdisjoint(da_dung_truoc)
