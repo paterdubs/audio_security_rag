@@ -11,11 +11,15 @@ data/banks/
 !data/annotations/
 !data/gold/
 
-# NGOẠI LỆ trong data/gold/: bản sao AUDIO THẬT (make_blind_set.py copy từ
-# AudioSet-strong để gán lại mù) không được redistribute — DATA_PLAN §9 cấm phát hành lại
-# audio AudioSet, chỉ script tái tạo được phép commit. mapping.csv (metadata nhỏ, không
-# phải audio) vẫn theo dõi bình thường vì nó KHÔNG nằm trong thư mục này.
+# NGOẠI LỆ trong data/gold/: mọi bản sao AUDIO THẬT (make_blind_set.py copy từ
+# AudioSet-strong để gán lại mù; select_gold_pilot.py + copy tay để nghe pilot) không
+# được redistribute — DATA_PLAN §9 cấm phát hành lại audio AudioSet, chỉ script tái tạo
+# được phép commit. *_candidates.csv/mapping.csv (metadata nhỏ, không phải audio) vẫn
+# theo dõi bình thường. Quy ước đặt tên thư mục audio: hậu tố `_audio/` hoặc tiền tố
+# `blind_`.
 data/gold/blind_v1_lan2/
+data/gold/*_audio/
+data/gold/blind_*/
 
 .venv/
 .venv-services/
