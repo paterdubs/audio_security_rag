@@ -146,9 +146,10 @@ không phải trạng thái hiện hành.
   `manifest.json`. `checkpoint_resume.pt` ghi đè mỗi epoch (tách khỏi `best.pt` — không đổi
   schema mà `predictions.py`/`eval_sed.py` phụ thuộc); `--resume` khôi phục RNG nên dãy số
   ngẫu nhiên tiếp theo giống hệt như chưa hề dừng.
-- **737 test đạt** (22/09, `pytest tests/` exit 0): 710 → 720 sau runner ablation
+- **760 test đạt** (22/09, `pytest tests/` exit 0): 710 → 720 sau runner ablation
   `time_pool_blocks`, → 737 sau khi phủ test cho `check_leakage.py` (cổng CHẶN này
-  trước đó **không có test nào**). Mốc trước thay đổi là 710.
+  trước đó **không có test nào**), → 760 sau bộ metric hallucination
+  (`ml/evaluation/hallucination.py`, 23 test, đóng góp C2). Mốc trước thay đổi là 710.
   Từ 649: pilot gold lần 1 (30/30), bộ gán mù lần 2 (`make_blind_set.py`, đã chạy thật),
   `agreement.py` (**đã chạy thật 22/09** — vá lỗi đuôi `.wav`, thêm `chi_tiet_bat_dong()`,
   xem "Đang làm" bên dưới), `--pos-weight-max`.
@@ -178,27 +179,31 @@ không phải trạng thái hiện hành.
 
 ### Việc tiếp theo
 
-0. ✅ **Kiểm lại `long_event`/`low_snr` trên θ\* hợp lý (`pw1`) — XONG 22/09.** Cả hai chẩn
-   đoán đo trên `v3` @θ\*=0,90 đều được kiểm lại trên `pw1` @θ\*=0,35: tỉ lệ phân mảnh
-   `long_event` **giữ nguyên** (không phải hệ quả của ngưỡng cực đoan); cơ chế Deletion
-   trên sự kiện thường **giữ nguyên**; nhưng câu "lệch biên chiếm gần hết, Deletion gần
-   như không đóng góp" trên sự kiện dài bị **phóng đại** — tỉ trọng Deletion tăng gấp ba
-   (10,2%→32,1%) ở θ\* hợp lý hơn, dù lệch biên vẫn trội hơn. Đã đính chính trong
-   [low_snr_co_che_20260921.md](docs/measurements/low_snr_co_che_20260921.md) §6, chi tiết
-   đầy đủ ở [phan_tich_lai_tren_pw1_20260922.md](docs/measurements/phan_tich_lai_tren_pw1_20260922.md).
-1. **Chốt cấu hình v4 và train nó.** Ablation đã xong: `--pos-weight-max 1.0` thắng ở mọi
-   chiều. `panns_ft_pw1` **đã chính là** cấu hình v4 dự kiến — cần quyết định đề bạt thẳng
-   nó làm mốc báo cáo (khuyến nghị, không tốn GPU) hay train lại dưới tên `v4` riêng.
-2. **`long_event`: còn ba hướng, `--time-pool-blocks` giờ đã đủ điều kiện chạy.** Bốn giả
-   thuyết đã bị loại (cửa sổ hẹp, trần thấp, khe hở năng lượng, trùng lát cắt khó), và mục
-   0 vừa xác nhận cả hai chẩn đoán còn lại (phân mảnh, lệch biên) vững qua phép kiểm θ\*.
-   Hướng còn lại: (a) nghe trực tiếp clip vỡ nhiều nhất — cần tai người; (b) trường tiếp
-   nhận thời gian của CNN14 ngắn hơn sự kiện 4s — kiểm bằng ablation
-   `--time-pool-blocks` ∈ {3,2} trên nền `--pos-weight-max 1.0`, tốn ~2 giờ GPU/lượt; (c)
-   BCE theo khung không phạt phân mảnh — phải đổi loss rồi train lại, chưa làm.
-3. **`--resume` vẫn CHƯA được kiểm bằng thực tế.** Runner qua đêm 21→22/09 có watchdog gọi
-   `--resume` khi train chết, nhưng cả ba lượt chạy trót lọt nên nhánh đó không lần nào
-   được thực thi. Món nợ còn nguyên.
+0. ✅ **`long_event` ĐÓNG HƯỚNG, chuẩn báo cáo đổi — XONG 22/09.** Ablation
+   `--time-pool-blocks` (ứng viên thứ sáu) bị bác bỏ: `tpb2` (tpb=2) không vỡ ít hơn
+   `pw1` (tpb=3) ở bất kỳ chế độ hậu xử lý nào, thua thuần về F1. Điều tra kèm theo cho
+   một phát hiện quan trọng hơn cả ablation: ở chế độ hậu xử lý **thích ứng-từ-train**
+   (không rò rỉ, nhất quán theo thời gian thật — thay cho cửa sổ cố định 7 khung), hai
+   model có tỉ lệ vỡ `long_event` gần bằng nhau (0,2469 vs 0,2540) nhưng F1 vẫn chênh 15%
+   → **tỉ lệ phân mảnh không nắm được phần chính của vấn đề `long_event`**. Quyết định:
+   dừng đào sâu hướng này (sáu giả thuyết đã kiểm và loại, đủ cho một chương phân tích
+   lỗi), và **chuyển mốc báo cáo sang chế độ thích ứng-từ-train** cho mọi run (`pw1` F1@θ\*
+   0,4333→**0,4682**, không phải rò rỉ vì suy từ thống kê train). Bảy run đã chấm lại đồng
+   nhất. Chi tiết:
+   [chuan_bao_cao_20260922.md](docs/measurements/chuan_bao_cao_20260922.md) ·
+   [long_event_dong_huong_20260922.md](docs/measurements/long_event_dong_huong_20260922.md) ·
+   [time_pool_ket_luan_20260922.md](docs/measurements/time_pool_ket_luan_20260922.md).
+1. **Bắt đầu W4 — hạ tầng metric hallucination (đóng góp C2).** Không bị chặn bởi gold vì
+   G2 chỉ cần khi chấm thật. `ml/evaluation/hallucination.py` +
+   `ml/configs/event_lexicon.yaml` đã có (EHR/EOR/GS/TOA/CHR, 23 test) — **CHƯA kiểm định
+   thủ công trên 100 caption** (điều kiện cần của C2, SYSTEM.md §8.2), việc tiếp theo là
+   sinh caption B0 trên dev và chấm thử end-to-end.
+2. **`--resume` vẫn CHƯA được kiểm bằng thực tế.** Runner qua đêm 21→22/09 có watchdog gọi
+   `--resume` khi train chết, nhưng chưa lượt nào chết thật nên nhánh đó chưa lần nào được
+   thực thi. Món nợ còn nguyên.
+3. **Pilot gold vòng 3 cần ~60 clip MỚI, thiên về 6 lớp hiếm** (door_slam, fireworks,
+   scream, siren, explosion, vehicle_crash) — cổng §8.5 trượt 0,7339/0,75 ở pilot chỉ 52 sự
+   kiện, sai số chuẩn ≈0,06 nên không phân biệt được với ngưỡng. 👤, không AI thay được.
 4. ✅ **Gold pilot 30 clip (DATA_PLAN §8.3 bước 1) — XONG 22/09.** 30/30 gán được, sau
    **16 file loại / 46 lượt nghe = tỉ lệ thất bại 34,8%** (7 game/phim
    `synthetic_or_game_audio`, 6 rác/không liên quan `unusable`, 3 nhạc nền

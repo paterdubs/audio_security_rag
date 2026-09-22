@@ -19,7 +19,7 @@ Các tuần là lịch dự kiến; làm sớm một phần không đồng nghĩ
 | **W1** | 15–21/09/2026 | Nền tảng + Walking Skeleton | 🔄 skeleton + evaluation_protocol có; CI/DVC/ADR-0001…0004 còn thiếu | ☐ |
 | **W2** | 22–28/09/2026 | Dữ liệu + Scaper + Precompute | 🔄 làm sớm; lô mới PASS QA + waveform PANNs, real dev/gold chưa có | ☐ |
 | **W3** | 29/09–05/10 | 4 Gold set + SED baseline | 🔄 PANNs v1/v2/v3 xong + đã chấm lại cùng giao thức có quét ngưỡng; gold chưa có, baseline BEATs–Conformer chưa làm | ☐ |
-| **W4** | 06–12/10 | AAC baseline B1 + hạ tầng metric | 🔜 | ☐ |
+| **W4** | 06–12/10 | AAC baseline B1 + hạ tầng metric | 🔄 làm sớm 22/09; bộ metric hallucination (EHR/EOR/GS/TOA/CHR) có, chưa kiểm định thủ công; B1 chưa bắt đầu | ☐ |
 | **W5** | 13–19/10 | **Grounded AAC (P)** — đóng góp chính | 🔜 | ☐ |
 | **W6** | 20–26/10 | Ablation + báo cáo theo slice | 🔜 | ☐ |
 | **W7** | 27/10–02/11 | Streaming + RAG + Dashboard | 🔄 dashboard/RAG template đã có; streaming còn kế hoạch | ☐ |
@@ -153,10 +153,10 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 | ☐ | Tích hợp BART-base decoder + cross-attention lên trunk | 🤖 | |
 | ☐ | Huấn luyện **B1** (chỉ NLL) trên Clotho/AudioCaps → fine-tune trên security data | 🤖 | |
 | ☐ | Tích hợp `aac-metrics`: BLEU/METEOR/ROUGE-L/CIDEr/SPICE/SPIDEr/FENSE | 🤖 | |
-| ☐ | Xây **`EVENT_LEXICON`** cho 16 class (EN), có xử lý phủ định + biến thể | 👥 | |
-| ☐ | Cài **EHR / EOR / GS / TOA / CHR** | 🤖 | SYSTEM.md §8.2 |
-| ☐ | 🔬 **Kiểm định bộ trích $P$ thủ công trên 100 caption**, báo cáo độ chính xác của chính bộ trích | 👤 | **Điều kiện cần để C2 được chấp nhận** |
-| ☐ | Cài **B0** (structured captioner từ timeline SED + template + LLM viết lại) | 🤖 | Cận trên grounding |
+| ☑ | Xây **`EVENT_LEXICON`** cho 16 class (EN+VI), có xử lý phủ định + biến thể | 👥 | **22/09 xong sớm** — `ml/configs/event_lexicon.yaml` (16 lớp/160 cụm), NegEx rút gọn cho phủ định, khớp biên từ. Nhận ra 16/16 cụm mà captioner B0 sinh (test bất biến). Chưa xử lý biến thể hình thái ngoài các dạng liệt kê tường minh |
+| ☑ | Cài **EHR / EOR / GS / TOA / CHR** | 🤖 | **22/09 xong sớm** — `ml/evaluation/hallucination.py`, 23 test TDD. Mọi metric trả `None` khi mẫu số 0 (không trả 0) — xem `evaluation_protocol.md` §4 |
+| ☐ | 🔬 **Kiểm định bộ trích $P$ thủ công trên 100 caption**, báo cáo độ chính xác của chính bộ trích | 👤 | **Điều kiện cần để C2 được chấp nhận — CHƯA LÀM.** Cờ `meta.da_kiem_dinh_thu_cong=false` trong YAML |
+| ☐ | Cài **B0** (structured captioner từ timeline SED + template + LLM viết lại) | 🤖 | Cận trên grounding. Template EN/VI đã có ở `services/inference/app/captioner.py` — chưa nối vào pipeline chấm G2 |
 | ☐ | Pipeline dịch EN→VI với glossary 16 class cố định | 🤖 | SYSTEM.md §7.4 |
 | ☐ | Đo B0, B1 trên G2 với đủ metric + bảng theo slice | 🤖 | |
 
@@ -319,6 +319,7 @@ Khi một tuần không đạt nghiệm thu, cắt theo **đúng thứ tự này
 | ☑ | Nâng cổng hợp đồng dữ liệu từ CẢNH BÁO lên CHẶN trong `train_sed.py` | Trước train mới | **21/09 xong** — `kiem_cong_hop_dong()` chặn cả `FAILED` lẫn `KHONG_RO`; `--force-du-lieu-chua-dat` bỏ qua được, ghi vào `manifest.json`. |
 | ☑ | Sửa `PrecomputedSedDataset` pickle nguyên memmap sang worker DataLoader | Trước train mới | Đo: pickle dev **921,8 MB → 0,159 MB**. v1/v2/v3 đều train ở `--workers 2` nên đều đã trả giá này; triệu chứng là crash không đều. |
 | ☑ | Đo hiệu chuẩn xác suất + ablation `pos_weight` | W3 | **19/09: ECE + reliability diagram xong** (`ml/evaluation/calibration.py`) — vùng 0,4–0,6 mang hơn nửa triệu khung mà tỉ lệ dương thật chỉ 1,7–3%. **22/09: ablation ba mức XONG, giả thuyết XÁC NHẬN** — `pos_weight` 30→10→1 cho ECE 0,3308→0,2033→**0,0231**, θ* 0,90→0,80→**0,35**, event-F1@θ* 0,4018→0,4192→**0,4333**; đơn điệu tuyệt đối, **không đánh đổi**. `pw30` tái hiện `v3` trong 0,7%. Số đo: `measurements/pos_weight_ket_luan_20260922.md`. |
+| ☑ | Ablation `--time-pool-blocks` (giả thuyết trường tiếp nhận thời gian của `long_event`) | W3 | **22/09 XONG — ứng viên thứ sáu bị loại.** `tpb2` (tpb=2) không vỡ ít hơn `pw1` (tpb=3) ở `long_event`, thua thuần F1 cả hai chế độ hậu xử lý. Phát hiện phụ quan trọng hơn: ở chế độ thích ứng-từ-train, hai model tỉ lệ vỡ gần bằng nhau nhưng F1 vẫn chênh 15% → **tỉ lệ phân mảnh không giải thích được F1 của `long_event`**. Quyết định: **đóng hướng `long_event`** (sáu giả thuyết đã loại) và **chuyển chuẩn báo cáo sang hậu xử lý thích ứng-từ-train** cho mọi run. Số đo: `measurements/time_pool_ket_luan_20260922.md` · `measurements/long_event_dong_huong_20260922.md` · `measurements/chuan_bao_cao_20260922.md`. |
 | ◐ | Bảo vệ checkpoint/raw lớn khỏi Git và thiết lập DVC | W1–W2 | Weight/checkpoint/cache/secret đã ignore; JAMS legacy theo dõi có chủ đích. DVC pipeline/remote vẫn chưa có. |
 
 ---

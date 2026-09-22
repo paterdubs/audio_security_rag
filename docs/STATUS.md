@@ -113,6 +113,34 @@
   nhãn, vì người gán nghe mù gán lại từ đầu). Phải vào phần Hạn chế.
   **Push:** `c5688d7..cae4f9f`, 42 commit của 19–22/09 trước đó chỉ tồn tại trên một máy.
   Kiểm an toàn trước khi đẩy: 0 file audio được theo dõi, không file bí mật.
+- 🟢 **22/09 (tiếp 4) — ablation `time_pool_blocks`: ứng viên thứ sáu của `long_event`
+  bị loại, HƯỚNG NÀY ĐÓNG; chuẩn báo cáo đổi sang hậu xử lý thích ứng-từ-train.**
+  `panns_ft_tpb2` (time_pool_blocks=2, đối chứng `panns_ft_pw1` tpb=3, cùng
+  `--pos-weight-max 1.0`) không vỡ ít hơn ở `long_event` dù đo bằng chế độ nào, thua thuần
+  về F1 — giả thuyết trường tiếp nhận thời gian ngắn bị bác bỏ. Phát hiện quan trọng hơn
+  ablation: ở chế độ thích ứng-từ-train (không rò rỉ, nhất quán theo thời gian thật), hai
+  model có tỉ lệ vỡ `long_event` gần bằng nhau (0,2469 vs 0,2540) nhưng F1 vẫn chênh 15% →
+  **tỉ lệ phân mảnh không nắm được phần chính của vấn đề `long_event`**. Quyết định: (a)
+  dừng đào sâu `long_event` — sáu giả thuyết đã kiểm và loại, đủ cho một chương phân tích
+  lỗi trung thực, chi phí tiếp theo không cân xứng khi W4/W5 chưa bắt đầu; (b) chuyển mốc
+  báo cáo sang chấm thích ứng-từ-train cho mọi run — không rò rỉ (suy từ thống kê tập
+  train, không đụng nhãn tập đang chấm), cải thiện đo được trên `pw1`: F1@θ\* 0,4333→
+  **0,4682**, F1 `long_event` 0,3182→**0,3602**. Bảy run (`v1`–`v3`, `pw1`/`pw10`/`pw30`,
+  `tpb2`) đã chấm lại đồng nhất, bảng đầy đủ ở `measurements/chuan_bao_cao_20260922.md`.
+  Một khẳng định sai về nguyên nhân nhiễu đã rút lại ngay khi phát hiện (không ảnh hưởng
+  kết luận, xem trang đó §4). Chi tiết:
+  [measurements/time_pool_ket_luan_20260922.md](measurements/time_pool_ket_luan_20260922.md) ·
+  [measurements/long_event_dong_huong_20260922.md](measurements/long_event_dong_huong_20260922.md) ·
+  [measurements/chuan_bao_cao_20260922.md](measurements/chuan_bao_cao_20260922.md).
+- 🟢 **22/09 (tiếp 5) — W4 bắt đầu: bộ metric hallucination (EHR/EOR/GS/TOA/CHR, đóng góp
+  C2) có hạ tầng đầu tiên.** `ml/evaluation/hallucination.py` + `ml/configs/event_lexicon.yaml`
+  (16 lớp / 160 cụm EN+VI, danh sách phủ định NegEx rút gọn), 23 test. Không bị chặn bởi
+  gold vì G2 chỉ cần lúc chấm thật trên caption gold. Hai lỗi thật bắt được lúc viết test:
+  YAML 1.1 đọc `no` không nháy thành boolean `False` (mất từ phủ định phổ biến nhất tiếng
+  Anh); lexicon phải nhận ra mọi cụm từ mà captioner B0 sinh ra, nếu không EHR của B0 —
+  cận trên grounding lý thuyết — sẽ dương vô lý. **CHƯA kiểm định thủ công trên 100
+  caption** (điều kiện cần của C2, SYSTEM.md §8.2) — cờ `meta.da_kiem_dinh_thu_cong=false`
+  ghi rõ trong YAML.
 - 🟢 **22/09 (tiếp 2) — rò rỉ nguồn: 5/5 cổng ĐẠT; và lần đầu có SỐ cho "dev thiên vị
   theo thiết kế".** `scripts/check_leakage.py` đã có từ trước với 3 kiểm tra trên
   `splits.csv` nhưng **không có test nào**; thêm kiểm tra 4–5 soi **đầu ra thật** (đọc cả
@@ -409,9 +437,9 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **737 test đạt** (22/09; 700 → 703 sau `ti_le_cap_nham`, → 710 sau runner ablation
+- **760 test đạt** (22/09; 700 → 703 sau `ti_le_cap_nham`, → 710 sau runner ablation
   `pos_weight`, → 720 sau runner ablation `time_pool_blocks`, → 737 sau khi phủ test cho
-  `check_leakage.py`),
+  `check_leakage.py`, → 760 sau bộ metric hallucination),
   chạy đầy đủ `pytest tests/` sau khi thêm 30
   test cho Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép
   ghép cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo

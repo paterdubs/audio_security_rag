@@ -430,6 +430,38 @@ chứng minh verifier từng bắt được lỗi thật.
     trong `docs/measurements/low_snr_co_che_20260921.md` §6, chi tiết đầy đủ ở
     `docs/measurements/phan_tich_lai_tren_pw1_20260922.md`. Không có code/test mới.
 
+12. ✅ **Ablation `time_pool_blocks` XONG, `long_event` ĐÓNG HƯỚNG, chuẩn báo cáo đổi —
+    22/09.** `panns_ft_tpb2` (time_pool_blocks=2, đối chứng `panns_ft_pw1` tpb=3, cùng
+    `--pos-weight-max 1.0`) qua `scripts/chay_ablation_time_pool.py` — giả thuyết trường
+    tiếp nhận thời gian ngắn là nguyên nhân của `long_event` **bị bác bỏ**: `tpb2` không
+    vỡ ít hơn ở bất kỳ chế độ hậu xử lý nào, thua thuần về F1@θ\* (0,4333→0,3466 cửa sổ cố
+    định; 0,4682→0,4113 thích ứng-từ-train).
+
+    Phát hiện phụ quan trọng hơn ablation: đo lại ở chế độ hậu xử lý **thích ứng-từ-train**
+    (`error_analysis.py --adaptive-postproc --adaptive-source train` — suy cửa sổ lọc từ
+    thống kê độ dài sự kiện của tập train, không rò rỉ vì không đụng nhãn tập đang chấm),
+    `pw1` và `tpb2` có tỉ lệ vỡ `long_event` gần bằng nhau (0,2469 vs 0,2540) nhưng F1 vẫn
+    chênh 15% tương đối. **Tỉ lệ phân mảnh — chỉ tiêu dùng suốt một tuần để đo mức độ hỏng
+    của `long_event` — không nắm được phần chính của vấn đề.**
+
+    Hai quyết định: (a) **đóng hướng điều tra `long_event`** — sáu giả thuyết đã kiểm và
+    loại có hệ thống (cửa sổ lọc · trần cửa sổ · khe hở năng lượng · trùng lát cắt · cơ
+    chế Deletion/lệch biên · trường tiếp nhận thời gian), đủ cho một chương phân tích lỗi
+    trung thực; chi phí tiếp tục (đã tốn ~4,5 giờ GPU riêng ablation này, một phần dưới
+    điều kiện GPU bị thảo nhiệt chặn 210/2100 MHz) không cân xứng khi W4/W5 — đóng góp
+    chính — chưa bắt đầu; (b) **chuyển mốc báo cáo sang chấm thích ứng-từ-train** cho mọi
+    run — cải thiện đo được trên `pw1` (F1@θ\* +8%, F1 `long_event` +13%), không rò rỉ.
+    Bảy run (`v1`–`v3`, `pw1`/`pw10`/`pw30`, `tpb2`) đã chấm lại đồng nhất
+    (`analysis_adaptive_train.json` song song với `analysis.json` cũ, không xoá bản cũ).
+
+    Một khẳng định sai về nguyên nhân nhiễu (cửa sổ lọc 560ms vs 280ms) đã rút lại ngay
+    khi kiểm `predictions/dev_all.npz` cho thấy lọc chạy sau khi nội suy lên cùng
+    `n_frames=1001` cho cả hai run — không đổi kết luận, chỉ đổi lý do đưa ra ban đầu.
+
+    Số đo: `docs/measurements/time_pool_ket_luan_20260922.md` ·
+    `docs/measurements/long_event_dong_huong_20260922.md` ·
+    `docs/measurements/chuan_bao_cao_20260922.md`.
+
 9. ✅ **Hạ tầng ablation `pos_weight` + bộ gán mù lần 2 — xong 21–22/09.**
    `train_sed.py` thêm `--pos-weight-max` (mặc định vẫn 30,0, hành vi cũ không đổi) —
    **chưa chạy lượt train nào với cờ này**, vẫn còn nguyên là việc phải làm để xác nhận
