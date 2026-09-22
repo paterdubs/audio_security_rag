@@ -16,7 +16,7 @@ Các tuần là lịch dự kiến; làm sớm một phần không đồng nghĩ
 
 | Tuần | Khoảng ngày | Chủ đề | Trạng thái | Nghiệm thu |
 |---|---|---|---|---|
-| **W1** | 15–21/09/2026 | Nền tảng + Walking Skeleton | 🔄 skeleton có; CI/DVC/protocol còn thiếu | ☐ |
+| **W1** | 15–21/09/2026 | Nền tảng + Walking Skeleton | 🔄 skeleton + evaluation_protocol có; CI/DVC/ADR-0001…0004 còn thiếu | ☐ |
 | **W2** | 22–28/09/2026 | Dữ liệu + Scaper + Precompute | 🔄 làm sớm; lô mới PASS QA + waveform PANNs, real dev/gold chưa có | ☐ |
 | **W3** | 29/09–05/10 | 4 Gold set + SED baseline | 🔄 PANNs v1/v2/v3 xong + đã chấm lại cùng giao thức có quét ngưỡng; gold chưa có, baseline BEATs–Conformer chưa làm | ☐ |
 | **W4** | 06–12/10 | AAC baseline B1 + hạ tầng metric | 🔜 | ☐ |
@@ -58,7 +58,7 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 | ☑ | `git init`, `.gitignore`, `README.md`, cấu trúc thư mục | 🤖 | `master`; base lịch sử `70ab498`, snapshot đầy đủ chuẩn bị publish 18/09 |
 | ☑ | Viết `docs/taxonomy.md` — 16 class, mỗi class có bao gồm/loại trừ + 3 ví dụ | 👥 | Đã có, kiểm tra với ontology |
 | ☑ | Viết `docs/annotation_guideline.md` | 👥 | Đã có; pilot/đóng băng chưa xong |
-| ☐ | Viết `docs/evaluation_protocol.md` | 🤖 | SYSTEM.md §8 |
+| ☑ | Viết `docs/evaluation_protocol.md` | 🤖 | **22/09 xong.** Cố ý KHÔNG lặp lại định nghĩa metric của SYSTEM.md §8 (một nguồn chân lý), mà gom **giao thức**: ba tập trả lời ba câu khác nhau · θ\* chọn trên tập đang chấm = chặn trên lạc quan · `bien` là chia lại rổ D+I · "chưa đo" ≠ 0 · khi nào hai run so được · hai thứ tuyệt đối không so · sức mạnh thống kê của cổng pilot · §11 liệt kê thứ bộ đánh giá CHƯA làm được |
 | ☑ | `docker-compose.yml`: db(pgvector) + redis + mlflow + api + inference + frontend | 🤖 | 6 service healthy trên máy hiện tại; chưa kiểm máy trắng |
 | ☐ | Khởi tạo DVC + remote local | 🤖 | |
 | ☑ | Schema DB + migration (Alembic) | 🤖 | Có và đã chạy trong Docker |

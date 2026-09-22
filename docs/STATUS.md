@@ -99,6 +99,20 @@
   chỉ còn xuất hiện khi kéo `v3` vào so. Phép đo ở
   [measurements/pos_weight_ket_luan_20260922.md](measurements/pos_weight_ket_luan_20260922.md),
   số thô ở [measurements/pos_weight_ablation_20260921.md](measurements/pos_weight_ablation_20260921.md).
+- 🟢 **22/09 (tiếp 3) — `docs/evaluation_protocol.md` XONG, và 42 commit đã được push.**
+  Tài liệu W1 còn thiếu từ đầu dự án. Cố ý **không** lặp lại định nghĩa metric của
+  `SYSTEM.md §8` (giữ một nguồn chân lý) mà gom **giao thức** — phần trước nay nằm rải rác
+  ở 20 file `docs/measurements/` và sẽ mất nếu không gom: ba tập trả lời ba câu khác nhau ·
+  θ\* chọn trên chính tập đang chấm nên mọi `f1_sao` là chặn trên lạc quan · `bien` là phép
+  chia lại rổ Deletion+Insertion chứ không phải loại lỗi thứ bảy · "chưa đo" ≠ 0 · điều kiện
+  để hai run so được (`giong`/`khac`/`KHONG_RO`) · hai thứ tuyệt đối không so (`v1`, và cột
+  thời gian giữa các run khác điều kiện nhiệt) · lát cắt chồng lấn nhau nên hàng đơn lẻ
+  không tách được nguyên nhân · §11 liệt kê thẳng những gì bộ đánh giá **chưa** làm được.
+  Ghi thêm một phát hiện chưa nằm ở đâu: **backbone PANNs CNN14 tiền huấn luyện trên
+  AudioSet, mà `gold_test` cũng là AudioSet-strong** → rò rỉ biểu diễn (không phải rò rỉ
+  nhãn, vì người gán nghe mù gán lại từ đầu). Phải vào phần Hạn chế.
+  **Push:** `c5688d7..cae4f9f`, 42 commit của 19–22/09 trước đó chỉ tồn tại trên một máy.
+  Kiểm an toàn trước khi đẩy: 0 file audio được theo dõi, không file bí mật.
 - 🟢 **22/09 (tiếp 2) — rò rỉ nguồn: 5/5 cổng ĐẠT; và lần đầu có SỐ cho "dev thiên vị
   theo thiết kế".** `scripts/check_leakage.py` đã có từ trước với 3 kiểm tra trên
   `splits.csv` nhưng **không có test nào**; thêm kiểm tra 4–5 soi **đầu ra thật** (đọc cả

@@ -31,7 +31,7 @@ Hệ thống nghe luồng âm thanh liên tục → phát hiện sự kiện có
 | `docs/DATA_PLAN.md` | *Chuẩn bị dữ liệu thế nào?* (10 ngày, quy trình gán nhãn có máy hỗ trợ) | **Suốt W2–W3** |
 | `docs/taxonomy.md` | 16 class, định nghĩa bao gồm/loại trừ | Khi làm việc với nhãn |
 | `docs/annotation_guideline.md` | Quy ước gán nhãn | Khi gán nhãn |
-| `docs/evaluation_protocol.md` (chưa có) | Metric và cách đo dự kiến | Tạm xem SYSTEM.md §8 |
+| `docs/evaluation_protocol.md` | *Chạy đánh giá thế nào để số có nghĩa* — và số đó KHÔNG được nói gì | Trước khi báo cáo bất kỳ con số nào |
 | `docs/STATUS.md` | Snapshot đã đối soát, bằng chứng, giới hạn | Khi cần số liệu hiện hành |
 | `docs/TRAINING_OPS_PLAN.md` | Tracking, kiểm tra dữ liệu, phân tích lỗi | Trước lần train mới |
 | `docs/RELATED_WORK_2026.md` | Đối chiếu văn liệu và mức xác minh | Khi viết chương 2 |
