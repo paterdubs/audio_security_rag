@@ -146,7 +146,9 @@ không phải trạng thái hiện hành.
   `manifest.json`. `checkpoint_resume.pt` ghi đè mỗi epoch (tách khỏi `best.pt` — không đổi
   schema mà `predictions.py`/`eval_sed.py` phụ thuộc); `--resume` khôi phục RNG nên dãy số
   ngẫu nhiên tiếp theo giống hệt như chưa hề dừng.
-- **710 test đạt** (22/09, `pytest tests/` exit 0). Mốc trước thay đổi là 703.
+- **737 test đạt** (22/09, `pytest tests/` exit 0): 710 → 720 sau runner ablation
+  `time_pool_blocks`, → 737 sau khi phủ test cho `check_leakage.py` (cổng CHẶN này
+  trước đó **không có test nào**). Mốc trước thay đổi là 710.
   Từ 649: pilot gold lần 1 (30/30), bộ gán mù lần 2 (`make_blind_set.py`, đã chạy thật),
   `agreement.py` (**đã chạy thật 22/09** — vá lỗi đuôi `.wav`, thêm `chi_tiet_bat_dong()`,
   xem "Đang làm" bên dưới), `--pos-weight-max`.

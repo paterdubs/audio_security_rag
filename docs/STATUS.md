@@ -99,6 +99,21 @@
   chỉ còn xuất hiện khi kéo `v3` vào so. Phép đo ở
   [measurements/pos_weight_ket_luan_20260922.md](measurements/pos_weight_ket_luan_20260922.md),
   số thô ở [measurements/pos_weight_ablation_20260921.md](measurements/pos_weight_ablation_20260921.md).
+- 🟢 **22/09 (tiếp 2) — rò rỉ nguồn: 5/5 cổng ĐẠT; và lần đầu có SỐ cho "dev thiên vị
+  theo thiết kế".** `scripts/check_leakage.py` đã có từ trước với 3 kiểm tra trên
+  `splits.csv` nhưng **không có test nào**; thêm kiểm tra 4–5 soi **đầu ra thật** (đọc cả
+  9.360 JAMS đã sinh, đối chiếu từng `source_file` Scaper thực sự dùng với bank được
+  phép) + 17 test. Kết quả: **không clip `gold_test`/`dev` nào lọt vào nguyên liệu
+  synthetic**; 0/2.215 nhóm nguồn nằm ở hai tập; không audio trùng SHA-256 xuyên tập.
+  Số phải khai báo (**không phải lỗi** — train và dev cố ý sinh từ cùng bank):
+  **0,9433** số nguồn foreground của dev cũng có trong train, và **1.284/1.440 clip dev
+  (0,8917)** có ít nhất một nguồn foreground từng dùng trong train. Nghĩa là dev đo khả
+  năng khái quát sang *tổ hợp mới của nguồn đã nghe*, **không** phải sang *nguồn chưa
+  từng nghe* — số này phải vào phần Hạn chế của khoá luận. Phép so giữa các run vẫn hợp
+  lệ vì thiên vị ngang nhau. Còn bỏ ngỏ: **156 clip dev** có toàn bộ nguồn foreground
+  chưa từng vào train — proxy duy nhất hiện có cho "nguồn chưa nghe", chấm lại rất rẻ,
+  chưa làm. Xem
+  [measurements/leakage_check_20260922.md](measurements/leakage_check_20260922.md).
 - 🟢 **22/09 (tiếp) — kiểm lại `long_event`/`low_snr` trên θ\* hợp lý (`pw1`), một trong
   hai chẩn đoán bị phóng đại.** Hai chẩn đoán dưới đo trên `v3` @θ\*=0,90 — ngưỡng cắt sát
   trần. Đo lại trên `pw1` @θ\*=0,35: tỉ lệ phân mảnh `long_event` **giữ nguyên** ở mọi ô
@@ -380,7 +395,9 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **710 test đạt** (22/09; 700 → 703 sau `ti_le_cap_nham`, → 710 sau runner ablation),
+- **737 test đạt** (22/09; 700 → 703 sau `ti_le_cap_nham`, → 710 sau runner ablation
+  `pos_weight`, → 720 sau runner ablation `time_pool_blocks`, → 737 sau khi phủ test cho
+  `check_leakage.py`),
   chạy đầy đủ `pytest tests/` sau khi thêm 30
   test cho Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép
   ghép cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo

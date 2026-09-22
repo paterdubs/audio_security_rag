@@ -94,7 +94,7 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 | ☑ | **QUYẾT ĐỊNH:** class nào thiếu dữ liệu → gộp / loại khỏi macro-F1 / bù bằng tổng hợp | 👤 | ADR-0005 giữ shout_yell 56/80 và vẫn tính macro-F1 |
 | ☑ | Pipeline Scaper: sinh soundscape 10s, tham số hoá SNR/overlap/RIR/thứ tự | 🤖 | Lô B0–B9 có source theo clip, duration đích, overlap ép, long_event 4s có giới hạn lớp, mô phỏng nhãn + seed theo clip. TSV chuẩn DCASE chưa xuất. |
 | ☑ | Sinh train 15–25h + dev, đảm bảo tỉ lệ slice: overlap ~30%, low-SNR ~25%, reverb ~40%, chain ~15% | 🤖 | Lô mới 22h train + 4h dev PASS `verify_synthetic`; xem STATUS §7. Không thay thế real dev/gold. |
-| ☐ | `scripts/check_leakage.py` + đưa vào CI | 🤖 | Chia theo `source_id`, không theo clip |
+| ◐ | `scripts/check_leakage.py` + đưa vào CI | 🤖 | Chia theo `source_id`, không theo clip. **Ô này từng ghi ☐ SAI** — script đã có từ `810be49` với 3 kiểm tra trên `splits.csv`. **22/09: thêm kiểm tra 4–5** (soi ĐẦU RA thật, tức 9.360 JAMS đã sinh, không chỉ soi bảng chia tập) + 17 test (trước đó cổng này **không có test nào**). **5/5 cổng ĐẠT.** Còn thiếu: đưa vào CI — dự án chưa có CI. Xem `measurements/leakage_check_20260922.md` |
 | ☐ | **Precompute đặc trưng BEATs → `.npy`** cho toàn bộ train/dev | 🤖 | Chưa làm. Hiện chỉ có waveform PANNs 32 kHz train/dev cho baseline; không gọi nhầm là feature BEATs. |
 | ☐ | Dựng Label Studio + import test set + **pilot 30 clip** | 👥 | |
 | ◐ | Pilot 30 clip, **nghỉ ≥3 ngày rồi gán lại mù** → tính tự-nhất-quán → **sửa guideline** → mới gán đại trà | 👤 | **22/09: lần 1+2+nghe lại lần ba đều XONG** — cổng tự-nhất-quán §8.5 **CHƯA ĐẠT** (event-F1 0,7339 < 0,75); guideline đã sửa theo phát hiện (mẫu hình speech nền dưới applause). Cần một vòng pilot mới trước khi gán đại trà — xem `decision_log.md` |
@@ -103,7 +103,7 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 ### Nghiệm thu W2
 - [ ] `docs/data_inventory.md` sinh tự động, mọi class có nguồn xác định
 - [ ] Train ≥ 15h synthetic, đủ 8 slice có mặt
-- [ ] `check_leakage.py` xanh
+- [x] `check_leakage.py` xanh — **22/09: 5/5 cổng ĐẠT** (3 cổng cũ trên `splits.csv` + 2 cổng mới soi JAMS đã sinh). Chưa vào CI vì chưa có CI
 - [ ] Feature BEATs đã precompute xong
 - [ ] Pilot 30 clip xong, guideline đã sửa, gán đại trà đang chạy
 
