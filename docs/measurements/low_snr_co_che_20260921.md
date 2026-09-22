@@ -117,3 +117,15 @@ trúc nhầm không đổi. Câu đúng là **Deletion trên sự kiện thườ
   SNR thấp có thể lấy lại phần đó. Nhưng chọn θ theo lát cắt của **chính tập đang chấm** là
   rò rỉ, nên chỉ làm được nếu suy θ từ một đại lượng đo được lúc suy luận (ví dụ SNR ước
   lượng), không phải từ nhãn lát cắt.
+
+## 6. Hiệu chỉnh thứ hai — 22/09, sau khi đo lại trên θ\* hợp lý hơn
+
+Toàn bộ trang này đo trên `v2`/`v3` ở θ\*=0,90 — một ngưỡng cắt sát trần. Đo lại trên `pw1`
+(θ\*=0,35, xem [pos_weight_ket_luan_20260922.md](pos_weight_ket_luan_20260922.md)) cho thấy câu
+ở §3 *"model vẫn nghe ra sự kiện... `thiếu` gần như không đóng góp"* trên nhánh `long_event` là
+**phóng đại**: tỉ trọng `thiếu` trong phần `dung` mất đi tăng từ 10,2% (v3, θ\*=0,90) lên 32,1%
+(pw1, θ\*=0,35) — gấp ba. `biên` vẫn là thành phần lớn hơn (50,3% vs 32,1%) nên **hướng kết
+luận không đổi** (lệch biên vẫn trội hơn Deletion trên sự kiện dài), nhưng "gần như không đóng
+góp" phải đọc thành "vẫn nhỏ hơn, không còn là không đáng kể". Chi tiết đầy đủ, kèm nhánh
+`khac` tái hiện gần như nguyên vẹn (không cần sửa):
+[phan_tich_lai_tren_pw1_20260922.md](phan_tich_lai_tren_pw1_20260922.md).

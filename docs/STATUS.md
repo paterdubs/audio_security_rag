@@ -99,6 +99,16 @@
   chỉ còn xuất hiện khi kéo `v3` vào so. Phép đo ở
   [measurements/pos_weight_ket_luan_20260922.md](measurements/pos_weight_ket_luan_20260922.md),
   số thô ở [measurements/pos_weight_ablation_20260921.md](measurements/pos_weight_ablation_20260921.md).
+- 🟢 **22/09 (tiếp) — kiểm lại `long_event`/`low_snr` trên θ\* hợp lý (`pw1`), một trong
+  hai chẩn đoán bị phóng đại.** Hai chẩn đoán dưới đo trên `v3` @θ\*=0,90 — ngưỡng cắt sát
+  trần. Đo lại trên `pw1` @θ\*=0,35: tỉ lệ phân mảnh `long_event` **giữ nguyên** ở mọi ô
+  (không phải hệ quả của θ\* cực đoan); cơ chế Deletion trên sự kiện thường **giữ nguyên**
+  (tỉ trọng 50,6%→52,2%). Nhưng câu "lệch biên chiếm 61–72%, Deletion gần như không đóng
+  góp" trên `long_event` **bị phóng đại**: tỉ trọng Deletion tăng gấp ba (10,2%→32,1%) ở
+  θ\* hợp lý hơn — lệch biên vẫn trội hơn (50,3%) nhưng không còn áp đảo. Đính chính ở
+  [measurements/low_snr_co_che_20260921.md](measurements/low_snr_co_che_20260921.md) §6,
+  đầy đủ ở
+  [measurements/phan_tich_lai_tren_pw1_20260922.md](measurements/phan_tich_lai_tren_pw1_20260922.md).
 - 🔴 **21/09 (tiếp) — `low_snr` hỏng bằng HAI cơ chế khác nhau tuỳ độ dài sự kiện.**
   Bảng 6 loại lỗi theo ô 2×2, tái hiện trên **cả `v2` lẫn `v3`**: nhánh sự kiện thường →
   **Deletion** (`thieu` hứng 51–60% phần `dung` mất đi, `thua` không tăng); nhánh

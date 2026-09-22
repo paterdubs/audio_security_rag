@@ -418,6 +418,18 @@ chứng minh verifier từng bắt được lỗi thật.
     ⚠️ **`--resume` vẫn chưa được kiểm bằng thực tế** — cả ba lượt chạy trót lọt nên nhánh
     watchdog không lần nào được thực thi.
 
+11. ✅ **Kiểm lại hai chẩn đoán `long_event`/`low_snr` trên θ\* của `pw1` — 22/09.** Cả hai
+    chẩn đoán đo trên `v3` @θ\*=0,90 — ngưỡng cắt sát trần, nên đáng nghi bị phóng đại.
+    Chạy lại `ml/evaluation/long_event_crosscut.py --run panns_ft_pw1` (10 s, không train
+    lại): tỉ lệ phân mảnh `long_event` **giữ nguyên** ở mọi ô đối chiếu (chênh lệch với
+    `khac` vẫn 0,09–0,17, so với 0,11–0,20 ở `v3`) — không phải hệ quả của θ\* cực đoan.
+    Cơ chế Deletion trên sự kiện thường **giữ nguyên** (tỉ trọng 50,6%→52,2%). Nhưng câu đã
+    ghi "lệch biên chiếm 61–72%, Deletion gần như không đóng góp" trên `long_event` **bị
+    phóng đại**: tỉ trọng Deletion trong phần `dung` mất đi tăng gấp ba (10,2%→32,1%) khi
+    θ\* hợp lý hơn — lệch biên vẫn trội hơn (50,3%) nhưng không còn áp đảo. Đã đính chính
+    trong `docs/measurements/low_snr_co_che_20260921.md` §6, chi tiết đầy đủ ở
+    `docs/measurements/phan_tich_lai_tren_pw1_20260922.md`. Không có code/test mới.
+
 9. ✅ **Hạ tầng ablation `pos_weight` + bộ gán mù lần 2 — xong 21–22/09.**
    `train_sed.py` thêm `--pos-weight-max` (mặc định vẫn 30,0, hành vi cũ không đổi) —
    **chưa chạy lượt train nào với cờ này**, vẫn còn nguyên là việc phải làm để xác nhận

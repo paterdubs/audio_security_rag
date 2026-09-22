@@ -176,17 +176,24 @@ không phải trạng thái hiện hành.
 
 ### Việc tiếp theo
 
+0. ✅ **Kiểm lại `long_event`/`low_snr` trên θ\* hợp lý (`pw1`) — XONG 22/09.** Cả hai chẩn
+   đoán đo trên `v3` @θ\*=0,90 đều được kiểm lại trên `pw1` @θ\*=0,35: tỉ lệ phân mảnh
+   `long_event` **giữ nguyên** (không phải hệ quả của ngưỡng cực đoan); cơ chế Deletion
+   trên sự kiện thường **giữ nguyên**; nhưng câu "lệch biên chiếm gần hết, Deletion gần
+   như không đóng góp" trên sự kiện dài bị **phóng đại** — tỉ trọng Deletion tăng gấp ba
+   (10,2%→32,1%) ở θ\* hợp lý hơn, dù lệch biên vẫn trội hơn. Đã đính chính trong
+   [low_snr_co_che_20260921.md](docs/measurements/low_snr_co_che_20260921.md) §6, chi tiết
+   đầy đủ ở [phan_tich_lai_tren_pw1_20260922.md](docs/measurements/phan_tich_lai_tren_pw1_20260922.md).
 1. **Chốt cấu hình v4 và train nó.** Ablation đã xong: `--pos-weight-max 1.0` thắng ở mọi
-   chiều. Việc còn lại là quyết định v4 gồm những gì ngoài `pos_weight` (có gộp luôn
-   `--time-pool-blocks` khác không, hay giữ một biến một lượt), rồi train + đánh giá đầy
-   đủ. Đây là run đầu tiên có đủ điều kiện làm mốc báo cáo trong luận văn.
-2. **`long_event`: còn ba hướng, không còn hướng rẻ.** Bốn giả thuyết đã bị loại (cửa sổ
-   hẹp, trần thấp, khe hở năng lượng, trùng lát cắt khó — xem trên), và phép đo cuối đã
-   thu hẹp phạm vi: thủ phạm phải gắn với chính độ dài sự kiện. Hướng còn lại: (a) nghe
-   trực tiếp clip vỡ nhiều nhất — cần tai người; (b) trường tiếp nhận thời gian của CNN14
-   ngắn hơn sự kiện 4s — kiểm bằng ablation `--time-pool-blocks`, tốn GPU, và giờ **nối
-   thẳng với phát hiện `low_snr`/lệch biên**: cả hai đều nói về khả năng chốt biên trên
-   đoạn dài; (c) BCE theo khung không phạt phân mảnh — phải đổi loss rồi train lại.
+   chiều. `panns_ft_pw1` **đã chính là** cấu hình v4 dự kiến — cần quyết định đề bạt thẳng
+   nó làm mốc báo cáo (khuyến nghị, không tốn GPU) hay train lại dưới tên `v4` riêng.
+2. **`long_event`: còn ba hướng, `--time-pool-blocks` giờ đã đủ điều kiện chạy.** Bốn giả
+   thuyết đã bị loại (cửa sổ hẹp, trần thấp, khe hở năng lượng, trùng lát cắt khó), và mục
+   0 vừa xác nhận cả hai chẩn đoán còn lại (phân mảnh, lệch biên) vững qua phép kiểm θ\*.
+   Hướng còn lại: (a) nghe trực tiếp clip vỡ nhiều nhất — cần tai người; (b) trường tiếp
+   nhận thời gian của CNN14 ngắn hơn sự kiện 4s — kiểm bằng ablation
+   `--time-pool-blocks` ∈ {3,2} trên nền `--pos-weight-max 1.0`, tốn ~2 giờ GPU/lượt; (c)
+   BCE theo khung không phạt phân mảnh — phải đổi loss rồi train lại, chưa làm.
 3. **`--resume` vẫn CHƯA được kiểm bằng thực tế.** Runner qua đêm 21→22/09 có watchdog gọi
    `--resume` khi train chết, nhưng cả ba lượt chạy trót lọt nên nhánh đó không lần nào
    được thực thi. Món nợ còn nguyên.
