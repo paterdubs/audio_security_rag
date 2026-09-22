@@ -19,7 +19,7 @@ Các tuần là lịch dự kiến; làm sớm một phần không đồng nghĩ
 | **W1** | 15–21/09/2026 | Nền tảng + Walking Skeleton | 🔄 skeleton + evaluation_protocol có; CI/DVC/ADR-0001…0004 còn thiếu | ☐ |
 | **W2** | 22–28/09/2026 | Dữ liệu + Scaper + Precompute | 🔄 làm sớm; lô mới PASS QA + waveform PANNs, real dev/gold chưa có | ☐ |
 | **W3** | 29/09–05/10 | 4 Gold set + SED baseline | 🔄 PANNs v1/v2/v3 xong + đã chấm lại cùng giao thức có quét ngưỡng; gold chưa có, baseline BEATs–Conformer chưa làm | ☐ |
-| **W4** | 06–12/10 | AAC baseline B1 + hạ tầng metric | 🔄 làm sớm 22/09; bộ metric hallucination (EHR/EOR/GS/TOA/CHR) có, chưa kiểm định thủ công; B1 chưa bắt đầu | ☐ |
+| **W4** | 06–12/10 | AAC baseline B1 + hạ tầng metric | 🔄 làm sớm 22/09; bộ metric hallucination (EHR/EOR/GS/TOA/CHR) + B0 nối pipeline chạy thật xong, chưa kiểm định thủ công; B1 chưa bắt đầu | ☐ |
 | **W5** | 13–19/10 | **Grounded AAC (P)** — đóng góp chính | 🔜 | ☐ |
 | **W6** | 20–26/10 | Ablation + báo cáo theo slice | 🔜 | ☐ |
 | **W7** | 27/10–02/11 | Streaming + RAG + Dashboard | 🔄 dashboard/RAG template đã có; streaming còn kế hoạch | ☐ |
@@ -156,7 +156,7 @@ W7 chạy được tương đối độc lập vì đã có walking skeleton t�
 | ☑ | Xây **`EVENT_LEXICON`** cho 16 class (EN+VI), có xử lý phủ định + biến thể | 👥 | **22/09 xong sớm** — `ml/configs/event_lexicon.yaml` (16 lớp/160 cụm), NegEx rút gọn cho phủ định, khớp biên từ. Nhận ra 16/16 cụm mà captioner B0 sinh (test bất biến). Chưa xử lý biến thể hình thái ngoài các dạng liệt kê tường minh |
 | ☑ | Cài **EHR / EOR / GS / TOA / CHR** | 🤖 | **22/09 xong sớm** — `ml/evaluation/hallucination.py`, 23 test TDD. Mọi metric trả `None` khi mẫu số 0 (không trả 0) — xem `evaluation_protocol.md` §4 |
 | ☐ | 🔬 **Kiểm định bộ trích $P$ thủ công trên 100 caption**, báo cáo độ chính xác của chính bộ trích | 👤 | **Điều kiện cần để C2 được chấp nhận — CHƯA LÀM.** Cờ `meta.da_kiem_dinh_thu_cong=false` trong YAML |
-| ☐ | Cài **B0** (structured captioner từ timeline SED + template + LLM viết lại) | 🤖 | Cận trên grounding. Template EN/VI đã có ở `services/inference/app/captioner.py` — chưa nối vào pipeline chấm G2 |
+| ◐ | Cài **B0** (structured captioner từ timeline SED + template + LLM viết lại) | 🤖 | Cận trên grounding. Template EN/VI ở `services/inference/app/captioner.py`. **22/09: nối vào pipeline chấm hallucination xong** (`ml/evaluation/caption_b0.py`) — chạy tự nhất quán trên dev, chưa chấm trên G2 vì G2 chưa có. LLM viết lại tự nhiên hoá vẫn chưa làm |
 | ☐ | Pipeline dịch EN→VI với glossary 16 class cố định | 🤖 | SYSTEM.md §7.4 |
 | ☐ | Đo B0, B1 trên G2 với đủ metric + bảng theo slice | 🤖 | |
 

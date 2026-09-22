@@ -146,10 +146,11 @@ không phải trạng thái hiện hành.
   `manifest.json`. `checkpoint_resume.pt` ghi đè mỗi epoch (tách khỏi `best.pt` — không đổi
   schema mà `predictions.py`/`eval_sed.py` phụ thuộc); `--resume` khôi phục RNG nên dãy số
   ngẫu nhiên tiếp theo giống hệt như chưa hề dừng.
-- **760 test đạt** (22/09, `pytest tests/` exit 0): 710 → 720 sau runner ablation
+- **772 test đạt** (22/09, `pytest tests/` exit 0): 710 → 720 sau runner ablation
   `time_pool_blocks`, → 737 sau khi phủ test cho `check_leakage.py` (cổng CHẶN này
   trước đó **không có test nào**), → 760 sau bộ metric hallucination
-  (`ml/evaluation/hallucination.py`, 23 test, đóng góp C2). Mốc trước thay đổi là 710.
+  (`ml/evaluation/hallucination.py`, 23 test, đóng góp C2), → 772 sau nối B0 vào pipeline
+  (`ml/evaluation/caption_b0.py`, 12 test). Mốc trước thay đổi là 710.
   Từ 649: pilot gold lần 1 (30/30), bộ gán mù lần 2 (`make_blind_set.py`, đã chạy thật),
   `agreement.py` (**đã chạy thật 22/09** — vá lỗi đuôi `.wav`, thêm `chi_tiet_bat_dong()`,
   xem "Đang làm" bên dưới), `--pos-weight-max`.
@@ -193,11 +194,13 @@ không phải trạng thái hiện hành.
    [chuan_bao_cao_20260922.md](docs/measurements/chuan_bao_cao_20260922.md) ·
    [long_event_dong_huong_20260922.md](docs/measurements/long_event_dong_huong_20260922.md) ·
    [time_pool_ket_luan_20260922.md](docs/measurements/time_pool_ket_luan_20260922.md).
-1. **Bắt đầu W4 — hạ tầng metric hallucination (đóng góp C2).** Không bị chặn bởi gold vì
-   G2 chỉ cần khi chấm thật. `ml/evaluation/hallucination.py` +
-   `ml/configs/event_lexicon.yaml` đã có (EHR/EOR/GS/TOA/CHR, 23 test) — **CHƯA kiểm định
-   thủ công trên 100 caption** (điều kiện cần của C2, SYSTEM.md §8.2), việc tiếp theo là
-   sinh caption B0 trên dev và chấm thử end-to-end.
+1. **W4 đang chạy — hạ tầng metric hallucination (đóng góp C2).** `ml/evaluation/
+   hallucination.py` + `ml/configs/event_lexicon.yaml` (EHR/EOR/GS/TOA/CHR, 23 test).
+   **22/09: nối B0 vào pipeline xong** — `ml/evaluation/caption_b0.py` (12 test), chạy
+   thật trên `panns_ft_pw1`/dev: EHR 0,2498 · EOR 0,2352 · GS 0,6134 · TOA 0,9311 (đo tự
+   nhất quán, không phải G2 — chưa cần gold). **Việc còn thiếu, cần bạn (👤):** kiểm định
+   thủ công bộ trích trên 100 caption (điều kiện cần của C2, SYSTEM.md §8.2) — cờ
+   `meta.da_kiem_dinh_thu_cong=false` trong `event_lexicon.yaml`.
 2. **`--resume` vẫn CHƯA được kiểm bằng thực tế.** Runner qua đêm 21→22/09 có watchdog gọi
    `--resume` khi train chết, nhưng chưa lượt nào chết thật nên nhánh đó chưa lần nào được
    thực thi. Món nợ còn nguyên.

@@ -132,6 +132,15 @@
   [measurements/time_pool_ket_luan_20260922.md](measurements/time_pool_ket_luan_20260922.md) ·
   [measurements/long_event_dong_huong_20260922.md](measurements/long_event_dong_huong_20260922.md) ·
   [measurements/chuan_bao_cao_20260922.md](measurements/chuan_bao_cao_20260922.md).
+- 🟢 **22/09 (tiếp 6) — nối B0 vào pipeline hallucination, chạy thật lần đầu.**
+  `ml/evaluation/caption_b0.py` sinh caption B0 từ timeline DỰ BÁO của model (không phải
+  nhãn tham chiếu), chấm EHR/EOR/GS/TOA/CHR so với strong label sẵn có trên
+  `data/synthetic/dev` — phép tự nhất quán, không cần G2 vì các metric này không cần
+  human reference. Dùng chung θ\*/cửa sổ thích ứng-từ-train đã có, không quét ngưỡng lại.
+  12 test. Chạy thật trên `panns_ft_pw1`/dev: **EHR 0,2498 · EOR 0,2352 · GS 0,6134 ·
+  TOA 0,9311** (đo được 1.309/1.440 clip cho EHR). Đọc đúng: EHR > 0 ở đây là model dự
+  báo sai (detection không khớp tham chiếu), không phải lỗi lexicon — lexicon đã kiểm
+  bất biến nhận ra mọi cụm B0 sinh ra.
 - 🟢 **22/09 (tiếp 5) — W4 bắt đầu: bộ metric hallucination (EHR/EOR/GS/TOA/CHR, đóng góp
   C2) có hạ tầng đầu tiên.** `ml/evaluation/hallucination.py` + `ml/configs/event_lexicon.yaml`
   (16 lớp / 160 cụm EN+VI, danh sách phủ định NegEx rút gọn), 23 test. Không bị chặn bởi
@@ -437,9 +446,9 @@ DVC pipeline/remote vẫn chưa có, nên GitHub không thay thế quản lý d�
 
 ## 5. Kiểm chứng và phạm vi cập nhật
 
-- **760 test đạt** (22/09; 700 → 703 sau `ti_le_cap_nham`, → 710 sau runner ablation
+- **772 test đạt** (22/09; 700 → 703 sau `ti_le_cap_nham`, → 710 sau runner ablation
   `pos_weight`, → 720 sau runner ablation `time_pool_blocks`, → 737 sau khi phủ test cho
-  `check_leakage.py`, → 760 sau bộ metric hallucination),
+  `check_leakage.py`, → 760 sau bộ metric hallucination, → 772 sau nối B0 vào pipeline),
   chạy đầy đủ `pytest tests/` sau khi thêm 30
   test cho Pha 1, Pha 3, phép gom sự kiện và lỗi pickle memmap, 21 test nữa cho Pha 4 (phép
   ghép cặp, lát cắt, ghi bền, đối chiếu `sed_eval`), 15 test cho Pha 5 và phân loại lỗi theo
