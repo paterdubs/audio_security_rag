@@ -1,0 +1,1593 @@
+{
+  "run": "panns_ft_tpb2",
+  "split": "dev",
+  "subset": "all",
+  "nguon": "ml/runs/panns_ft_tpb2/predictions/dev_all.npz",
+  "n_clip": 1440,
+  "n_ref": 4873,
+  "class_ids": [
+    "alarm_bell",
+    "applause_cheering",
+    "door_slam",
+    "explosion",
+    "fireworks",
+    "glass_breaking",
+    "gunshot",
+    "laughter",
+    "object_drop_dishes",
+    "running_footsteps",
+    "scream",
+    "shout_yell",
+    "siren",
+    "speech_normal",
+    "vehicle_crash"
+  ],
+  "collar_sec": 0.2,
+  "adaptive_postproc": false,
+  "max_median_frames": 51,
+  "adaptive_source": "dev",
+  "median_size": 7,
+  "theta_sao": 0.3,
+  "f1_05": 0.3251662877831102,
+  "seg_05": 0.709150781503641,
+  "f1_sao": 0.3465944594876068,
+  "seg_sao": 0.7275390625,
+  "f1_vector": 0.35166855203619907,
+  "seg_vector": 0.7339621871044142,
+  "loi": {
+    "θ = 0,50": {
+      "n_ref": 4873,
+      "n_pred": 7004,
+      "dem": {
+        "dung": 1931,
+        "bien": 1047,
+        "thay_the": 578,
+        "thieu": 1317,
+        "thua": 3448
+      },
+      "ty_le": {
+        "dung": 0.3963,
+        "bien": 0.2149,
+        "thay_the": 0.1186,
+        "thieu": 0.2703,
+        "thua": 0.7076
+      },
+      "phan_manh": 1255,
+      "gop": 184,
+      "sed_eval": {
+        "n_ref": 4873,
+        "n_sys": 7004,
+        "error_rate": 1.550379642930433,
+        "substitution": 460,
+        "deletion": 2482,
+        "insertion": 4613
+      },
+      "doi_chieu_dung_vs_ntp": {
+        "ghep_greedy": 1931,
+        "sed_eval_ntp": 1931,
+        "lech": 0
+      }
+    },
+    "θ = 0,30": {
+      "n_ref": 4873,
+      "n_pred": 9530,
+      "dem": {
+        "dung": 2496,
+        "bien": 1031,
+        "thay_the": 714,
+        "thieu": 632,
+        "thua": 5289
+      },
+      "ty_le": {
+        "dung": 0.5122,
+        "bien": 0.2116,
+        "thay_the": 0.1465,
+        "thieu": 0.1297,
+        "thua": 1.0854
+      },
+      "phan_manh": 1392,
+      "gop": 184,
+      "sed_eval": {
+        "n_ref": 4873,
+        "n_sys": 9530,
+        "error_rate": 1.785142622614406,
+        "substitution": 712,
+        "deletion": 1665,
+        "insertion": 6322
+      },
+      "doi_chieu_dung_vs_ntp": {
+        "ghep_greedy": 2496,
+        "sed_eval_ntp": 2496,
+        "lech": 0
+      }
+    }
+  },
+  "lat_cat": [
+    {
+      "lat_cat": "overlap",
+      "n_clip": 437,
+      "n_ref": 1723,
+      "n_pred": 3217,
+      "segment_f1": 0.7229029217719132,
+      "event_f1": 0.33360323886639676,
+      "dem": {
+        "dung": 824,
+        "bien": 369,
+        "thay_the": 277,
+        "thieu": 253,
+        "thua": 1747
+      },
+      "phan_manh": 501,
+      "gop": 100
+    },
+    {
+      "lat_cat": "low_snr",
+      "n_clip": 390,
+      "n_ref": 1449,
+      "n_pred": 2774,
+      "segment_f1": 0.7028235951915012,
+      "event_f1": 0.29126213592233013,
+      "dem": {
+        "dung": 615,
+        "bien": 367,
+        "thay_the": 223,
+        "thieu": 244,
+        "thua": 1569
+      },
+      "phan_manh": 417,
+      "gop": 60
+    },
+    {
+      "lat_cat": "reverb",
+      "n_clip": 557,
+      "n_ref": 1888,
+      "n_pred": 3578,
+      "segment_f1": 0.6915806626833242,
+      "event_f1": 0.3190633004024881,
+      "dem": {
+        "dung": 872,
+        "bien": 411,
+        "thay_the": 295,
+        "thieu": 310,
+        "thua": 2000
+      },
+      "phan_manh": 509,
+      "gop": 86
+    },
+    {
+      "lat_cat": "long_event",
+      "n_clip": 144,
+      "n_ref": 559,
+      "n_pred": 1563,
+      "segment_f1": 0.737275064267352,
+      "event_f1": 0.24222431668237515,
+      "dem": {
+        "dung": 257,
+        "bien": 146,
+        "thay_the": 93,
+        "thieu": 63,
+        "thua": 1067
+      },
+      "phan_manh": 219,
+      "gop": 26
+    },
+    {
+      "lat_cat": "causal_chain",
+      "n_clip": 203,
+      "n_ref": 845,
+      "n_pred": 1428,
+      "segment_f1": 0.7166301969365427,
+      "event_f1": 0.3818741750989881,
+      "dem": {
+        "dung": 434,
+        "bien": 175,
+        "thay_the": 105,
+        "thieu": 131,
+        "thua": 714
+      },
+      "phan_manh": 214,
+      "gop": 15
+    },
+    {
+      "lat_cat": "sach",
+      "n_clip": 357,
+      "n_ref": 967,
+      "n_pred": 1928,
+      "segment_f1": 0.7507555913761838,
+      "event_f1": 0.4006908462867012,
+      "dem": {
+        "dung": 580,
+        "bien": 173,
+        "thay_the": 132,
+        "thieu": 82,
+        "thua": 1043
+      },
+      "phan_manh": 271,
+      "gop": 20
+    }
+  ],
+  "ma_tran": [
+    [
+      255,
+      7,
+      2,
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      0,
+      0,
+      1,
+      4,
+      1,
+      0,
+      30
+    ],
+    [
+      3,
+      322,
+      2,
+      1,
+      2,
+      0,
+      0,
+      0,
+      1,
+      6,
+      1,
+      0,
+      4,
+      0,
+      0,
+      31
+    ],
+    [
+      4,
+      3,
+      188,
+      4,
+      9,
+      5,
+      7,
+      0,
+      4,
+      18,
+      0,
+      2,
+      2,
+      1,
+      3,
+      67
+    ],
+    [
+      3,
+      8,
+      4,
+      188,
+      5,
+      3,
+      5,
+      2,
+      1,
+      9,
+      0,
+      3,
+      6,
+      3,
+      1,
+      35
+    ],
+    [
+      3,
+      4,
+      4,
+      5,
+      287,
+      3,
+      7,
+      0,
+      1,
+      11,
+      0,
+      1,
+      2,
+      0,
+      4,
+      40
+    ],
+    [
+      2,
+      1,
+      2,
+      2,
+      5,
+      270,
+      4,
+      1,
+      2,
+      10,
+      1,
+      1,
+      3,
+      0,
+      0,
+      24
+    ],
+    [
+      1,
+      4,
+      13,
+      8,
+      10,
+      2,
+      150,
+      0,
+      0,
+      24,
+      0,
+      0,
+      3,
+      0,
+      1,
+      52
+    ],
+    [
+      4,
+      11,
+      2,
+      0,
+      4,
+      1,
+      0,
+      227,
+      0,
+      5,
+      2,
+      9,
+      4,
+      1,
+      1,
+      42
+    ],
+    [
+      10,
+      8,
+      19,
+      0,
+      11,
+      21,
+      2,
+      1,
+      143,
+      31,
+      1,
+      2,
+      3,
+      1,
+      1,
+      72
+    ],
+    [
+      2,
+      10,
+      7,
+      6,
+      18,
+      2,
+      11,
+      0,
+      0,
+      248,
+      1,
+      2,
+      3,
+      2,
+      2,
+      86
+    ],
+    [
+      4,
+      5,
+      0,
+      0,
+      4,
+      1,
+      0,
+      0,
+      0,
+      2,
+      266,
+      4,
+      3,
+      0,
+      2,
+      24
+    ],
+    [
+      2,
+      0,
+      2,
+      1,
+      7,
+      1,
+      1,
+      1,
+      1,
+      3,
+      0,
+      315,
+      2,
+      1,
+      0,
+      34
+    ],
+    [
+      3,
+      3,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      260,
+      0,
+      0,
+      6
+    ],
+    [
+      4,
+      8,
+      1,
+      1,
+      4,
+      2,
+      0,
+      3,
+      0,
+      3,
+      2,
+      19,
+      3,
+      225,
+      3,
+      35
+    ],
+    [
+      8,
+      10,
+      11,
+      2,
+      11,
+      2,
+      5,
+      2,
+      5,
+      10,
+      4,
+      3,
+      4,
+      5,
+      183,
+      54
+    ],
+    [
+      472,
+      743,
+      188,
+      128,
+      839,
+      293,
+      155,
+      150,
+      120,
+      621,
+      259,
+      399,
+      490,
+      299,
+      133,
+      0
+    ]
+  ],
+  "nham": [
+    {
+      "ref": "object_drop_dishes",
+      "pred": "running_footsteps",
+      "n": 31,
+      "da_khai": true
+    },
+    {
+      "ref": "gunshot",
+      "pred": "running_footsteps",
+      "n": 24,
+      "da_khai": true
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "glass_breaking",
+      "n": 21,
+      "da_khai": true
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "door_slam",
+      "n": 19,
+      "da_khai": true
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "shout_yell",
+      "n": 19,
+      "da_khai": true
+    },
+    {
+      "ref": "door_slam",
+      "pred": "running_footsteps",
+      "n": 18,
+      "da_khai": true
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "fireworks",
+      "n": 18,
+      "da_khai": true
+    },
+    {
+      "ref": "gunshot",
+      "pred": "door_slam",
+      "n": 13,
+      "da_khai": true
+    },
+    {
+      "ref": "fireworks",
+      "pred": "running_footsteps",
+      "n": 11,
+      "da_khai": true
+    },
+    {
+      "ref": "laughter",
+      "pred": "applause_cheering",
+      "n": 11,
+      "da_khai": false
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "fireworks",
+      "n": 11,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "gunshot",
+      "n": 11,
+      "da_khai": true
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "door_slam",
+      "n": 11,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "fireworks",
+      "n": 11,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "running_footsteps",
+      "n": 10,
+      "da_khai": false
+    },
+    {
+      "ref": "gunshot",
+      "pred": "fireworks",
+      "n": 10,
+      "da_khai": true
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "alarm_bell",
+      "n": 10,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "applause_cheering",
+      "n": 10,
+      "da_khai": true
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "applause_cheering",
+      "n": 10,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "running_footsteps",
+      "n": 10,
+      "da_khai": false
+    },
+    {
+      "ref": "door_slam",
+      "pred": "fireworks",
+      "n": 9,
+      "da_khai": true
+    },
+    {
+      "ref": "explosion",
+      "pred": "running_footsteps",
+      "n": 9,
+      "da_khai": true
+    },
+    {
+      "ref": "laughter",
+      "pred": "shout_yell",
+      "n": 9,
+      "da_khai": true
+    },
+    {
+      "ref": "explosion",
+      "pred": "applause_cheering",
+      "n": 8,
+      "da_khai": false
+    },
+    {
+      "ref": "gunshot",
+      "pred": "explosion",
+      "n": 8,
+      "da_khai": true
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "applause_cheering",
+      "n": 8,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "applause_cheering",
+      "n": 8,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "alarm_bell",
+      "n": 8,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "applause_cheering",
+      "n": 7,
+      "da_khai": false
+    },
+    {
+      "ref": "door_slam",
+      "pred": "gunshot",
+      "n": 7,
+      "da_khai": true
+    },
+    {
+      "ref": "fireworks",
+      "pred": "gunshot",
+      "n": 7,
+      "da_khai": true
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "door_slam",
+      "n": 7,
+      "da_khai": true
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "fireworks",
+      "n": 7,
+      "da_khai": false
+    },
+    {
+      "ref": "applause_cheering",
+      "pred": "running_footsteps",
+      "n": 6,
+      "da_khai": true
+    },
+    {
+      "ref": "explosion",
+      "pred": "siren",
+      "n": 6,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "explosion",
+      "n": 6,
+      "da_khai": true
+    },
+    {
+      "ref": "door_slam",
+      "pred": "glass_breaking",
+      "n": 5,
+      "da_khai": false
+    },
+    {
+      "ref": "explosion",
+      "pred": "fireworks",
+      "n": 5,
+      "da_khai": true
+    },
+    {
+      "ref": "explosion",
+      "pred": "gunshot",
+      "n": 5,
+      "da_khai": true
+    },
+    {
+      "ref": "fireworks",
+      "pred": "explosion",
+      "n": 5,
+      "da_khai": true
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "fireworks",
+      "n": 5,
+      "da_khai": false
+    },
+    {
+      "ref": "laughter",
+      "pred": "running_footsteps",
+      "n": 5,
+      "da_khai": false
+    },
+    {
+      "ref": "scream",
+      "pred": "applause_cheering",
+      "n": 5,
+      "da_khai": true
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "gunshot",
+      "n": 5,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "object_drop_dishes",
+      "n": 5,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "speech_normal",
+      "n": 5,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "siren",
+      "n": 4,
+      "da_khai": true
+    },
+    {
+      "ref": "applause_cheering",
+      "pred": "siren",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "door_slam",
+      "pred": "alarm_bell",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "door_slam",
+      "pred": "explosion",
+      "n": 4,
+      "da_khai": true
+    },
+    {
+      "ref": "door_slam",
+      "pred": "object_drop_dishes",
+      "n": 4,
+      "da_khai": true
+    },
+    {
+      "ref": "explosion",
+      "pred": "door_slam",
+      "n": 4,
+      "da_khai": true
+    },
+    {
+      "ref": "fireworks",
+      "pred": "applause_cheering",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "fireworks",
+      "pred": "door_slam",
+      "n": 4,
+      "da_khai": true
+    },
+    {
+      "ref": "fireworks",
+      "pred": "vehicle_crash",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "gunshot",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "gunshot",
+      "pred": "applause_cheering",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "laughter",
+      "pred": "alarm_bell",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "laughter",
+      "pred": "fireworks",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "laughter",
+      "pred": "siren",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "scream",
+      "pred": "alarm_bell",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "scream",
+      "pred": "fireworks",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "scream",
+      "pred": "shout_yell",
+      "n": 4,
+      "da_khai": true
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "alarm_bell",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "fireworks",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "scream",
+      "n": 4,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "siren",
+      "n": 4,
+      "da_khai": true
+    },
+    {
+      "ref": "applause_cheering",
+      "pred": "alarm_bell",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "door_slam",
+      "pred": "applause_cheering",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "door_slam",
+      "pred": "vehicle_crash",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "explosion",
+      "pred": "alarm_bell",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "explosion",
+      "pred": "glass_breaking",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "explosion",
+      "pred": "shout_yell",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "explosion",
+      "pred": "speech_normal",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "fireworks",
+      "pred": "alarm_bell",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "fireworks",
+      "pred": "glass_breaking",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "siren",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "gunshot",
+      "pred": "siren",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "siren",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "siren",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "scream",
+      "pred": "siren",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "running_footsteps",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "siren",
+      "pred": "alarm_bell",
+      "n": 3,
+      "da_khai": true
+    },
+    {
+      "ref": "siren",
+      "pred": "applause_cheering",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "laughter",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "running_footsteps",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "siren",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "vehicle_crash",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "shout_yell",
+      "n": 3,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "door_slam",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "laughter",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "object_drop_dishes",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "applause_cheering",
+      "pred": "door_slam",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "applause_cheering",
+      "pred": "fireworks",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "door_slam",
+      "pred": "shout_yell",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "door_slam",
+      "pred": "siren",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "explosion",
+      "pred": "laughter",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "fireworks",
+      "pred": "siren",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "alarm_bell",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "door_slam",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "explosion",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "object_drop_dishes",
+      "n": 2,
+      "da_khai": true
+    },
+    {
+      "ref": "gunshot",
+      "pred": "glass_breaking",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "laughter",
+      "pred": "door_slam",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "laughter",
+      "pred": "scream",
+      "n": 2,
+      "da_khai": true
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "gunshot",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "shout_yell",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "alarm_bell",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "glass_breaking",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "shout_yell",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "speech_normal",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "vehicle_crash",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "scream",
+      "pred": "running_footsteps",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "scream",
+      "pred": "vehicle_crash",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "alarm_bell",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "door_slam",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "siren",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "glass_breaking",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "scream",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "explosion",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "glass_breaking",
+      "n": 2,
+      "da_khai": true
+    },
+    {
+      "ref": "vehicle_crash",
+      "pred": "laughter",
+      "n": 2,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "explosion",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "fireworks",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "glass_breaking",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "gunshot",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "shout_yell",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "alarm_bell",
+      "pred": "speech_normal",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "applause_cheering",
+      "pred": "explosion",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "applause_cheering",
+      "pred": "object_drop_dishes",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "applause_cheering",
+      "pred": "scream",
+      "n": 1,
+      "da_khai": true
+    },
+    {
+      "ref": "door_slam",
+      "pred": "speech_normal",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "explosion",
+      "pred": "object_drop_dishes",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "explosion",
+      "pred": "vehicle_crash",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "fireworks",
+      "pred": "object_drop_dishes",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "fireworks",
+      "pred": "shout_yell",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "applause_cheering",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "laughter",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "scream",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "glass_breaking",
+      "pred": "shout_yell",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "gunshot",
+      "pred": "alarm_bell",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "gunshot",
+      "pred": "vehicle_crash",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "laughter",
+      "pred": "glass_breaking",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "laughter",
+      "pred": "speech_normal",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "laughter",
+      "pred": "vehicle_crash",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "laughter",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "scream",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "speech_normal",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "object_drop_dishes",
+      "pred": "vehicle_crash",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "running_footsteps",
+      "pred": "scream",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "scream",
+      "pred": "glass_breaking",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "explosion",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "glass_breaking",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "gunshot",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "laughter",
+      "n": 1,
+      "da_khai": true
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "object_drop_dishes",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "shout_yell",
+      "pred": "speech_normal",
+      "n": 1,
+      "da_khai": true
+    },
+    {
+      "ref": "siren",
+      "pred": "fireworks",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "siren",
+      "pred": "running_footsteps",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "door_slam",
+      "n": 1,
+      "da_khai": false
+    },
+    {
+      "ref": "speech_normal",
+      "pred": "explosion",
+      "n": 1,
+      "da_khai": false
+    }
+  ],
+  "theo_lop": [
+    {
+      "class_id": "alarm_bell",
+      "n_ref": 308,
+      "threshold": 0.4,
+      "f1_rieng": 0.39581351094196,
+      "f1_toan_cuc": 0.3952205882352941
+    },
+    {
+      "class_id": "applause_cheering",
+      "n_ref": 373,
+      "threshold": 0.2,
+      "f1_rieng": 0.24773413897280966,
+      "f1_toan_cuc": 0.22105263157894736
+    },
+    {
+      "class_id": "door_slam",
+      "n_ref": 317,
+      "threshold": 0.35,
+      "f1_rieng": 0.3444108761329305,
+      "f1_toan_cuc": 0.32808398950131235
+    },
+    {
+      "class_id": "explosion",
+      "n_ref": 276,
+      "threshold": 0.35,
+      "f1_rieng": 0.49572649572649574,
+      "f1_toan_cuc": 0.49117174959871596
+    },
+    {
+      "class_id": "fireworks",
+      "n_ref": 372,
+      "threshold": 0.25,
+      "f1_rieng": 0.1949008498583569,
+      "f1_toan_cuc": 0.19119496855345913
+    },
+    {
+      "class_id": "glass_breaking",
+      "n_ref": 328,
+      "threshold": 0.3,
+      "f1_rieng": 0.44919786096256686,
+      "f1_toan_cuc": 0.44919786096256686
+    },
+    {
+      "class_id": "gunshot",
+      "n_ref": 268,
+      "threshold": 0.35,
+      "f1_rieng": 0.45255474452554745,
+      "f1_toan_cuc": 0.4350649350649351
+    },
+    {
+      "class_id": "laughter",
+      "n_ref": 313,
+      "threshold": 0.3,
+      "f1_rieng": 0.4045584045584046,
+      "f1_toan_cuc": 0.4045584045584046
+    },
+    {
+      "class_id": "object_drop_dishes",
+      "n_ref": 326,
+      "threshold": 0.3,
+      "f1_rieng": 0.42574257425742573,
+      "f1_toan_cuc": 0.42574257425742573
+    },
+    {
+      "class_id": "running_footsteps",
+      "n_ref": 400,
+      "threshold": 0.4,
+      "f1_rieng": 0.34146341463414637,
+      "f1_toan_cuc": 0.3181169757489301
+    },
+    {
+      "class_id": "scream",
+      "n_ref": 315,
+      "threshold": 0.3,
+      "f1_rieng": 0.5000000000000001,
+      "f1_toan_cuc": 0.5000000000000001
+    },
+    {
+      "class_id": "shout_yell",
+      "n_ref": 371,
+      "threshold": 0.25,
+      "f1_rieng": 0.35408245755860945,
+      "f1_toan_cuc": 0.3480565371024735
+    },
+    {
+      "class_id": "siren",
+      "n_ref": 274,
+      "threshold": 0.25,
+      "f1_rieng": 0.3800564440263406,
+      "f1_toan_cuc": 0.3775700934579439
+    },
+    {
+      "class_id": "speech_normal",
+      "n_ref": 313,
+      "threshold": 0.35,
+      "f1_rieng": 0.3304347826086957,
+      "f1_toan_cuc": 0.3215962441314554
+    },
+    {
+      "class_id": "vehicle_crash",
+      "n_ref": 319,
+      "threshold": 0.3,
+      "f1_rieng": 0.2940275650842266,
+      "f1_toan_cuc": 0.2940275650842266
+    }
+  ],
+  "nguong_theo_lop": {
+    "alarm_bell": 0.4,
+    "applause_cheering": 0.2,
+    "door_slam": 0.35,
+    "explosion": 0.35,
+    "fireworks": 0.25,
+    "glass_breaking": 0.3,
+    "gunshot": 0.35,
+    "laughter": 0.3,
+    "object_drop_dishes": 0.3,
+    "running_footsteps": 0.4,
+    "scream": 0.3,
+    "shout_yell": 0.25,
+    "siren": 0.25,
+    "speech_normal": 0.35,
+    "vehicle_crash": 0.3
+  },
+  "giay": 96.5,
+  "ghi_chu": "dev tổng hợp sinh cùng recipe B0–B9 với train của v3 → thiên vị v3 theo thiết kế; θ* và θ theo lớp chọn trên chính tập đang chấm → rò rỉ"
+}

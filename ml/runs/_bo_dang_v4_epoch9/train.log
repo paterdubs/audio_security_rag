@@ -1,0 +1,14 @@
+model: 80,784,350 tham số học được · 1001 khung/clip · cuda
+dữ liệu: 7128 train / 792 val (tách tạm từ synthetic train)
+cửa sổ lọc theo lớp: alarm_bell=29, applause_cheering=51, door_slam=25, explosion=51, fireworks=51, glass_breaking=47, gunshot=21, laughter=51, object_drop_dishes=21, running_footsteps=17, scream=51, shout_yell=51, siren=51, speech_normal=51, vehicle_crash=51
+epoch  1/25  loss=0.7320  mAP(clip)=0.2454  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (209s)
+epoch  2/25  loss=0.5291  mAP(clip)=0.3398  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (361s)
+epoch  3/25  loss=0.4860  mAP(clip)=0.5884  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (554s)
+epoch  4/25  loss=0.4411  mAP(clip)=0.6764  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (613s)
+D:\IUH_K18\HK1N5\KLTN\audio-security-rag\.venv\Lib\site-packages\dcase_util\utils\utils.py:12: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+epoch  5/25  loss=0.4126  mAP(clip)=0.7167  F1(đoạn 1s)=0.5272  F1(sự kiện)=0.2529  (607s)
+epoch  6/25  loss=0.4070  mAP(clip)=0.7440  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (602s)
+epoch  7/25  loss=0.4030  mAP(clip)=0.7633  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (574s)
+epoch  8/25  loss=0.3980  mAP(clip)=0.7749  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (617s)
+epoch  9/25  loss=0.3933  mAP(clip)=0.7878  F1(đoạn 1s)=0.0000  F1(sự kiện)=0.0000  (594s)
