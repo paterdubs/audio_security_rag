@@ -1,0 +1,94 @@
+# Từ vựng trích sự kiện từ caption — SYSTEM.md §8.2, đóng góp C2.
+#
+# ⚠️ ĐÂY LÀ THÀNH PHẦN QUYẾT ĐỊNH ĐỘ TIN CẬY CỦA TOÀN BỘ METRIC HALLUCINATION.
+# EHR/EOR/GS/TOA/CHR đều dựng trên tập P = "sự kiện được nhắc tới trong caption", và P
+# hoàn toàn do file này quyết định. Thiếu một biến thể diễn đạt → model nói đúng mà bị
+# tính là bỏ sót (EOR tăng oan). Thừa một cụm quá rộng → bắt nhầm và EHR tăng oan.
+#
+# SYSTEM.md §8.2 đặt điều kiện: bộ trích phải được **kiểm định thủ công trên 100 caption**
+# và báo cáo độ chính xác của chính nó, nếu không thì C2 không được chấp nhận. Việc đó
+# CHƯA LÀM. Cho tới khi làm xong, mọi số EHR/EOR chỉ là số sơ bộ.
+#
+# Nguyên tắc chọn cụm:
+#   - Chỉ cụm mà người bản ngữ thực sự dùng để chỉ CHÍNH sự kiện đó.
+#   - KHÔNG thêm cụm quá rộng ("sound", "noise", "bang") vì chúng trùng nhiều lớp.
+#   - Khớp theo biên từ, không phân biệt hoa thường (xem `hallucination.py`).
+#   - Biến thể số nhiều viết tường minh, KHÔNG suy diễn bằng quy tắc hình thái: tiếng Anh
+#     có quá nhiều ngoại lệ và một quy tắc sai sẽ hỏng im lặng.
+#
+# Bản VI để dành cho caption tiếng Việt (§7.4); hiện đường đo chính chạy trên EN để
+# benchmark được với AudioCaps/Clotho.
+
+meta:
+  version: "0.1.0"
+  nguon: "SYSTEM.md §8.2 + services/inference/app/vocab.py"
+  da_kiem_dinh_thu_cong: false   # ĐIỀU KIỆN CẦN của C2, chưa làm
+
+classes:
+  gunshot:
+    en: [gunshot, gunshots, gunfire, gun fire, shots fired, a shot, shots, firearm]
+    vi: [tiếng súng, tiếng nổ súng, súng nổ]
+  explosion:
+    en: [explosion, explosions, explode, exploding, exploded, blast, detonation]
+    vi: [tiếng nổ, vụ nổ]
+  scream:
+    en: [scream, screams, screaming, screamed, shriek, shrieking]
+    vi: [tiếng hét, tiếng thét, hét hoảng loạn]
+  glass_breaking:
+    en: [glass breaking, breaking glass, glass shatters, shattering glass, glass smashing,
+         broken glass, glass shattering]
+    vi: [tiếng kính vỡ, kính vỡ, vỡ kính]
+  vehicle_crash:
+    en: [vehicle crash, car crash, crash, collision, cars colliding, tire squeal,
+         tires squealing, skidding]
+    vi: [tiếng va chạm xe, va chạm xe, tai nạn xe]
+  shout_yell:
+    en: [shout, shouts, shouting, shouted, yell, yells, yelling, yelled]
+    vi: [tiếng quát, tiếng quát tháo, la hét]
+  door_slam:
+    en: [door slam, door slams, door slamming, slamming door, slamming a door,
+         door banging, banging door]
+    vi: [tiếng đóng sập cửa, tiếng sập cửa, đóng sầm cửa]
+  running_footsteps:
+    en: [running footsteps, footsteps, running steps, someone running, people running,
+         footfalls]
+    vi: [tiếng bước chân chạy, tiếng chân chạy, bước chân]
+  siren:
+    en: [siren, sirens, police siren, ambulance siren, fire engine siren]
+    vi: [tiếng còi hú, còi hú, còi ưu tiên]
+  alarm_bell:
+    en: [alarm, alarms, alarm bell, fire alarm, smoke alarm, car alarm, doorbell,
+         bell ringing, ringing bell]
+    vi: [tiếng chuông báo động, chuông báo động, tiếng chuông]
+  fireworks:
+    en: [fireworks, firework, firecracker, firecrackers, pyrotechnics]
+    vi: [tiếng pháo hoa, pháo hoa, tiếng pháo]
+  object_drop_dishes:
+    en: [dishes falling, falling dishes, dishes clattering, clattering dishes,
+         objects falling, falling objects, dropped object, dish breaking, pots and pans]
+    vi: [tiếng rơi vỡ đồ, tiếng bát đĩa rơi, đồ vật rơi]
+  laughter:
+    en: [laughter, laughing, laughs, laugh, giggling, chuckling]
+    vi: [tiếng cười, cười]
+  applause_cheering:
+    en: [applause, clapping, applauding, cheering, cheers, crowd cheering, ovation]
+    vi: [tiếng vỗ tay, vỗ tay, tiếng reo hò, reo hò]
+  speech_normal:
+    en: [people talking, talking, speech, speaking, conversation, a person speaking,
+         voices, chatter]
+    vi: [tiếng nói chuyện, nói chuyện, tiếng người nói, trò chuyện]
+  ambient_noise:
+    en: [ambient noise, background noise, ambient background noise, room tone,
+         ambience, background hum]
+    vi: [tiếng ồn nền, tiếng nền, âm thanh nền]
+
+# Cụm phủ định. Nằm trong `cua_so_phu_dinh` token TRƯỚC cụm sự kiện thì cụm đó không
+# được tính là "được nhắc tới". Cách này là NegEx rút gọn — đủ cho caption một hai câu,
+# KHÔNG đủ cho văn bản dài, và chính nó là thứ phải kiểm định trên 100 caption.
+# ⚠️ PHẢI để trong nháy: YAML 1.1 đọc `no` (và `yes`/`on`/`off`) thành BOOLEAN, nên
+# `no` không nháy sẽ vào Python thành `False` — tức mất luôn từ phủ định phổ biến nhất.
+phu_dinh:
+  en: ["no", "not", "n't", "without", "never", "absent", "lacks", "lacking", "none",
+       "nothing"]
+  vi: ["không", "chẳng", "chưa", "không có", "không hề"]
+cua_so_phu_dinh: 4
