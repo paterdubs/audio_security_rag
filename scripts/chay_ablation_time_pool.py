@@ -9,11 +9,22 @@ lại của `long_event` (docs/measurements/long_event_gap_20260921.md §4): tr�
 thời gian của CNN14 ngắn hơn sự kiện 4+ giây, nên hạ `--time-pool-blocks` từ 3 xuống 2
 (tăng độ phân giải thời gian) có thể giảm tỉ lệ phân mảnh `long_event`.
 
-Hai lượt, MỘT biến mỗi lượt — `--pos-weight-max` khoá cứng ở 1.0 cho cả hai (bài học từ
-ablation trước: trộn biến sẽ không quy kết được chênh lệch cho biến nào):
+MỘT lượt, `--pos-weight-max` khoá cứng ở 1.0 (bài học từ ablation trước: trộn biến sẽ
+không quy kết được chênh lệch cho biến nào):
 
-    1. `panns_ft_v4`   time_pool_blocks=3 (mặc định — giống hệt `pw1`, chỉ khác tên)
-    2. `panns_ft_tpb2` time_pool_blocks=2
+    `panns_ft_tpb2` time_pool_blocks=2, đối chứng là `panns_ft_pw1` (time_pool_blocks=3)
+
+BỎ LƯỢT `panns_ft_v4` — 22/09, sau 9 epoch. Lượt đó có cấu hình GIỐNG HỆT `panns_ft_pw1`
+đã train xong, chỉ khác tên, nên nó chỉ mua được một cái tên đẹp cho mốc báo cáo cộng một
+bằng chứng tái lập (thứ `pw30`↔`v3` đã cho rồi). Giữa chừng GPU bị thảo nhiệt chặn xuống
+210/2100 MHz ở 89°C, epoch từ ~350 s (chuẩn đêm qua) lên ~600 s, nên cái giá của tên đẹp
+nhảy từ ~1,5 giờ lên ~3 giờ máy chạy ở 89°C. Không đáng. Phần train dở giữ ở
+`ml/runs/_bo_dang_v4_epoch9/` (đặt tên để không ai nhầm là kết quả), resume được nếu sau
+này thực sự cần một run mang tên v4.
+
+⚠️ Vì lý do nhiệt trên, **cột thời gian trong manifest không so được giữa các run** chạy ở
+điều kiện nhiệt khác nhau (đêm mát vs trưa nóng). Chỉ số chất lượng không bị ảnh hưởng —
+xung nhịp thấp làm chậm chứ không làm sai phép tính.
 
 Sau mỗi lượt: predictions → threshold_sweep → calibration → error_analysis (bước cuối
 TỰ sinh tỉ lệ phân mảnh `long_event` trong `analysis.json['lat_cat']`, không cần đo lại
@@ -71,8 +82,10 @@ CAU_HINH_BASE = [
     "--mixup-label", "hard", "--adaptive-postproc",
 ]
 
-LUOT = [("panns_ft_v4", 3), ("panns_ft_tpb2", 2)]
-MOI_RUN = ["panns_ft_v3", "panns_ft_pw1", "panns_ft_v4", "panns_ft_tpb2"]
+# `panns_ft_pw1` KHÔNG nằm trong LUOT vì nó đã train xong và chính là mức đối chứng
+# time_pool_blocks=3; chỉ cần train mức 2. Xem docstring về lượt `v4` đã bỏ.
+LUOT = [("panns_ft_tpb2", 2)]
+MOI_RUN = ["panns_ft_v3", "panns_ft_pw1", "panns_ft_tpb2"]
 
 
 # ── Ghi nhật ký ──────────────────────────────────────────────────────────────
@@ -257,24 +270,31 @@ def dong_bao_cao(ket_qua: dict[str, dict]) -> Iterator[str]:
     yield ("Sinh tự động bởi `scripts/chay_ablation_time_pool.py`. **Trang này chỉ có số**; "
            "phần diễn giải và đồng bộ tài liệu làm tay sau, vì nó cần phán đoán.")
     yield ""
-    yield ("Cả hai lượt khoá `--pos-weight-max 1.0`, chỉ đổi `--time-pool-blocks`; cùng split "
-           "train, chấm trên cùng `data/synthetic/dev`. `panns_ft_v4` (time_pool_blocks=3) có "
-           "cấu hình GIỐNG HỆT `panns_ft_pw1`, chỉ khác tên — dùng để kiểm tái lập, tương tự "
-           "cách `pw30` từng kiểm tái lập `v3`.")
+    yield ("`panns_ft_tpb2` (time_pool_blocks=2) so với đối chứng `panns_ft_pw1` "
+           "(time_pool_blocks=3); hai lượt khoá cùng `--pos-weight-max 1.0`, cùng mọi tham số "
+           "khác, cùng split train, chấm trên cùng `data/synthetic/dev`.")
     yield ""
     yield ("> ⚠️ `data/synthetic/dev` sinh **cùng recipe B0–B9** với train → thiên vị theo "
            "thiết kế, **ngang nhau** cho mọi lượt ở đây. θ\\* chọn trên chính tập đang chấm "
-           "→ **chặn trên lạc quan** cho mọi lượt.")
+           "→ **chặn trên lạc quan** cho mọi lượt. 0,8917 số clip dev có ít nhất một nguồn "
+           "foreground từng dùng trong train (`measurements/leakage_check_20260922.md`).")
+    yield ""
+    yield ("> ⚠️ **Không đọc cột thời gian của manifest để so giữa các run**: lượt này chạy "
+           "ban ngày với GPU bị thảo nhiệt chặn xuống 210/2100 MHz, các lượt trước chạy ban "
+           "đêm. Chỉ số chất lượng không bị ảnh hưởng.")
     yield ""
     yield from bang_tom_tat(ket_qua)
     yield ""
     yield "## Câu hỏi trang này phải trả lời"
     yield ""
-    yield "1. `panns_ft_v4` có tái hiện `panns_ft_pw1` trong biên độ tương tự `pw30`↔`v3` không?"
-    yield ("2. Tỉ lệ vỡ `long_event` của `tpb2` (time_pool_blocks=2) có THẤP hơn `v4` "
+    yield ("1. Tỉ lệ vỡ `long_event` của `tpb2` (time_pool_blocks=2) có THẤP hơn `pw1` "
            "(time_pool_blocks=3) không? Nếu có, trường tiếp nhận thời gian ngắn là một phần "
-           "nguyên nhân thật. Nếu KHÔNG đổi hoặc đổi ngược, giả thuyết bị bác bỏ.")
-    yield "3. F1 tổng của `tpb2` có đánh đổi lấy tỉ lệ vỡ thấp hơn không, hay thắng thuần?"
+           "nguyên nhân thật của `long_event`. Nếu KHÔNG đổi hoặc đổi ngược, giả thuyết bị "
+           "bác bỏ — và đó là ứng viên thứ NĂM bị loại.")
+    yield ("2. F1 tổng của `tpb2` có đánh đổi lấy tỉ lệ vỡ thấp hơn không, hay thắng thuần? "
+           "Ablation `pos_weight` đã cho một ca thắng thuần, đừng mặc định phải có đánh đổi.")
+    yield ("3. Nếu tỉ lệ vỡ giảm mà F1 `long_event` KHÔNG tăng: phân mảnh không phải thứ đang "
+           "giới hạn F1 trên sự kiện dài, và cả hướng điều tra này cần đặt lại đề.")
     yield ""
 
 
