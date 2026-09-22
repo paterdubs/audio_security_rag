@@ -1,0 +1,131 @@
+{
+  "run": "panns_ft_pw1",
+  "split": "dev",
+  "ngon_ngu": "en",
+  "theta_sao": 0.25,
+  "n_clip": 1440,
+  "tong_hop": {
+    "ehr": {
+      "trung_binh": 0.2497923411788958,
+      "n_do_duoc": 1309,
+      "n_chua_do": 131
+    },
+    "eor": {
+      "trung_binh": 0.23520923520923523,
+      "n_do_duoc": 1287,
+      "n_chua_do": 153
+    },
+    "gs": {
+      "trung_binh": 0.6134100448690114,
+      "n_do_duoc": 1316,
+      "n_chua_do": 124
+    },
+    "chr": {
+      "trung_binh": 0.2296844181459566,
+      "n_do_duoc": 845,
+      "n_chua_do": 595
+    },
+    "toa": {
+      "trung_binh": 0.9310675140462374,
+      "n_do_duoc": 1034,
+      "n_chua_do": 406
+    }
+  },
+  "vi_du": [
+    {
+      "caption": "A vehicle crash is followed by people talking, an alarm bell, an alarm bell, objects or dishes falling and a door slamming.",
+      "P": [
+        "alarm_bell",
+        "door_slam",
+        "object_drop_dishes",
+        "speech_normal",
+        "vehicle_crash"
+      ],
+      "G": [
+        "alarm_bell",
+        "object_drop_dishes",
+        "vehicle_crash"
+      ],
+      "ehr": 0.4,
+      "eor": 0.0,
+      "gs": 0.6,
+      "chr": 0.0,
+      "toa": 1.0
+    },
+    {
+      "caption": "Fireworks is followed by an alarm bell, an alarm bell and a person shouting.",
+      "P": [
+        "alarm_bell",
+        "fireworks",
+        "shout_yell"
+      ],
+      "G": [
+        "alarm_bell",
+        "object_drop_dishes",
+        "shout_yell"
+      ],
+      "ehr": 0.3333333333333333,
+      "eor": 0.3333333333333333,
+      "gs": 0.5,
+      "chr": null,
+      "toa": 1.0
+    },
+    {
+      "caption": "Fireworks, an explosion and an explosion are heard at the same time.",
+      "P": [
+        "explosion",
+        "fireworks"
+      ],
+      "G": [
+        "explosion",
+        "fireworks"
+      ],
+      "ehr": 0.0,
+      "eor": 0.0,
+      "gs": 1.0,
+      "chr": 0.0,
+      "toa": 1.0
+    },
+    {
+      "caption": "Applause and cheering, a door slamming, running footsteps and an explosion are heard at the same time.",
+      "P": [
+        "applause_cheering",
+        "door_slam",
+        "explosion",
+        "running_footsteps"
+      ],
+      "G": [
+        "applause_cheering",
+        "door_slam",
+        "explosion",
+        "laughter",
+        "object_drop_dishes"
+      ],
+      "ehr": 0.25,
+      "eor": 0.4,
+      "gs": 0.5,
+      "chr": 0.0,
+      "toa": 1.0
+    },
+    {
+      "caption": "An explosion, fireworks, a door slamming, a siren and a door slamming are heard at the same time.",
+      "P": [
+        "door_slam",
+        "explosion",
+        "fireworks",
+        "siren"
+      ],
+      "G": [
+        "door_slam",
+        "explosion",
+        "object_drop_dishes",
+        "siren"
+      ],
+      "ehr": 0.25,
+      "eor": 0.25,
+      "gs": 0.6,
+      "chr": 0.0,
+      "toa": 1.0
+    }
+  ]
+}
