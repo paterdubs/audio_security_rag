@@ -10,6 +10,17 @@ guideline riêng của các lớp hiếm cho tới tận lần gán đại trà,
 ⚠️ Cột `classes_tham_khao` trong file kết quả CHỈ dùng để chọn mẫu đa dạng, không phải
 để gán nhãn. Chế độ GOLD cấm máy đề xuất (`annotation_guideline.md` §7.2) — người gán
 KHÔNG được nhìn cột này khi mở file audio để nghe.
+
+Vòng pilot SAU lần đầu (ví dụ lần 3, sau khi lần 1 trượt cổng §8.5 vì cỡ mẫu quá nhỏ)
+cần hai cờ thêm:
+
+    --tru-them data/gold/da_dung_lan1_lan2.csv   # KHÔNG chọn lại clip đã dùng
+    --chi-lop door_slam,fireworks,scream,siren,explosion,vehicle_crash   # thiên về lớp hiếm
+
+`--tru-them` nhận một CSV có cột `file_id` (dùng lại đúng schema `exclusions.csv`) — build
+bằng cách gộp cột `file_id` của mọi file pilot/mồi đã dùng trước đó. Thiếu cờ này ở vòng
+sau là lỗi nghiêm trọng: người gán sẽ vô tình gặp lại clip đã nghe, và tự-nhất-quán đo
+được là trí nhớ chứ không phải độ ổn định của guideline.
 """
 
 from __future__ import annotations
@@ -99,6 +110,15 @@ def segment_bi_loai(raw_manifest_path: Path, loai: set[str]) -> set[str]:
                if row["source_dataset"] == "audioset_strong" and row["file_id"] in loai}
 
 
+def loc_chi_lop(theo_lop: dict[str, list[str]],
+                chi_lop: set[str] | None) -> dict[str, list[str]]:
+    """Giữ lại CHỈ các lớp trong `chi_lop` — dùng để thiên hẳn về lớp hiếm ở vòng pilot
+    sau lần đầu. `None` hoặc rỗng giữ nguyên mọi lớp (hành vi mặc định, vòng pilot đầu)."""
+    if not chi_lop:
+        return theo_lop
+    return {lop: files for lop, files in theo_lop.items() if lop in chi_lop}
+
+
 def gom_theo_lop(gold_groups: set[str], segments: Iterable[dict],
                  segment_loai_tru: set[str] = frozenset()) -> dict[str, dict]:
     """{lớp: [file_id]} CHỈ cho segment thuộc `gold_groups` và KHÔNG nằm trong
@@ -119,7 +139,11 @@ def gom_theo_lop(gold_groups: set[str], segments: Iterable[dict],
 
 def doc_gold_theo_lop(splits_path: Path, segments_path: Path,
                       raw_manifest_path: Path = RAW_MANIFEST_PATH,
-                      exclusions_path: Path = EXCLUSIONS_PATH) -> dict[str, dict]:
+                      exclusions_path: Path = EXCLUSIONS_PATH,
+                      tru_them_path: Path | None = None) -> dict[str, dict]:
+    """`tru_them_path`: CSV cột `file_id` của clip đã dùng ở vòng pilot trước — loại
+    THÊM vào, cộng dồn với `exclusions.csv` (lý do khác: audio rác, không phải "đã dùng").
+    """
     gold_groups: set[str] = set()
     with splits_path.open(encoding="utf-8", newline="") as handle:
         for row in csv.DictReader(handle):
@@ -128,6 +152,8 @@ def doc_gold_theo_lop(splits_path: Path, segments_path: Path,
 
     loai = file_id_bi_loai(exclusions_path)
     segment_loai_tru = segment_bi_loai(raw_manifest_path, loai)
+    if tru_them_path is not None:
+        segment_loai_tru = segment_loai_tru | file_id_bi_loai(tru_them_path)
 
     with segments_path.open(encoding="utf-8") as handle:
         segments = [json.loads(line) for line in handle]
@@ -144,24 +170,37 @@ def run(args: argparse.Namespace) -> int:
 
     loai = file_id_bi_loai(args.exclusions)
     n_segment_loai = len(segment_bi_loai(args.raw_manifest, loai)) if loai else 0
-    du_lieu = doc_gold_theo_lop(args.splits, args.segments, args.raw_manifest, args.exclusions)
+    du_lieu = doc_gold_theo_lop(args.splits, args.segments, args.raw_manifest,
+                                args.exclusions, args.tru_them)
     theo_lop, thong_tin = du_lieu["theo_lop"], du_lieu["thong_tin"]
     n_file_gold = len(thong_tin)
+    n_da_dung = len(file_id_bi_loai(args.tru_them)) if args.tru_them else 0
     print(f"▶ {n_file_gold} file WAV trong gold_test, {len(theo_lop)} lớp có mặt"
-         + (f" ({n_segment_loai} file đã loại vì exclusions.csv)" if n_segment_loai else ""))
+         + (f" ({n_segment_loai} file đã loại vì exclusions.csv)" if n_segment_loai else "")
+         + (f" ({n_da_dung} file đã loại vì --tru-them)" if n_da_dung else ""))
+
+    chi_lop = {c.strip() for c in args.chi_lop.split(",") if c.strip()} if args.chi_lop else None
+    theo_lop = loc_chi_lop(theo_lop, chi_lop)
+    if chi_lop:
+        print(f"  thiên về {len(theo_lop)}/{len(chi_lop)} lớp yêu cầu có mặt trong gold_test"
+             f": {sorted(theo_lop)}")
 
     chon = chon_pilot(theo_lop, args.n, args.seed)
     print(f"  chọn {len(chon)}/{args.n} file (seed={args.seed!r})")
 
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    with args.out.open("w", encoding="utf-8", newline="") as handle:
+    out = args.out.resolve()
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(["file_id", "path", "classes_tham_khao"])
         for file_id in chon:
             info = thong_tin[file_id]
             writer.writerow([file_id, info["path"], ";".join(info["classes"])])
 
-    print(f"\n✓ {args.out.relative_to(REPO_ROOT)}")
+    # .resolve() trên cả hai vế: --out truyền đường dẫn TƯƠNG ĐỐI (ví dụ
+    # "data/gold/...") trước đây làm relative_to() ném lỗi ngay sau khi file đã ghi
+    # xong — người dùng thấy traceback và tưởng lệnh thất bại dù kết quả đã đúng.
+    print(f"\n✓ {out.relative_to(REPO_ROOT.resolve())}")
     print("  ⚠️ Cột classes_tham_khao chỉ để tham khảo chọn mẫu — KHÔNG nhìn khi gán nhãn.")
     return 0
 
@@ -176,6 +215,10 @@ def main() -> int:
     parser.add_argument("--segments", type=Path, default=SEGMENTS_PATH)
     parser.add_argument("--raw-manifest", type=Path, default=RAW_MANIFEST_PATH)
     parser.add_argument("--exclusions", type=Path, default=EXCLUSIONS_PATH)
+    parser.add_argument("--tru-them", type=Path, default=None, dest="tru_them",
+                        help="CSV cột file_id của clip đã dùng ở vòng pilot trước")
+    parser.add_argument("--chi-lop", default=None, dest="chi_lop",
+                        help="danh sách lớp phân cách bởi dấu phẩy, thiên hẳn về các lớp này")
     parser.add_argument("--out", type=Path, default=OUT_PATH)
     return run(parser.parse_args())
 
